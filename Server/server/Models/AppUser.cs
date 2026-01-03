@@ -8,6 +8,9 @@ public class AppUser : IdentityUser
     // Thêm các field riêng cho app chạy bộ
     public double HeightCm { get; set; }
     public double WeightKg { get; set; }
+    public double TotalDistanceKm { get; set; }
+    public double TotalTimeSeconds { get; set; }
+    public string? AvatarUrl { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Quan hệ 1-nhiều

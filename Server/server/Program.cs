@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using server.config;
 using server.Configs;
 using server.Models;
 using server.Services.Implements;
@@ -22,6 +23,7 @@ builder.Services.AddScoped<IRun, RunService>();
 builder.Services.AddScoped<IDailyGoal, DailyGoalService>();
 
 // Add services to the container.
+builder.Services.AddAutoMapper(typeof(AutoMapperConfig).Assembly);
 builder.Services.AddControllers();
 builder.Services.AddAuthentication(options =>
 {
@@ -43,6 +45,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
+app.UseRouting();
+
+app.UseCors("_allowSpecificOrigins");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
