@@ -5,10 +5,13 @@ namespace server.Models;
 
 public class AppUser : IdentityUser
 {
-    // Thêm các field riêng cho app chạy bộ
+    public string FullName { get; set; } = string.Empty;
     public double HeightCm { get; set; }
     public double WeightKg { get; set; }
+    public string? AvatarUrl { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public double TotalDistanceKm { get; set; } = 0;
+    public double TotalTimeSeconds { get; set; } = 0;
 
     // Quan hệ 1-nhiều
     public ICollection<RunSession> RunSessions { get; set; } = new List<RunSession>();

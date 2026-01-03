@@ -5,17 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bc54e4c9-b60e-460d-87f5-6a9c68e4bc80" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Controllers/RunController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Controllers/RunController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/DTO/RunSessionDTO.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/DTO/RunSessionDTO.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Models/AppUser.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Models/AppUser.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Server/server/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/client/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Properties/launchSettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Properties/launchSettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Services/Run/IRun.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Services/Run/IRun.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Services/Run/RunService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Services/Run/RunService.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/client/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/client/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/client/pubspec.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/client/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/client/windows/flutter/generated_plugins.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/running_app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/running_app.iml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
