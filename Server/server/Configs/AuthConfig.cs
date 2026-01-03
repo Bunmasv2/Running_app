@@ -1,0 +1,60 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using server.Models;
+using server.Util;
+
+namespace server.Configs
+{
+    public static class AuthConfig
+    {
+        public static AuthenticationBuilder AddGoogleAuth(this AuthenticationBuilder builder, IConfiguration configuration)
+        {
+            builder.AddGoogle(options =>
+            {
+                options.ClientId = configuration["Authentication:Google:ClientId"];
+                options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
+                options.CallbackPath = "/users/signin-google/google-callback";
+
+                options.SaveTokens = true;
+                options.AccessType = "offline";
+                options.Scope.Add("email");
+                options.Scope.Add("profile");
+
+                options.Events.OnTicketReceived = async context =>
+                {
+                    var email = context.Principal.FindFirstValue(ClaimTypes.Email);
+                    var name = context.Principal.FindFirstValue(ClaimTypes.Name);
+
+                    var userService = context.HttpContext.RequestServices.GetRequiredService<IUser>();
+                    var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
+                    var db = context.HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
+
+                    var roles = await userManager.GetRolesAsync(user);
+
+                    // Tạo token
+                    var accessToken = JwtUtils.GenerateToken(user, roles, 1, configuration);
+                    var refreshToken = JwtUtils.GenerateToken(user, roles, 24, configuration);
+
+                    // Lưu cookie
+                    CookieUtils.SetCookie(context.Response, "token", accessToken, 24);
+                    await userService.SaveRefreshToken(user.Id, refreshToken);
+
+                    context.Response.Redirect("http://localhost:3000/project?success=true");
+                    context.HandleResponse();
+                };
+
+                options.Events.OnRemoteFailure = context =>
+                {
+                    context.Response.Redirect("http://localhost:3000/project?success=false");
+                    context.HandleResponse();
+                    return System.Threading.Tasks.Task.CompletedTask;
+                };
+            });
+
+            return builder;
+        }
+    }
+}

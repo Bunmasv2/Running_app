@@ -2,7 +2,7 @@ using server.DTO;
 
 namespace server.Services.Interfaces;
 
-public interface IRunService
+public interface IRun
 {
     // Hàm nhận vào UserId và DTO, trả về kết quả DTO
     Task<RunSessionDto.RunResponseDto> ProcessRunSessionAsync(string userId, RunSessionDto.RunCreateDto runDto);
