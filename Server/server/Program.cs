@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using server.Configs;
 using server.Models;
 using server.Services.Implements;
 using server.Services.Interfaces;
@@ -15,11 +17,19 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<IRunService, RunService>();
+builder.Services.AddScoped<IUser, UserService>();
+builder.Services.AddScoped<IRun, RunService>();
+builder.Services.AddScoped<IDailyGoal, DailyGoalService>();
 
 // Add services to the container.
-
 builder.Services.AddControllers();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddGoogleAuth(builder.Configuration)
+.AddJWT(builder.Configuration);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

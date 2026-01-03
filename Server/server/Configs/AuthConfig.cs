@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using server.Models;
+using server.Services.Interfaces;
 using server.Util;
 
 namespace server.Configs
@@ -16,12 +17,10 @@ namespace server.Configs
             {
                 options.ClientId = configuration["Authentication:Google:ClientId"];
                 options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-                options.CallbackPath = "/users/signin-google/google-callback";
+                options.CallbackPath = configuration["Authentication:Google:CallBack"];
 
                 options.SaveTokens = true;
                 options.AccessType = "offline";
-                options.Scope.Add("email");
-                options.Scope.Add("profile");
 
                 options.Events.OnTicketReceived = async context =>
                 {
@@ -32,15 +31,10 @@ namespace server.Configs
                     var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
                     var db = context.HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
 
+                    var user = await userService.FindOrCreateUserByEmailAsync(email, name);
                     var roles = await userManager.GetRolesAsync(user);
 
-                    // Tạo token
                     var accessToken = JwtUtils.GenerateToken(user, roles, 1, configuration);
-                    var refreshToken = JwtUtils.GenerateToken(user, roles, 24, configuration);
-
-                    // Lưu cookie
-                    CookieUtils.SetCookie(context.Response, "token", accessToken, 24);
-                    await userService.SaveRefreshToken(user.Id, refreshToken);
 
                     context.Response.Redirect("http://localhost:3000/project?success=true");
                     context.HandleResponse();

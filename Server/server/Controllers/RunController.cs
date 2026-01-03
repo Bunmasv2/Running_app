@@ -6,15 +6,15 @@ using server.Services.Interfaces;
 
 namespace server.Controllers;
 
-[Route("api/[controller]")]
+[Route("[controller]")]
 [ApiController]
 [Authorize] // Yêu cầu phải có Token đăng nhập
 public class RunController : ControllerBase
 {
-    private readonly IRunService _runService;
+    private readonly IRun _runService;
 
     // Inject Interface vào Controller
-    public RunController(IRunService runService)
+    public RunController(IRun runService)
     {
         _runService = runService;
     }
