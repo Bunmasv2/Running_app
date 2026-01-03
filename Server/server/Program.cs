@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using server.Models;
-using server.Services.Implements;
+using server.Services;
 using server.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +16,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IRunService, RunService>();
+builder.Services.AddScoped<IGoalService, GoalService>();
 
 // Add services to the container.
 
