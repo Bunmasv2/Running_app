@@ -1,0 +1,49 @@
+# =====================
+# IDE
+# =====================
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# =====================
+# Flutter
+# =====================
+client/.dart_tool/
+client/.flutter-plugins
+client/.flutter-plugins-dependencies
+client/.packages
+client/.metadata
+client/build/
+
+# Flutter platform build
+client/android/.gradle/
+client/android/app/build/
+client/ios/Pods/
+client/ios/Flutter/Generated.xcconfig
+client/ios/Flutter/flutter_export_environment.sh
+client/macos/Pods/
+client/windows/build/
+client/linux/build/
+
+# =====================
+# ASP.NET Core
+# =====================
+Server/**/bin/
+Server/**/obj/
+Server/**/*.user
+
+# Config chứa secret
+Server/**/appsettings.Development.json
+Server/**/appsettings.*.json
+
+# =====================
+# Database
+# =====================
+*.mdf
+*.ldf
+
+# =====================
+# Logs
+# =====================
+*.log
