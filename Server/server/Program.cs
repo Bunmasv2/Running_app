@@ -10,8 +10,18 @@ using server.Services.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 
 // Kết nối SQL
+// builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+//MySQL Connection
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseMySql(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        ServerVersion.AutoDetect(
+            builder.Configuration.GetConnectionString("DefaultConnection")
+        )
+    )
+);
+
 
 // Đăng ký Identity
 builder.Services.AddIdentity<AppUser, IdentityRole>()
