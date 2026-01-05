@@ -5,7 +5,7 @@ using server.Services.Interfaces;
 
 namespace server.Services
 {
-    public class RunService : IRunService
+    public class RunService : IRun
     {
         private readonly ApplicationDbContext _context;
 

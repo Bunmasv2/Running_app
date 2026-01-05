@@ -5,6 +5,7 @@ using server.config;
 using server.Configs;
 using server.Models;
 using server.Services;
+using server.Services.Implements;
 using server.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -30,6 +31,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
 
 builder.Services.AddScoped<IUser, UserService>();
 builder.Services.AddScoped<IRun, RunService>();
+// builder.Services.AddScoped<IRun, RunService>();
 builder.Services.AddScoped<IDailyGoal, DailyGoalService>();
 // Add services to the container.
 builder.Services.AddAutoMapper(typeof(AutoMapperConfig).Assembly);
