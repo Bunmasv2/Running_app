@@ -13,13 +13,13 @@ namespace server.Controllers;
 [Authorize]
 public class DailyGoalController : ControllerBase
 {
-    private readonly IRun _runService;
-    private readonly IDailyGoal _dailyGoalService;
+    private readonly IRunService _runService;
+    private readonly IDailyGoalService _dailyGoalService;
     private readonly IConfiguration _configuration;
 
     public DailyGoalController(
-        IRun runService, 
-        IDailyGoal dailyService, 
+        IRunService runService, 
+        IDailyGoalService dailyService, 
         IConfiguration configuration)
     {
         _runService = runService;

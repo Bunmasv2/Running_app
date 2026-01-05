@@ -14,15 +14,15 @@ namespace server.Controllers;
 [ApiController]
 public class UserController : ControllerBase
 {
-    private readonly IRun _runService;
-    private readonly IUser _userServcie;
-    private readonly IDailyGoal _dailyGoalService;
+    private readonly IRunService _runService;
+    private readonly IUserService _userServcie;
+    private readonly IDailyGoalService _dailyGoalService;
     private readonly IConfiguration _configuration;
 
     public UserController(
-        IRun runService,
-        IUser userServcie,
-        IDailyGoal dailyService,
+        IRunService runService,
+        IUserService userServcie,
+        IDailyGoalService dailyService,
         IConfiguration configuration)
     {
         _runService = runService;
