@@ -31,6 +31,38 @@ public class UserController : ControllerBase
         _configuration = configuration;
     }
 
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] UserDTO.RegisterDto dto)
+    {
+        Console.WriteLine($"EMailll: {dto.Email}");
+        Console.WriteLine($"Passss: {dto.Password}");
+
+        var result = await _userServcie.Register(dto);
+
+        if (!result)
+            throw new ErrorException(400, "Đăng ký thất bại");
+
+        return Ok(new
+        {
+            message = "Đăng ký thành công"
+        });
+    }
+
+
+
+    [HttpPost("signin")]
+    public async Task<IActionResult> SignIn([FromBody] UserDTO.SignIn signIn)
+    {
+        if (signIn == null)
+        {
+            throw new ErrorException(400, "Invalid sign-in data");
+        }
+
+        var result = await _userServcie.SignIn(signIn.Email, signIn.Password);
+        return Ok(new { message = "Sign-in endpoint", data = result });
+    }
+
+
     [HttpGet("signin-google")]
     public IActionResult SignGoogle(string returnUrl = "https://www.facebook.com/")
     {
@@ -83,7 +115,7 @@ public class UserController : ControllerBase
         if (!result.Succeeded)
             throw new ErrorException(400, "Upload failed");
 
-        return Ok(new{ message = "Upload avatar successful" });
+        return Ok(new { message = "Upload avatar successful" });
     }
 
 }

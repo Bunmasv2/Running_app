@@ -6,9 +6,10 @@ import '../Models/UserProfile.dart';
 
 class UserService {
   // URL Server Render của bạn
-  static const String _baseUrl = 'https://running-app-ywpg.onrender.com/user';
-
+  // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/User';
+  // static const String _baseUrl = 'http://10.0.2.2:5000/User';
   // --- 1. QUẢN LÝ AUTH (ĐĂNG NHẬP / ĐĂNG XUẤT) ---
+  static const String _baseUrl = 'http://10.0.2.2:5144/User';
 
   // 1. GỌI API ĐĂNG NHẬP
   Future<bool> login(String email, String password) async {
@@ -16,7 +17,7 @@ class UserService {
       // Giả định backend bạn có endpoint POST /login
       // Nếu backend chưa có, bạn cần viết thêm API Login nhận Email/Pass trả về Token
       final response = await http.post(
-        Uri.parse('$_baseUrl/signin-google'),
+        Uri.parse('$_baseUrl/signin'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "email": email,
@@ -25,16 +26,20 @@ class UserService {
       );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final Map<String, dynamic> responseBody = jsonDecode(response.body);
 
-        // Giả sử server trả về: { "token": "eyJh..." }
-        String token = data['token'];
+        // Phải vào trong node 'data' trước
+        final userData = responseBody['data'];
 
-        // LƯU TOKEN VÀO MÁY
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accessToken', token);
+        if (userData != null && userData['token'] != null) {
+          String token = userData['token'];
 
-        return true;
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('accessToken', token);
+
+          print("Đăng nhập thành công, đã lưu Token!");
+          return true;
+        }
       }
       return false;
     } catch (e) {
@@ -76,6 +81,8 @@ class UserService {
       return false;
     }
   }
+
+
 
 
   // 2. KIỂM TRA ĐÃ ĐĂNG NHẬP CHƯA (Cho Splash Screen)
@@ -172,6 +179,48 @@ class UserService {
       return response.statusCode == 200;
     } catch (e) {
       return false;
+    }
+  }
+
+  Future<String?> register({
+    required String userName,
+    required String email,
+    required String password,
+    required double heightCm,
+    required double weightKg,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/register'),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          // "userName": userName,
+          // "email": email,
+          // "password": password,
+          // "confirmPass": password,
+          // "heightCm": heightCm,
+          // "weightKg": weightKg,
+          "userName": "DatTran",
+          "email": "trandat2280600642@gmail.com",
+          "password": "Dat@1912",
+          "confirmPass": "Dat@1912",
+          "heightCm": 179,
+          "weightKg": 78,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return null; // Thành công
+      } else {
+        // Parse tin nhắn lỗi từ Backend (do ErrorHandlingMiddleware trả về)
+        final errorData = jsonDecode(response.body);
+        return errorData['message'] ?? "Đã có lỗi xảy ra";
+      }
+    } catch (e) {
+      print("Register error: $e");
+      return "Không thể kết nối đến server";
     }
   }
 }

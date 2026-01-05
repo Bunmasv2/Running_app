@@ -7,6 +7,7 @@ namespace server.DTO
             public string UserName { get; set; }
             public string Email { get; set; }
             public string Password { get; set; }
+            public string ConfirmPass { get; set; }
             public double HeightCm { get; set; }
             public double WeightKg { get; set; }
         }
@@ -37,6 +38,17 @@ namespace server.DTO
             public string UserName { get; set; }
             public double HeightCm { get; set; }
             public double WeightKg { get; set; }
+        }
+
+        public class SignIn
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
+        }
+        public class SignInResponse
+        {
+            public string Email { get; set; }
+            public string Token { get; set; }
         }
     }
 }
