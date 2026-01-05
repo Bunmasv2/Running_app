@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/material.dart'; // Cần import để dùng Navigator & Context
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/UserProfile.dart';
+import '../Views/GoogleWebView.dart'; // Bắt buộc phải import file WebView này
 
 class UserService {
   // URL Server Render của bạn
@@ -10,13 +12,11 @@ class UserService {
 
   // --- 1. QUẢN LÝ AUTH (ĐĂNG NHẬP / ĐĂNG XUẤT) ---
 
-  // 1. GỌI API ĐĂNG NHẬP
+  // A. ĐĂNG NHẬP THƯỜNG (EMAIL/PASS)
   Future<bool> login(String email, String password) async {
     try {
-      // Giả định backend bạn có endpoint POST /login
-      // Nếu backend chưa có, bạn cần viết thêm API Login nhận Email/Pass trả về Token
       final response = await http.post(
-        Uri.parse('$_baseUrl/signin-google'),
+        Uri.parse('$_baseUrl/signin-google'), // Hoặc endpoint /login nếu bạn đã sửa backend
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "email": email,
@@ -26,11 +26,9 @@ class UserService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
-        // Giả sử server trả về: { "token": "eyJh..." }
         String token = data['token'];
 
-        // LƯU TOKEN VÀO MÁY
+        // Lưu Token
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('accessToken', token);
 
@@ -43,42 +41,32 @@ class UserService {
     }
   }
 
-  Future<bool> loginGoogle() async {
+  // B. ĐĂNG NHẬP GOOGLE (DÙNG WEBVIEW - KHÔNG CẦN FIREBASE)
+  Future<bool> loginGoogle(BuildContext context) async {
     try {
-      // Gọi API /signin-google
-      // Lưu ý: API này trả về 302 Redirect, http client sẽ tự động follow redirect
-      // nhưng sẽ không hiện giao diện đăng nhập cho user nhập pass được.
-      final response = await http.get(
-        Uri.parse('$_baseUrl/signin-google'),
-        headers: {'Content-Type': 'application/json'},
+      // 1. Mở màn hình WebView và chờ kết quả trả về (Token)
+      final String? token = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const GoogleWebView()),
       );
 
-      print("Google API Status: ${response.statusCode}");
-      print("Google API Body: ${response.body}");
-
-      // Logic tạm thời: Nếu server trả về 200 (nghĩa là backend đã xử lý xong token)
-      if (response.statusCode == 200) {
-        // Cần parse token từ response (Tùy backend trả về JSON hay HTML)
-        try {
-          final data = jsonDecode(response.body);
-          if (data['token'] != null) {
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString('accessToken', data['token']);
-            return true;
-          }
-        } catch(e) {
-          print("Lỗi parse JSON Google: $e");
-        }
+      // 2. Nếu lấy được token (người dùng đăng nhập thành công và WebView bắt được link)
+      if (token != null && token.isNotEmpty) {
+        // Lưu token vào máy
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('accessToken', token);
+        return true;
       }
+
+      // Trường hợp người dùng tắt WebView hoặc không đăng nhập
       return false;
     } catch (e) {
-      print('Login Google Error: $e');
+      print('Login Google WebView Error: $e');
       return false;
     }
   }
 
-
-  // 2. KIỂM TRA ĐÃ ĐĂNG NHẬP CHƯA (Cho Splash Screen)
+  // 2. KIỂM TRA ĐÃ ĐĂNG NHẬP CHƯA
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('accessToken');
@@ -91,34 +79,23 @@ class UserService {
     await prefs.remove('accessToken');
   }
 
-  // [HÀM TẠM] Dùng để lưu token cứng trong lúc chưa làm màn hình Login
-  // Bạn gọi hàm này 1 lần duy nhất ở main.dart để nạp token vào máy
-  Future<void> saveTokenManually(String hardcodedToken) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('accessToken', hardcodedToken);
-    print("Đã lưu token thủ công vào máy!");
-  }
-
   // --- 2. CÁC HÀM HELPER ---
 
-  // Lấy Token từ bộ nhớ máy (Không còn hardcode nữa)
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('accessToken');
   }
 
-  // Tạo Header có chứa Token
   Future<Map<String, String>> _getHeaders() async {
     String? token = await _getToken();
     return {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Gửi kèm Token
+      'Authorization': 'Bearer $token',
     };
   }
 
   // --- 3. CÁC CHỨC NĂNG USER PROFILE ---
 
-  // Lấy thông tin User
   Future<UserProfile?> getUserProfile() async {
     try {
       final headers = await _getHeaders();
@@ -134,7 +111,6 @@ class UserService {
     }
   }
 
-  // Cập nhật thông tin
   Future<bool> updateProfile(String userName, double height, double weight) async {
     try {
       final headers = await _getHeaders();
@@ -157,15 +133,11 @@ class UserService {
     }
   }
 
-  // Upload Avatar
   Future<bool> uploadAvatar(File imageFile) async {
     try {
       String? token = await _getToken();
       var request = http.MultipartRequest('POST', Uri.parse('$_baseUrl/avatar'));
-
-      // Với Multipart, phải thêm header thủ công như này
       request.headers['Authorization'] = 'Bearer $token';
-
       request.files.add(await http.MultipartFile.fromPath('avatar', imageFile.path));
       var response = await request.send();
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../Views/HomeView.dart'; // Để dùng class DailyGoal
-
+// SỬA: Import Model chung, KHÔNG import HomeView
+import 'package:client/models/RunModels.dart';
 class GoalProgressComponent extends StatelessWidget {
   final DailyGoal? goal;
   final VoidCallback onSetGoal;
@@ -13,7 +13,7 @@ class GoalProgressComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Nếu chưa đặt mục tiêu -> Hiện nút "Đặt mục tiêu"
+    // 1. Nếu chưa đặt mục tiêu (goal == null)
     if (goal == null) {
       return GestureDetector(
         onTap: onSetGoal,
@@ -40,7 +40,7 @@ class GoalProgressComponent extends StatelessWidget {
       );
     }
 
-    // Nếu đã có mục tiêu -> Vẽ vòng tròn Progress
+    // 2. Nếu đã có mục tiêu
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -48,7 +48,7 @@ class GoalProgressComponent extends StatelessWidget {
           width: 200,
           height: 200,
           child: CircularProgressIndicator(
-            value: goal!.progress,
+            value: goal!.progress, // Getter .progress đã có trong Model
             strokeWidth: 15,
             backgroundColor: Colors.grey[200],
             color: Colors.blueAccent,

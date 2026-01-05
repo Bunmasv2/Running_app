@@ -26,7 +26,7 @@ class _SplashViewState extends State<SplashView> {
       Navigator.pushReplacementNamed(context, '/main');
     } else {
       // Chưa đăng nhập -> Vào Login
-      Navigator.pushReplacementNamed(context, '/login');
+      Navigator.pushReplacementNamed(context, '/main');
     }
   }
 
