@@ -7,6 +7,12 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using server.Configs;
+using System.Reflection.Metadata.Ecma335;
+using server.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.SqlServer.Server;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 
 namespace server.Controllers;
 
@@ -18,17 +24,23 @@ public class UserController : ControllerBase
     private readonly IUserService _userServcie;
     private readonly IDailyGoalService _dailyGoalService;
     private readonly IConfiguration _configuration;
+    private readonly ApplicationDbContext _context;
+    private readonly IMapper _mapper;
 
     public UserController(
         IRunService runService,
         IUserService userServcie,
         IDailyGoalService dailyService,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        ApplicationDbContext context,
+        IMapper mapper)
     {
         _runService = runService;
         _userServcie = userServcie;
         _dailyGoalService = dailyService;
         _configuration = configuration;
+        _context = context;
+        _mapper = mapper;
     }
 
     [HttpPost("register")]
@@ -85,7 +97,7 @@ public class UserController : ControllerBase
     public async Task<ActionResult> GetUserProfile()
     {
         string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        UserDTO.Profile user = await _userServcie.GetUserProfile("cc04e4e8-12bd-45e8-9ef5-808a2c16de5e");
+        UserDTO.Profile user = await _userServcie.GetUserProfile(userId);
         return Ok(user);
     }
 
@@ -116,6 +128,14 @@ public class UserController : ControllerBase
             throw new ErrorException(400, "Upload failed");
 
         return Ok(new { message = "Upload avatar successful" });
+    }
+
+    [HttpGet("getAll")]
+    public async Task<IActionResult> GetAllUser()
+    {
+        var users = await _context.Users.ToListAsync();
+        var result = _mapper.Map<List<UserDTO.Profile>>(users);
+        return Ok(new { mesenger = "", data = result });
     }
 
 }

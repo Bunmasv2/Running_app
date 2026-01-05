@@ -25,19 +25,30 @@ class UserService {
         }),
       );
 
+      // if (response.statusCode == 200) {
+      //   final Map<String, dynamic> responseBody = jsonDecode(response.body);
+      //
+      //   // Phải vào trong node 'data' trước
+      //   final userData = responseBody['data'];
+      //
+      //   if (userData != null && userData['token'] != null) {
+      //     String token = userData['token'];
+      //
+      //     final prefs = await SharedPreferences.getInstance();
+      //     await prefs.setString('accessToken', token);
+      //
+      //     print("Đăng nhập thành công, đã lưu Token!");
+      //     return true;
+      //   }
       if (response.statusCode == 200) {
-        final Map<String, dynamic> responseBody = jsonDecode(response.body);
-
-        // Phải vào trong node 'data' trước
-        final userData = responseBody['data'];
+        final fullResponse = jsonDecode(response.body);
+        // Phải lấy từ Map 'data' mà bạn đã bọc ở Controller
+        final userData = fullResponse['data'];
 
         if (userData != null && userData['token'] != null) {
           String token = userData['token'];
-
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('accessToken', token);
-
-          print("Đăng nhập thành công, đã lưu Token!");
           return true;
         }
       }
@@ -132,6 +143,7 @@ class UserService {
       final response = await http.get(Uri.parse('$_baseUrl/profile'), headers: headers);
 
       if (response.statusCode == 200) {
+        print("Dữ liệu thật từ Server: ${response.body}");
         return UserProfile.fromJson(jsonDecode(response.body));
       }
       return null;
@@ -196,18 +208,18 @@ class UserService {
           "Content-Type": "application/json",
         },
         body: jsonEncode({
-          // "userName": userName,
-          // "email": email,
-          // "password": password,
-          // "confirmPass": password,
-          // "heightCm": heightCm,
-          // "weightKg": weightKg,
-          "userName": "DatTran",
-          "email": "trandat2280600642@gmail.com",
-          "password": "Dat@1912",
-          "confirmPass": "Dat@1912",
-          "heightCm": 179,
-          "weightKg": 78,
+          "userName": userName,
+          "email": email,
+          "password": password,
+          "confirmPass": password,
+          "heightCm": heightCm,
+          "weightKg": weightKg,
+          // "userName": "DatTran",
+          // "email": "trandat2280600642@gmail.com",
+          // "password": "Dat@1912",
+          // "confirmPass": "Dat@1912",
+          // "heightCm": 179,
+          // "weightKg": 78,
         }),
       );
 

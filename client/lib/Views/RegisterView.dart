@@ -11,6 +11,8 @@ class RegisterView extends StatefulWidget {
 class _RegisterViewState extends State<RegisterView> {
   final UserService _userService = UserService();
 
+  final _formKey = GlobalKey<FormState>();
+
   final _userNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -22,6 +24,10 @@ class _RegisterViewState extends State<RegisterView> {
   String? _errorMessage;
 
   void _handleRegister() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     if (_passwordController.text != _confirmPassController.text) {
       setState(() => _errorMessage = "Mật khẩu xác nhận không khớp");
       return;
@@ -32,7 +38,7 @@ class _RegisterViewState extends State<RegisterView> {
       _errorMessage = null;
     });
 
-    String? success = await _userService.register(
+    String? errorFromBE = await _userService.register(
       userName: _userNameController.text,
       email: _emailController.text,
       password: _passwordController.text,
@@ -43,88 +49,70 @@ class _RegisterViewState extends State<RegisterView> {
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (success == null ) {
-      Navigator.pop(context); // Quay lại Login
+    if (errorFromBE == null) {
+      // Đăng ký thành công
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Đăng ký thành công!")),
+      );
+      Navigator.pop(context);
     } else {
-      setState(() => _errorMessage = "Đăng ký thất bại, vui lòng kiểm tra lại!");
+      // Hiển thị lỗi cụ thể từ Backend (Ví dụ: Email đã tồn tại)
+      setState(() => _errorMessage = errorFromBE);
     }
+
+
+    // if (success == null ) {
+    //   Navigator.pop(context); // Quay lại Login
+    // } else {
+    //   setState(() => _errorMessage = "Đăng ký thất bại, vui lòng kiểm tra lại!");
+    // }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text("Đăng ký"),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: const Text("Đăng ký")),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Icon(Icons.person_add, size: 80, color: Colors.blue),
-            const SizedBox(height: 20),
+        // 3. Bọc toàn bộ vào Widget Form
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Icon(Icons.person_add, size: 80, color: Colors.blue),
+              const SizedBox(height: 20),
 
-            _buildInput(_userNameController, "Tên người dùng", Icons.person),
-            _buildInput(_emailController, "Email", Icons.email),
+              _buildInput(_userNameController, "Tên người dùng", Icons.person),
+              _buildInput(_emailController, "Email", Icons.email, keyboardType: TextInputType.emailAddress),
 
-            _buildInput(
-              _passwordController,
-              "Mật khẩu",
-              Icons.lock,
-              isPassword: true,
-            ),
-            _buildInput(
-              _confirmPassController,
-              "Xác nhận mật khẩu",
-              Icons.lock_outline,
-              isPassword: true,
-            ),
+              _buildInput(_passwordController, "Mật khẩu", Icons.lock, isPassword: true),
+              _buildInput(_confirmPassController, "Xác nhận mật khẩu", Icons.lock_outline, isPassword: true),
 
-            _buildInput(
-              _heightController,
-              "Chiều cao (cm)",
-              Icons.height,
-              keyboardType: TextInputType.number,
-            ),
-            _buildInput(
-              _weightController,
-              "Cân nặng (kg)",
-              Icons.monitor_weight,
-              keyboardType: TextInputType.number,
-            ),
+              _buildInput(_heightController, "Chiều cao (cm)", Icons.height, keyboardType: TextInputType.number),
+              _buildInput(_weightController, "Cân nặng (kg)", Icons.monitor_weight, keyboardType: TextInputType.number),
 
-            if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text(
-                  _errorMessage!,
-                  style: const TextStyle(color: Colors.red),
-                  textAlign: TextAlign.center,
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Text(_errorMessage!, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center),
                 ),
-              ),
 
-            const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
-            ElevatedButton(
-              onPressed: _isLoading ? null : _handleRegister,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _handleRegister,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text("Đăng ký", style: TextStyle(fontSize: 18, color: Colors.white)),
               ),
-              child: _isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text(
-                "Đăng ký",
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -138,17 +126,27 @@ class _RegisterViewState extends State<RegisterView> {
         TextInputType keyboardType = TextInputType.text,
       }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: TextField(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField( // Đổi từ TextField thành TextFormField
         controller: controller,
         obscureText: isPassword,
         keyboardType: keyboardType,
+        // Logic kiểm tra dữ liệu nằm ở đây
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return "Vui lòng nhập $label";
+          }
+          // Bạn có thể thêm kiểm tra định dạng email ở đây nếu muốn
+          if (label == "Email" && !value.contains("@")) {
+            return "Email không hợp lệ";
+          }
+          return null; // Trả về null nghĩa là hợp lệ
+        },
         decoration: InputDecoration(
           labelText: label,
           prefixIcon: Icon(icon),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          contentPadding: const EdgeInsets.symmetric(vertical: 15),
         ),
       ),
     );
