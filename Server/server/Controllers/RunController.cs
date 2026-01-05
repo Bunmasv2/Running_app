@@ -1,46 +1,69 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using server.DTO;
 using server.Services.Interfaces;
 
-namespace server.Controllers;
-
-[Route("[controller]")]
-[ApiController]
-[Authorize] // Yêu cầu phải có Token đăng nhập
-public class RunController : ControllerBase
+namespace server.Controllers
 {
-    private readonly IRun _runService;
-
-    // Inject Interface vào Controller
-    public RunController(IRun runService)
+    [Route("[controller]")]
+    [ApiController]
+    // [Authorize]
+    public class RunController : ControllerBase
     {
-        _runService = runService;
-    }
+        private readonly IRun _runService;
 
-    [HttpPost("finish")]
-    public async Task<IActionResult> FinishRun([FromBody] RunSessionDto.RunCreateDto request)
-    {
-        try
+        public RunController(IRun runService)
         {
-            // Lấy UserId từ Token (Claims)
-            string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            
-            if (string.IsNullOrEmpty(userId))
-            {
-                return Unauthorized("Không tìm thấy thông tin User");
-            }
-
-            // Gọi Service để xử lý logic
-            RunSessionDto.RunResponseDto result = await _runService.ProcessRunSessionAsync(userId, request);
-
-            return Ok(result);
+            _runService = runService;
         }
-        catch (Exception ex)
+
+        private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        // POST: api/runs (Lưu bài chạy khi bấm Kết thúc)
+        [HttpPost]
+        public async Task<IActionResult> SaveRun([FromBody] RunSessionDto.RunCreateDto dto)
         {
-            // Xử lý lỗi nếu Service ném ra
-            return BadRequest(new { Error = ex.Message });
+            try
+            {
+                var result = await _runService.SaveRunSessionAsync(GetUserId(), dto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        // GET: api/runs/history?pageIndex=1&pageSize=10
+        [HttpGet("history")]
+        public async Task<IActionResult> GetHistory([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
+        {
+            var history = await _runService.GetRunHistoryAsync(GetUserId(), pageIndex, pageSize);
+            return Ok(history);
+        }
+
+        // GET: api/runs/{id} (Xem chi tiết để vẽ Map)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetRunDetail(int id)
+        {
+            try
+            {
+                var detail = await _runService.GetRunDetailAsync(id, GetUserId());
+                return Ok(detail);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound("Không tìm thấy bài chạy này");
+            }
+        }
+
+        // GET: api/runs/today-stats (Cho Widget trang chủ)
+        [HttpGet("today-stats")]
+        public async Task<IActionResult> GetTodayStats()
+        {
+            var stats = await _runService.GetTodayStatsAsync(GetUserId());
+            return Ok(stats);
         }
     }
 }

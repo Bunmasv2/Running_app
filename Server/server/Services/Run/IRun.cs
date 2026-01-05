@@ -4,9 +4,8 @@ namespace server.Services.Interfaces;
 
 public interface IRun
 {
-    // Hàm nhận vào UserId và DTO, trả về kết quả DTO
-    Task<RunSessionDto.RunResponseDto> ProcessRunSessionAsync(string userId, RunSessionDto.RunCreateDto runDto);
-    
-    // Bạn có thể thêm các hàm khác sau này, ví dụ:
-    // Task<List<RunResponseDto>> GetHistoryAsync(string userId);
+    Task<RunSessionDto.RunResponseDto> SaveRunSessionAsync(string userId, RunSessionDto.RunCreateDto dto);
+    Task<List<RunSessionDto.RunHistoryItemDto>> GetRunHistoryAsync(string userId, int pageIndex, int pageSize);
+    Task<RunSessionDto.RunDetailDto> GetRunDetailAsync(int runId, string userId);
+    Task<RunSessionDto.DailyStatDto> GetTodayStatsAsync(string userId);
 }

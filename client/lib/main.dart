@@ -1,9 +1,9 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart'; // Để check Android/iOS
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart'; // Bản đồ OSM miễn phí
-import 'package:latlong2/latlong.dart'; // Xử lý tọa độ
-import 'package:geolocator/geolocator.dart'; // Bắt GPS
-import 'package:flutter/foundation.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:geolocator/geolocator.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,12 +15,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Realtime GPS Tracker',
+      title: 'Run Tracker UI',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blue),
       home: const TrackingPage(),
     );
   }
@@ -34,95 +31,107 @@ class TrackingPage extends StatefulWidget {
 }
 
 class _TrackingPageState extends State<TrackingPage> {
-  // 1. DỮ LIỆU RAM: Lưu toàn bộ điểm chạy tại đây
+  // Dữ liệu đường chạy
   final List<LatLng> _routePoints = [];
+
+  // Các biến thống kê
+  double _totalDistanceKm = 0.0;
+  double _burnedCalories = 0.0;
+  Duration _elapsedTime = Duration.zero;
+
+  // Cấu hình người dùng (Giả định)
+  final double _userWeightKg = 65.0; // Ví dụ 65kg
 
   // Quản lý trạng thái
   StreamSubscription<Position>? _positionStream;
+  Timer? _timer;
   bool _isTracking = false;
   final MapController _mapController = MapController();
+  final Distance _distanceCalculator = const Distance(); // Công cụ tính khoảng cách
 
-  // --- CẤU HÌNH GPS CHUYÊN SÂU (3 GIÂY/LẦN) ---
+  // --- 1. CẤU HÌNH GPS ---
   LocationSettings _getLocationSettings() {
-    // Cấu hình riêng cho Android để bắt buộc lấy mẫu mỗi 3s
-    // Kể cả khi đứng yên (distanceFilter = 0)
     if (defaultTargetPlatform == TargetPlatform.android) {
       return AndroidSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 0, // Bắt kể cả khi di chuyển 0 mét
+        distanceFilter: 0,
         forceLocationManager: true,
-        intervalDuration: const Duration(seconds: 3), // Quan trọng: 3 giây/lần
-        // foregroundNotificationConfig: ... (Cần nếu muốn chạy ngầm bền bỉ)
+        intervalDuration: const Duration(seconds: 3), // Bắt mỗi 3 giây
       );
     }
-
-    // Cấu hình cho iOS và các nền tảng khác
     return const LocationSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 0,
-      timeLimit: Duration(seconds: 3), // Cố gắng trả về sau mỗi 3s
+      timeLimit: Duration(seconds: 3),
     );
   }
 
-  // --- BẮT ĐẦU CHẠY ---
+  // --- 2. LOGIC BẮT ĐẦU CHẠY ---
   void _startTracking() async {
-    // 1. Xin quyền (Code tối giản, thực tế nên check kỹ hơn)
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) return;
     }
 
-    // 2. Xóa dữ liệu cũ, đổi trạng thái
     setState(() {
       _routePoints.clear();
+      _totalDistanceKm = 0.0;
+      _burnedCalories = 0.0;
+      _elapsedTime = Duration.zero;
       _isTracking = true;
     });
 
-    // 3. Bắt đầu lắng nghe Stream
+    // Bắt đầu đếm giờ (Mỗi giây update UI 1 lần)
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        _elapsedTime = Duration(seconds: _elapsedTime.inSeconds + 1);
+      });
+    });
+
+    // Bắt đầu lắng nghe GPS
     _positionStream = Geolocator.getPositionStream(
         locationSettings: _getLocationSettings()
     ).listen((Position position) {
-
-      // LOGIC CHẠY MỖI 3 GIÂY KHI CÓ TỌA ĐỘ MỚI
-      print("GPS Update: ${position.latitude}, ${position.longitude}");
-
-      setState(() {
-        // Lưu vào RAM
-        LatLng newPoint = LatLng(position.latitude, position.longitude);
-        _routePoints.add(newPoint);
-
-        // Di chuyển Camera theo người chạy
-        _mapController.move(newPoint, 17.0);
-      });
+      _updateLocation(position);
     });
   }
 
-  // --- KẾT THÚC CHẠY ---
-  void _stopTracking() {
-    // 1. Hủy lắng nghe GPS -> Dừng cập nhật vị trí
-    _positionStream?.cancel();
-    _positionStream = null;
+  // --- 3. XỬ LÝ KHI CÓ TỌA ĐỘ MỚI ---
+  void _updateLocation(Position position) {
+    LatLng newPoint = LatLng(position.latitude, position.longitude);
 
     setState(() {
-      _isTracking = false;
+      // Nếu đã có điểm trước đó, tính khoảng cách cộng dồn
+      if (_routePoints.isNotEmpty) {
+        double distMeter = _distanceCalculator.as(LengthUnit.Meter, _routePoints.last, newPoint);
+
+        // Chỉ cộng nếu di chuyển > 0.5 mét (lọc nhiễu)
+        if (distMeter > 0.5) {
+          _totalDistanceKm += (distMeter / 1000); // Đổi ra KM
+
+          // Tính Calo: Weight * Distance(km) * 1.036
+          _burnedCalories = _userWeightKg * _totalDistanceKm * 1.036;
+        }
+      }
+
+      _routePoints.add(newPoint);
+      _mapController.move(newPoint, 17.0);
     });
-
-    // 2. Zoom out để nhìn thấy toàn bộ quãng đường vừa chạy
-    if (_routePoints.isNotEmpty) {
-      _zoomToFitRoute();
-    }
-
-    // Tại đây dữ liệu vẫn nằm trong biến _routePoints
-    // Bạn có thể xem lại trên map thoải mái
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Đã kết thúc! Tổng quãng đường: ${_routePoints.length} điểm GPS"))
-    );
   }
 
-  // Hàm phụ trợ: Zoom bản đồ để thấy hết đường đi
+  // --- 4. KẾT THÚC ---
+  void _stopTracking() {
+    _positionStream?.cancel();
+    _timer?.cancel();
+    setState(() => _isTracking = false);
+
+    // Zoom out xem toàn cảnh
+    if (_routePoints.isNotEmpty) _zoomToFitRoute();
+  }
+
   void _zoomToFitRoute() {
-    // Tính toán khung bao (Bounds)
+    if (_routePoints.isEmpty) return;
     double minLat = 90, maxLat = -90, minLng = 180, maxLng = -180;
     for (var p in _routePoints) {
       if (p.latitude < minLat) minLat = p.latitude;
@@ -130,8 +139,6 @@ class _TrackingPageState extends State<TrackingPage> {
       if (p.longitude < minLng) minLng = p.longitude;
       if (p.longitude > maxLng) maxLng = p.longitude;
     }
-
-    // Fit bounds
     _mapController.fitCamera(
       CameraFit.bounds(
         bounds: LatLngBounds(LatLng(minLat, minLng), LatLng(maxLat, maxLng)),
@@ -140,39 +147,31 @@ class _TrackingPageState extends State<TrackingPage> {
     );
   }
 
+  // Helper format thời gian HH:MM:SS
+  String _formatDuration(Duration d) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(d.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(d.inSeconds.remainder(60));
+    return "${twoDigits(d.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isTracking ? 'Đang ghi hình (3s/lần)...' : 'Kết quả chạy bộ'),
-        backgroundColor: _isTracking ? Colors.redAccent : Colors.blueAccent,
-        foregroundColor: Colors.white,
-        actions: [
-          // Nút hiển thị số điểm GPS đang có trong RAM
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: Text("${_routePoints.length} pts", style: const TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          )
-        ],
-      ),
       body: Stack(
         children: [
-          // 1. BẢN ĐỒ
+          // LỚP 1: BẢN ĐỒ FULL MÀN HÌNH
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              initialCenter: const LatLng(10.762622, 106.660172), // Mặc định HCM
+              initialCenter: const LatLng(10.762622, 106.660172),
               initialZoom: 15.0,
             ),
             children: [
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.running_app',
+                userAgentPackageName: 'com.example.runapp',
               ),
-
-              // Vẽ đường màu xanh
               PolylineLayer(
                 polylines: [
                   Polyline(
@@ -182,46 +181,88 @@ class _TrackingPageState extends State<TrackingPage> {
                   ),
                 ],
               ),
-
-              // Vẽ điểm đầu (Xanh) và điểm cuối/hiện tại (Đỏ)
               if (_routePoints.isNotEmpty)
                 MarkerLayer(
                   markers: [
                     Marker(
-                      point: _routePoints.first,
-                      width: 40, height: 40,
-                      child: const Icon(Icons.location_on, color: Colors.green, size: 40),
-                    ),
-                    Marker(
                       point: _routePoints.last,
-                      width: 40, height: 40,
-                      child: const Icon(Icons.directions_run, color: Colors.red, size: 40),
+                      width: 20, height: 20,
+                      child: Container(
+                        decoration: BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 3)
+                        ),
+                      ),
                     ),
                   ],
                 ),
             ],
           ),
 
-          // 2. NÚT ĐIỀU KHIỂN
+          // LỚP 2: BẢNG THÔNG SỐ (GÓC TRÊN TRÁI)
+          // Chỉ hiện khi đang chạy hoặc đã chạy xong
+          if (_routePoints.isNotEmpty || _isTracking)
+            Positioned(
+              top: 50, // Cách mép trên (tránh tai thỏ)
+              left: 16,
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7), // Nền đen bán trong suốt
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [BoxShadow(blurRadius: 5, color: Colors.black26)],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _statRow(Icons.timer, _formatDuration(_elapsedTime), Colors.yellow),
+                    const SizedBox(height: 8),
+                    _statRow(Icons.directions_run, "${_totalDistanceKm.toStringAsFixed(2)} km", Colors.blueAccent),
+                    const SizedBox(height: 8),
+                    _statRow(Icons.local_fire_department, "${_burnedCalories.toStringAsFixed(0)} kcal", Colors.orange),
+                  ],
+                ),
+              ),
+            ),
+
+          // LỚP 3: NÚT ĐIỀU KHIỂN (Ở DƯỚI)
           Positioned(
-            bottom: 30,
-            left: 20,
-            right: 20,
+            bottom: 30, left: 20, right: 20,
             child: ElevatedButton(
               onPressed: _isTracking ? _stopTracking : _startTracking,
               style: ElevatedButton.styleFrom(
                 backgroundColor: _isTracking ? Colors.red : Colors.green,
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                elevation: 5,
               ),
               child: Text(
-                _isTracking ? 'KẾT THÚC' : 'BẮT ĐẦU CHẠY',
-                style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                _isTracking ? 'KẾT THÚC BUỔI CHẠY' : 'BẮT ĐẦU',
+                style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // Widget hiển thị 1 dòng thông số
+  Widget _statRow(IconData icon, String value, Color color) {
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 20),
+        const SizedBox(width: 8),
+        Text(
+          value,
+          style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              fontFamily: 'monospace' // Font đơn cách số không bị nhảy
+          ),
+        ),
+      ],
     );
   }
 }
