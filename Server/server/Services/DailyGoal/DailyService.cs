@@ -5,7 +5,7 @@ using server.Services.Interfaces;
 
 namespace server.Services.Implements;
 
-public class DailyGoalService : IDailyGoal
+public class DailyGoalService : IDailyGoalService
 {
     private readonly ApplicationDbContext _context;
 

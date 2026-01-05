@@ -29,10 +29,10 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddScoped<IUser, UserService>();
-builder.Services.AddScoped<IRun, RunService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRunService, RunService>();
 // builder.Services.AddScoped<IRun, RunService>();
-builder.Services.AddScoped<IDailyGoal, DailyGoalService>();
+builder.Services.AddScoped<IDailyGoalService, DailyGoalService>();
 // Add services to the container.
 builder.Services.AddAutoMapper(typeof(AutoMapperConfig).Assembly);
 builder.Services.AddControllers();

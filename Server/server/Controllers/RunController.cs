@@ -11,9 +11,9 @@ namespace server.Controllers
     // [Authorize]
     public class RunController : ControllerBase
     {
-        private readonly IRun _runService;
+        private readonly IRunService _runService;
 
-        public RunController(IRun runService)
+        public RunController(IRunService runService)
         {
             _runService = runService;
         }

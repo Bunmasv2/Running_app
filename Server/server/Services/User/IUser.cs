@@ -4,7 +4,7 @@ using server.Models;
 
 namespace server.Services.Interfaces;
 
-public interface IUser
+public interface IUserService
 {
     Task<AppUser> FindOrCreateUserByEmailAsync(string email, string name);
     Task<UserDTO.Profile> GetUserProfile(string userId);
