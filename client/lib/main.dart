@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'Views/MainScreen.dart';
-import 'Views/TrackingView.dart'; // Import màn hình map đã làm ở bước trước
+import 'Views/TrackingView.dart';
+import 'Views/LoginView.dart';  // Cần import LoginView (nếu chưa có file này thì tạo tạm)
+import 'Views/SplashView.dart'; // Cần import SplashView (nếu chưa có file này thì tạo tạm)
 
 void main() {
   runApp(const MyApp());
@@ -14,27 +16,17 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Running Tracker',
       debugShowCheckedModeBanner: false,
-
-      // Cấu hình Theme theo style hiện đại (Material 3)
       theme: ThemeData(
-          useMaterial3: true,
-          colorSchemeSeed: Colors.blue, // Màu chủ đạo
-          scaffoldBackgroundColor: Colors.white,
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.white,
-            surfaceTintColor: Colors.transparent, // Bỏ hiệu ứng ám màu khi scroll
-            elevation: 0,
-            centerTitle: false,
-          )
+        useMaterial3: true,
+        colorSchemeSeed: Colors.blue,
       ),
 
-      // Route mặc định là MainScreen (chứa 3 tabs)
-      initialRoute: '/',
+      // SỬA Ở ĐÂY: Thay vì vào thẳng Main, hãy vào Splash để check token
+      home: const SplashView(),
 
-      // Định nghĩa các Routes
       routes: {
-        '/': (context) => const MainScreen(),
-        // TrackingView không nằm trong BottomBar nên để route riêng [cite: 83]
+        '/login': (context) => const LoginView(),
+        '/main': (context) => const MainScreen(),
         '/tracking': (context) => const TrackingView(),
       },
     );

@@ -1,9 +1,13 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart'; // Cần thiết để check Android/iOS
+import 'package:flutter/foundation.dart'; // Check Android/iOS
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+
+// Import Service và Model bạn vừa tạo
+import '../Services/RunService.dart';
+import '../Services/UserService.dart';
 
 class TrackingView extends StatefulWidget {
   const TrackingView({super.key});
@@ -15,6 +19,7 @@ class TrackingView extends StatefulWidget {
 class _TrackingViewState extends State<TrackingView> {
   // --- STATE VARIABLES ---
   final MapController _mapController = MapController();
+  final RunService _runService = RunService(); // 1. Khởi tạo Service
 
   // Dữ liệu đường chạy
   List<LatLng> _routePoints = [];
@@ -26,14 +31,21 @@ class _TrackingViewState extends State<TrackingView> {
   Timer? _timer;
   StreamSubscription<Position>? _positionStream;
 
+  // Trạng thái lưu dữ liệu
+  bool _isSaving = false; // 2. Biến để hiện Loading khi đang gọi API
+
   // Giả định cân nặng User (Sau này lấy từ Profile)
   final double _userWeightKg = 65.0;
 
   @override
   void initState() {
     super.initState();
-    _startTracking();
-  }
+    final UserService _tempUser = UserService();
+    // Paste token từ jwt.io vào đây
+    _tempUser.saveTokenManually("eyJhbGciOiJIUzI1NiIsI...");
+    // ---------------------------------------
+
+    _startTracking();  }
 
   @override
   void dispose() {
@@ -43,18 +55,16 @@ class _TrackingViewState extends State<TrackingView> {
     super.dispose();
   }
 
-  // --- CẤU HÌNH GPS (QUAN TRỌNG ĐỂ VẼ MƯỢT) ---
+  // --- CẤU HÌNH GPS ---
   LocationSettings _getLocationSettings() {
     if (defaultTargetPlatform == TargetPlatform.android) {
       return AndroidSettings(
         accuracy: LocationAccuracy.high,
-        distanceFilter: 0, // Bắt mọi di chuyển dù nhỏ nhất
-        forceLocationManager: true, // Ép dùng chip GPS để ổn định hơn trên Android
-        intervalDuration: const Duration(seconds: 1), // Cập nhật mỗi 1 giây
-        // foregroundNotificationConfig: ... (Cấu hình chạy nền nếu cần sau này)
+        distanceFilter: 0,
+        forceLocationManager: true,
+        intervalDuration: const Duration(seconds: 1),
       );
     }
-    // Cấu hình cho iOS
     return const LocationSettings(
       accuracy: LocationAccuracy.high,
       distanceFilter: 0,
@@ -62,16 +72,11 @@ class _TrackingViewState extends State<TrackingView> {
     );
   }
 
-  // --- LOGIC XỬ LÝ ---
+  // --- LOGIC TRACKING ---
   Future<void> _startTracking() async {
-    // 1. Check Service GPS có bật không
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      // Có thể show dialog nhắc user bật GPS tại đây
-      return;
-    }
+    if (!serviceEnabled) return;
 
-    // 2. Check Quyền
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -79,16 +84,14 @@ class _TrackingViewState extends State<TrackingView> {
     }
     if (permission == LocationPermission.deniedForever) return;
 
-    // 3. Start Timer (Đếm giờ)
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         _elapsed = Duration(seconds: _elapsed.inSeconds + 1);
       });
     });
 
-    // 4. Start GPS Stream (Lắng nghe vị trí)
     _positionStream = Geolocator.getPositionStream(
-        locationSettings: _getLocationSettings() // Sử dụng cấu hình mượt
+        locationSettings: _getLocationSettings()
     ).listen((Position position) {
       _updatePosition(position);
     });
@@ -98,30 +101,54 @@ class _TrackingViewState extends State<TrackingView> {
     LatLng newPoint = LatLng(pos.latitude, pos.longitude);
 
     setState(() {
-      // Tính toán khoảng cách và calo
       if (_routePoints.isNotEmpty) {
         final double distBytes = const Distance().as(LengthUnit.Meter, _routePoints.last, newPoint);
-
-        // Chỉ cộng dồn nếu di chuyển thực sự (> 0.5m) để tránh nhiễu khi đứng yên
+        // Lọc nhiễu nhỏ
         if (distBytes > 0.5) {
           _distanceKm += (distBytes / 1000);
           _calories = _userWeightKg * _distanceKm * 1.036;
         }
       }
-
-      // Luôn thêm điểm mới vào đường vẽ để tạo cảm giác mượt
       _routePoints.add(newPoint);
-
-      // Di chuyển camera theo người chạy
       _mapController.move(newPoint, 17.0);
     });
   }
 
-  void _stopRun() {
+  // --- 3. LOGIC KẾT THÚC & GỌI API ---
+  Future<void> _stopRun() async {
+    // A. Dừng theo dõi ngay lập tức
     _timer?.cancel();
     _positionStream?.cancel();
-    // Trả về true để báo cho màn hình trước biết là đã chạy xong
-    Navigator.pop(context, true);
+
+    // B. Hiển thị Loading
+    setState(() => _isSaving = true);
+
+    // C. Gọi API lưu lên Server (Backend: RunController)
+    bool success = await _runService.saveRun(
+      distance: _distanceKm,
+      calories: _calories,
+      duration: _elapsed,
+      routePoints: _routePoints,
+    );
+
+    // D. Xử lý kết quả
+    if (!mounted) return;
+
+    setState(() => _isSaving = false);
+
+    if (success) {
+      // Thành công: Quay về Home và báo reload
+      Navigator.pop(context, true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Đã lưu bài chạy thành công!"), backgroundColor: Colors.green),
+      );
+    } else {
+      // Thất bại: Báo lỗi (Tạm thời vẫn cho thoát, hoặc giữ lại tùy bạn)
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Lỗi kết nối server! Không thể lưu."), backgroundColor: Colors.red),
+      );
+      // Navigator.pop(context, true); // Nếu muốn thoát luôn dù lỗi thì mở dòng này
+    }
   }
 
   String _formatDuration(Duration d) {
@@ -156,7 +183,6 @@ class _TrackingViewState extends State<TrackingView> {
                   ),
                 ],
               ),
-              // Marker hiện tại (tùy chọn, để biết mình đang ở đâu chính xác)
               if (_routePoints.isNotEmpty)
                 MarkerLayer(
                   markers: [
@@ -200,13 +226,13 @@ class _TrackingViewState extends State<TrackingView> {
             ),
           ),
 
-          // LỚP 3: NÚT KẾT THÚC
+          // LỚP 3: NÚT KẾT THÚC (CÓ LOADING)
           Positioned(
             bottom: 40,
             left: 40,
             right: 40,
             child: ElevatedButton(
-              onPressed: _stopRun,
+              onPressed: _isSaving ? null : _stopRun, // Disable nút khi đang lưu
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.redAccent,
                 padding: const EdgeInsets.symmetric(vertical: 15),
@@ -215,7 +241,16 @@ class _TrackingViewState extends State<TrackingView> {
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
-              child: const Text(
+              child: _isSaving
+                  ? const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)),
+                  SizedBox(width: 10),
+                  Text("ĐANG LƯU...", style: TextStyle(color: Colors.white)),
+                ],
+              )
+                  : const Text(
                 "KẾT THÚC",
                 style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
               ),

@@ -1,85 +1,76 @@
 import 'package:flutter/material.dart';
-import '../Models/RunModel.dart';
+import '../Views/HomeView.dart'; // Để dùng class DailyGoal
 
 class GoalProgressComponent extends StatelessWidget {
-  final DailyGoal? goal; // Có thể null nếu chưa đặt mục tiêu
+  final DailyGoal? goal;
   final VoidCallback onSetGoal;
 
-  const GoalProgressComponent({super.key, this.goal, required this.onSetGoal});
+  const GoalProgressComponent({
+    super.key,
+    required this.goal,
+    required this.onSetGoal,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // TRƯỜNG HỢP 1: Chưa có mục tiêu (Hiển thị nút +)
+    // Nếu chưa đặt mục tiêu -> Hiện nút "Đặt mục tiêu"
     if (goal == null) {
       return GestureDetector(
         onTap: onSetGoal,
         child: Container(
-          height: 200,
           width: 200,
+          height: 200,
           decoration: BoxDecoration(
+            color: Colors.white,
             shape: BoxShape.circle,
-            color: Colors.grey.shade100,
-            // SỬA LỖI TẠI ĐÂY: Đổi sang solid và làm mờ màu border
-            border: Border.all(
-                color: Colors.blueAccent.withOpacity(0.5),
-                width: 2,
-                style: BorderStyle.solid
-            ),
+            border: Border.all(color: Colors.grey.shade300, width: 2),
+            boxShadow: [
+              BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5))
+            ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
-              Icon(Icons.add_circle_outline, size: 50, color: Colors.blueAccent),
-              SizedBox(height: 8),
-              Text(
-                  "Đặt mục tiêu ngay",
-                  style: TextStyle(
-                      color: Colors.blueAccent,
-                      fontWeight: FontWeight.bold
-                  )
-              ),
+              Icon(Icons.add, size: 40, color: Colors.blue),
+              SizedBox(height: 10),
+              Text("Đặt mục tiêu", style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
             ],
           ),
         ),
       );
     }
 
-    // TRƯỜNG HỢP 2: Đã có mục tiêu -> Hiển thị Circular Progress
-    return SizedBox(
-      height: 200,
-      width: 200,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Vòng tròn nền (màu xám nhạt)
-          CircularProgressIndicator(
-            value: 1.0,
+    // Nếu đã có mục tiêu -> Vẽ vòng tròn Progress
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        SizedBox(
+          width: 200,
+          height: 200,
+          child: CircularProgressIndicator(
+            value: goal!.progress,
             strokeWidth: 15,
-            color: Colors.grey.shade200,
-          ),
-          // Vòng tròn tiến độ (màu cam)
-          CircularProgressIndicator(
-            value: goal!.progress > 1.0 ? 1.0 : goal!.progress, // Max là 100%
-            strokeWidth: 15,
-            color: Colors.orange,
+            backgroundColor: Colors.grey[200],
+            color: Colors.blueAccent,
             strokeCap: StrokeCap.round,
-            backgroundColor: Colors.transparent,
           ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "${(goal!.progress * 100).toStringAsFixed(0)}%",
-                style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
-              ),
-              Text(
-                "Mục tiêu: ${goal!.targetDistanceKm} km",
-                style: const TextStyle(color: Colors.grey),
-              )
-            ],
-          )
-        ],
-      ),
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.directions_run, color: Colors.blue, size: 30),
+            const SizedBox(height: 5),
+            Text(
+              goal!.currentDistanceKm.toStringAsFixed(2),
+              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              "/ ${goal!.targetDistanceKm.toStringAsFixed(0)} km",
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+          ],
+        )
+      ],
     );
   }
 }
