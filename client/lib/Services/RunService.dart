@@ -1,14 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Cần import
-import '../Models/RunModels.dart'; // File model bạn đã tạo
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/RunModels.dart';
 
 class RunService {
-  // URL Server Render (Lưu ý: Backend bạn đặt Route là [controller] nên path là /run hoặc /Run)
   static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run';
 
-  // Helper lấy token (Giống bên UserService)
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('accessToken');
@@ -22,7 +20,6 @@ class RunService {
     };
   }
 
-  // 1. LƯU BÀI CHẠY (SAVE)
   Future<bool> saveRun({
     required double distance,
     required double calories,
@@ -31,8 +28,6 @@ class RunService {
   }) async {
     try {
       final headers = await _getHeaders();
-
-      // Convert tọa độ
       List<Map<String, double>> coords = routePoints.map((p) => {
         "latitude": p.latitude,
         "longitude": p.longitude
@@ -51,26 +46,19 @@ class RunService {
 
       final response = await http.post(
         Uri.parse(_baseUrl),
-        headers: headers, // Token được gửi ở đây
+        headers: headers,
         body: jsonEncode(dto.toJson()),
       );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return true;
-      }
-      print('Lỗi Save Run: ${response.body}');
-      return false;
+      return response.statusCode == 200 || response.statusCode == 201;
     } catch (e) {
-      print('Lỗi kết nối: $e');
       return false;
     }
   }
 
-  // 2. LẤY LỊCH SỬ CHẠY (HISTORY)
+  // 2. GET HISTORY
   Future<List<RunHistoryDto>> getRunHistory({int pageIndex = 1}) async {
     try {
       final headers = await _getHeaders();
-
       final uri = Uri.parse('$_baseUrl/history').replace(queryParameters: {
         'pageIndex': pageIndex.toString(),
         'pageSize': '10',
@@ -84,8 +72,23 @@ class RunService {
       }
       return [];
     } catch (e) {
-      print('Lỗi lấy lịch sử: $e');
+      print("Lỗi Get History: $e"); // Log lỗi để debug
       return [];
+    }
+  }
+
+  // 3. GET DETAIL
+  Future<RunDetailDto?> getRunDetail(int id) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(Uri.parse('$_baseUrl/$id'), headers: headers);
+
+      if (response.statusCode == 200) {
+        return RunDetailDto.fromJson(jsonDecode(response.body));
+      }
+      return null;
+    } catch (e) {
+      return null;
     }
   }
 }

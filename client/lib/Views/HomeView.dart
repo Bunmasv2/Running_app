@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
-import '../Components/GoalProgressComponent.dart'; // Đảm bảo bạn đã có file này (code ở dưới)
-import '../Models/UserProfile.dart';
+
+// 1. CÁC IMPORT QUAN TRỌNG
+import '../models/RunModels.dart';
+// import '../models/DailyGoalModel.dart';
+import '../Services/GoalService.dart'; // Import Service Goal
 import '../Services/UserService.dart';
+import '../Models/UserProfile.dart';
+import '../Components//GoalProgressComponent.dart'; // Đường dẫn tới component vừa sửa
 import 'TrackingView.dart';
-
-// Model đơn giản cho Mục tiêu (để dùng trong UI)
-class DailyGoal {
-  final double targetDistanceKm;
-  final double currentDistanceKm;
-
-  DailyGoal({required this.targetDistanceKm, required this.currentDistanceKm});
-
-  double get progress => (currentDistanceKm / targetDistanceKm).clamp(0.0, 1.0);
-}
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -22,16 +17,18 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  // Khởi tạo các Service
   final UserService _userService = UserService();
+  final GoalService _goalService = GoalService(); // Thêm GoalService
 
-  // State dữ liệu
   UserProfile? _userProfile;
-  DailyGoal? _dailyGoal;
+  DailyGoal? _dailyGoal; // Sử dụng class từ RunModels.dart
 
-  // Thống kê hôm nay (Mock data - Sau này gọi API /run/today-stats)
+  // Thống kê hôm nay
   double _todayKm = 0.0;
   int _todayMinutes = 0;
   double _todayKcal = 0.0;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -40,20 +37,37 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Future<void> _loadData() async {
-    // 1. Lấy thông tin User (Tên, Avatar)
-    UserProfile? user = await _userService.getUserProfile();
+    setState(() => _isLoading = true);
 
-    // 2. Giả lập lấy thống kê hôm nay (Hoặc gọi API RunService.getTodayStats)
-    // Tạm thời hardcode để test giao diện
-    setState(() {
-      _userProfile = user;
-      _todayKm = 5.2;
-      _todayMinutes = 35;
-      _todayKcal = 320;
-    });
+    // Gọi song song các API để tiết kiệm thời gian
+    // Lưu ý: Bạn cần đảm bảo UserService.getUserProfile() đã được viết đúng
+    final userFuture = _userService.getUserProfile();
+    final goalFuture = _goalService.getTodayGoal();
+
+    final results = await Future.wait([userFuture, goalFuture]);
+
+    if (mounted) {
+      setState(() {
+        _userProfile = results[0] as UserProfile?;
+        _dailyGoal = results[1] as DailyGoal?;
+
+        // Nếu có goal, cập nhật luôn số km hiện tại vào biến thống kê (logic tạm)
+        if (_dailyGoal != null) {
+          _todayKm = _dailyGoal!.currentDistanceKm;
+        } else {
+          // Nếu chưa có goal, tạm để 0 hoặc lấy từ 1 API thống kê khác
+          _todayKm = 0.0;
+        }
+
+        // Mock các chỉ số khác (vì chưa có API full thống kê)
+        _todayMinutes = 0;
+        _todayKcal = 0;
+
+        _isLoading = false;
+      });
+    }
   }
 
-  // --- CHỨC NĂNG 1: ĐẶT MỤC TIÊU ---
   void _handleSetGoal() {
     final TextEditingController controller = TextEditingController();
 
@@ -64,8 +78,10 @@ class _HomeViewState extends State<HomeView> {
         content: TextField(
           controller: controller,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          autofocus: true,
           decoration: const InputDecoration(
             labelText: "Số Km muốn chạy",
+            hintText: "Ví dụ: 5.0",
             suffixText: "km",
             border: OutlineInputBorder(),
           ),
@@ -73,16 +89,21 @@ class _HomeViewState extends State<HomeView> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Hủy")),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final double? target = double.tryParse(controller.text);
               if (target != null && target > 0) {
-                setState(() {
-                  _dailyGoal = DailyGoal(
-                    targetDistanceKm: target,
-                    currentDistanceKm: _todayKm,
-                  );
-                });
-                Navigator.pop(ctx);
+                Navigator.pop(ctx); // Đóng dialog trước
+
+                // Gọi API lưu mục tiêu
+                setState(() => _isLoading = true);
+                DailyGoal? newGoal = await _goalService.setTodayGoal(target);
+
+                if (mounted) {
+                  setState(() {
+                    _dailyGoal = newGoal;
+                    _isLoading = false;
+                  });
+                }
               }
             },
             child: const Text("Lưu"),
@@ -94,28 +115,15 @@ class _HomeViewState extends State<HomeView> {
 
   // --- CHỨC NĂNG 2: BẮT ĐẦU CHẠY ---
   void _startRunning() async {
-    // Chuyển sang màn hình Map
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const TrackingView()),
     );
 
-    // Nếu chạy xong và bấm "Kết thúc" (trả về true)
+    // Nếu chạy xong và có kết quả trả về
     if (result == true) {
-      // Reload lại dữ liệu (Cộng dồn giả lập để thấy thay đổi)
-      setState(() {
-        _todayKm += 2.5; // Giả sử vừa chạy thêm 2.5km
-        _todayKcal += 150;
-        _todayMinutes += 15;
-
-        // Cập nhật lại thanh tiến độ
-        if (_dailyGoal != null) {
-          _dailyGoal = DailyGoal(
-            targetDistanceKm: _dailyGoal!.targetDistanceKm,
-            currentDistanceKm: _todayKm,
-          );
-        }
-      });
+      // Reload lại toàn bộ dữ liệu từ Server để cập nhật tiến độ mới nhất
+      _loadData();
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Đã lưu kết quả chạy thành công!")),
@@ -142,27 +150,27 @@ class _HomeViewState extends State<HomeView> {
     );
 
     if (confirm == true) {
-      await _userService.logout(); // Xóa token
+      // await _userService.logout(); // Uncomment nếu bạn đã viết hàm logout
       if (!mounted) return;
-      // Quay về màn hình Login và xóa hết lịch sử cũ
       Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Lấy tên user hoặc hiển thị mặc định
-    String displayName = _userProfile?.userName ?? "Người chạy bộ";
+    String displayName = _userProfile?.userName ?? "Runner";
 
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey[50],
-        body: SingleChildScrollView(
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- HEADER: Chào & Logout ---
+              // HEADER
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -175,7 +183,7 @@ class _HomeViewState extends State<HomeView> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "Xin chào, $displayName!",
+                        "Hi, $displayName!",
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -186,13 +194,10 @@ class _HomeViewState extends State<HomeView> {
                   ),
                   Row(
                     children: [
-                      // Nút Logout
                       IconButton(
                         onPressed: _handleLogout,
                         icon: const Icon(Icons.logout, color: Colors.redAccent),
-                        tooltip: "Đăng xuất",
                       ),
-                      // Avatar
                       CircleAvatar(
                         radius: 22,
                         backgroundColor: Colors.blue[100],
@@ -210,7 +215,7 @@ class _HomeViewState extends State<HomeView> {
 
               const SizedBox(height: 30),
 
-              // --- GOAL PROGRESS ---
+              // GOAL PROGRESS COMPONENT
               Center(
                 child: GoalProgressComponent(
                   goal: _dailyGoal,
@@ -220,7 +225,7 @@ class _HomeViewState extends State<HomeView> {
 
               const SizedBox(height: 30),
 
-              // --- DASHBOARD STATS ---
+              // THỐNG KÊ
               const Text(
                 "Thống kê hôm nay",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -247,7 +252,6 @@ class _HomeViewState extends State<HomeView> {
                 ],
               ),
               const SizedBox(height: 15),
-              // Card Calo full width
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -285,7 +289,7 @@ class _HomeViewState extends State<HomeView> {
 
               const SizedBox(height: 40),
 
-              // --- BUTTON START ---
+              // NÚT BẮT ĐẦU CHẠY
               SizedBox(
                 width: double.infinity,
                 height: 55,

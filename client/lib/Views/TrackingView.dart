@@ -40,11 +40,6 @@ class _TrackingViewState extends State<TrackingView> {
   @override
   void initState() {
     super.initState();
-    final UserService _tempUser = UserService();
-    // Paste token từ jwt.io vào đây
-    _tempUser.saveTokenManually("eyJhbGciOiJIUzI1NiIsI...");
-    // ---------------------------------------
-
     _startTracking();  }
 
   @override
