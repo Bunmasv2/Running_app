@@ -5,7 +5,7 @@ namespace server.Models;
 
 public class AppUser : IdentityUser
 {
-    public string FullName { get; set; } = string.Empty;
+    public string? FullName { get; set; } = string.Empty;
     public double HeightCm { get; set; }
     public double WeightKg { get; set; }
     public double TotalDistanceKm { get; set; } = 0;
