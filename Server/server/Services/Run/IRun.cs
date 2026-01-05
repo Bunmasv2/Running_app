@@ -2,7 +2,7 @@ using server.DTO;
 
 namespace server.Services.Interfaces;
 
-public interface IRunService
+public interface IRun
 {
     Task<RunSessionDto.RunResponseDto> SaveRunSessionAsync(string userId, RunSessionDto.RunCreateDto dto);
     Task<List<RunSessionDto.RunHistoryItemDto>> GetRunHistoryAsync(string userId, int pageIndex, int pageSize);
