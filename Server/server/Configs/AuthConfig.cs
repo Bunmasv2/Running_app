@@ -27,7 +27,7 @@ namespace server.Configs
                     var email = context.Principal.FindFirstValue(ClaimTypes.Email);
                     var name = context.Principal.FindFirstValue(ClaimTypes.Name);
 
-                    var userService = context.HttpContext.RequestServices.GetRequiredService<IUser>();
+                    var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
                     var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<AppUser>>();
                     var db = context.HttpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
 
