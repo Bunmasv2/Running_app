@@ -18,5 +18,25 @@ namespace server.DTO
             public List<string> Roles { get; set; }
             public string Email { get; set; }
         }
+
+        public class Profile
+        {
+            public string Email { get; set; }
+            public string UserName { get; set; }
+            public DateTime CreatedAt { get; set; }
+            public double HeightCm { get; set; }
+            public double WeightKg { get; set; }
+            public double TotalDistanceKm { get; set; }
+            public double TotalTimeSeconds { get; set; }
+            public string? AvatarUrl { get; set; }
+        }
+
+        public class UpdateProfile
+        {
+            public string Email { get; set; }
+            public string UserName { get; set; }
+            public double HeightCm { get; set; }
+            public double WeightKg { get; set; }
+        }
     }
 }

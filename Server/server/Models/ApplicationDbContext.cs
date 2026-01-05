@@ -17,6 +17,5 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        // Có thể config thêm ràng buộc tại đây nếu cần
     }
 }
