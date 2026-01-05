@@ -49,7 +49,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("profile")]
-    [Authorize]
+    // [Authorize]
     public async Task<ActionResult> GetUserProfile()
     {
         string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
