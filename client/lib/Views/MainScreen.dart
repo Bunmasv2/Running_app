@@ -1,7 +1,8 @@
+import 'package:client/Views/HistoryView.dart';
 import 'package:flutter/material.dart';
 import '../Components/BottomNavBarComponent.dart';
 import 'HomeView.dart';
-// import 'HistoryView.dart'; // Bạn cần tạo file này
+import 'HistoryView.dart';
 import 'ProfileView.dart'; // Bạn cần tạo file này
 
 // Widget Placeholder tạm thời cho History và Profile nếu bạn chưa tạo file
@@ -30,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _pages = [
       const HomeView(),                  // Tab 0
-      const PlaceholderView("Lịch sử"),  // Tab 1 (Thay bằng HistoryView sau này)
+      const HistoryView(),  // Tab 1 (Thay bằng HistoryView sau này)
       const ProfileView(),  // Tab 2 (Thay bằng ProfileView sau này)
     ];
   }

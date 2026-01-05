@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../Services/UserService.dart';
-// import 'MainScreen.dart'; // Đảm bảo import đúng đường dẫn file MainScreen
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -40,11 +39,12 @@ class _LoginViewState extends State<LoginView> {
     }
   }
 
-  // Xử lý đăng nhập Google
+  // Xử lý đăng nhập Google (Dùng WebView)
   void _handleGoogleLogin() async {
     setState(() => _isLoading = true);
 
-    bool success = await _userService.loginGoogle();
+    // TRUYỀN CONTEXT VÀO ĐÂY ĐỂ MỞ WEBVIEW
+    bool success = await _userService.loginGoogle(context);
 
     if (!mounted) return;
     setState(() => _isLoading = false);
@@ -53,7 +53,7 @@ class _LoginViewState extends State<LoginView> {
       Navigator.pushReplacementNamed(context, '/main');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Đăng nhập Google thất bại hoặc chưa cấu hình!")),
+        const SnackBar(content: Text("Đăng nhập thất bại hoặc bạn đã hủy thao tác.")),
       );
     }
   }
@@ -62,7 +62,7 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView( // Thêm SingleChildScrollView để tránh lỗi bàn phím che
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 60.0),
           child: Column(
@@ -78,6 +78,7 @@ class _LoginViewState extends State<LoginView> {
               ),
               const SizedBox(height: 40),
 
+              // Email Input
               TextField(
                 controller: _emailController,
                 decoration: const InputDecoration(
@@ -88,6 +89,7 @@ class _LoginViewState extends State<LoginView> {
               ),
               const SizedBox(height: 20),
 
+              // Password Input
               TextField(
                 controller: _passController,
                 obscureText: true,
@@ -110,6 +112,7 @@ class _LoginViewState extends State<LoginView> {
 
               const SizedBox(height: 30),
 
+              // Login Button
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
@@ -124,7 +127,7 @@ class _LoginViewState extends State<LoginView> {
 
               const SizedBox(height: 30),
 
-              // --- PHẦN MỚI: DÒNG KẺ HOẶC ---
+              // Dòng kẻ "Hoặc"
               Row(
                 children: [
                   Expanded(child: Divider(color: Colors.grey[400])),
@@ -138,7 +141,7 @@ class _LoginViewState extends State<LoginView> {
 
               const SizedBox(height: 20),
 
-              // --- PHẦN MỚI: NÚT GOOGLE ---
+              // Nút Google
               OutlinedButton(
                 onPressed: _isLoading ? null : _handleGoogleLogin,
                 style: OutlinedButton.styleFrom(
@@ -146,18 +149,17 @@ class _LoginViewState extends State<LoginView> {
                   side: BorderSide(color: Colors.grey.shade300),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   backgroundColor: Colors.white,
-                  elevation: 2, // Đổ bóng nhẹ
+                  elevation: 2,
                   shadowColor: Colors.black12,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Icon Google (Load từ mạng cho nhanh, thực tế nên dùng asset local)
                     Image.network(
                       'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
                       height: 24,
                       width: 24,
-                      errorBuilder: (context, error, stackTrace) => const Icon(Icons.public, color: Colors.red),
+                      errorBuilder: (ctx, err, stack) => const Icon(Icons.public, color: Colors.red),
                     ),
                     const SizedBox(width: 12),
                     const Text(
