@@ -3,10 +3,11 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/RunModels.dart';
+import '../models/UserRanking.dart';
 
 class RunService {
-  static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run';
-
+  // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run';
+  static const String _baseUrl = 'http://10.0.2.2:5144/Run';
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('accessToken');
@@ -89,6 +90,34 @@ class RunService {
       return null;
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<List<UserRanking>> getWeeklyRanking() async {
+    try {
+      final headers = await _getHeaders();
+
+      final response = await http.get(
+        Uri.parse('$_baseUrl/top-weekly'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        print("Dữ liệu thật từ Server: ${response.body}");
+        final decoded = jsonDecode(response.body);
+
+        final List listData = decoded['data'];
+
+        return listData
+            .map((e) => UserRanking.fromJson(e))
+            .toList();
+      } else {
+        print('Get ranking failed: ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      print('Get ranking error: $e');
+      return [];
     }
   }
 }

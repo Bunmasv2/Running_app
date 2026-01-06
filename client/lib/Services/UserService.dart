@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/UserProfile.dart';
 import '../Views/GoogleWebView.dart'; // Bắt buộc phải import file WebView này
+import '../models/UserRanking.dart';
 
 class UserService {
   // URL Server Render của bạn

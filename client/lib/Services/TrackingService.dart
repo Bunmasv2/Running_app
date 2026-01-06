@@ -6,8 +6,8 @@ import 'package:latlong2/latlong.dart';
 class TrackingService {
   // Thay đổi URL này thành domain server thật của bạn
   // Nếu test trên máy ảo Android dùng localhost, hãy dùng 'http://10.0.2.2:3000/api/runs'
-  static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run/history';
-
+  // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run/history';
+  static const String _baseUrl = 'http://10.0.2.2:5144/Run/history';
   Future<bool> saveRunSession({
     required double distanceKm,
     required double calories,

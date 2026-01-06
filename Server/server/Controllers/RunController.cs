@@ -65,5 +65,23 @@ namespace server.Controllers
             var stats = await _runService.GetTodayStatsAsync(GetUserId());
             return Ok(stats);
         }
+
+        [HttpGet("top-weekly")]
+        public async Task<IActionResult> GetWeeklyRanking()
+        {
+            var result = await _runService.GetTop10WeeklyAsync();
+            Console.WriteLine("Vao duoc rrrrrr");
+            Console.WriteLine($"--- Tổng số user trong top: {result.Count()} ---");
+            foreach (var user in result)
+            {
+                Console.WriteLine($"User: {user.Username} | Time: {user.TotalTime} | Calories: {user.CaloriesBurned} kcal");
+            }
+            return Ok(new
+            {
+                title = "Ranking Runner",
+                subtitle = "Những Chiến Binh Yêu Bản Thân – 7 Ngày Gần Nhất",
+                data = result
+            });
+        }
     }
 }

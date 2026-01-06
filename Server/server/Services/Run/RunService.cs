@@ -138,5 +138,40 @@ namespace server.Services
                 ProgressPercent = Math.Round(progress, 1)
             };
         }
+
+        public async Task<List<UserDTO.userRanking>> GetTop10WeeklyAsync()
+        {
+            var fromDate = DateTime.UtcNow.AddDays(-7);
+
+            var result = await _context.RunSessions
+                .Include(r => r.User)
+                .Where(r => r.StartTime >= fromDate)
+                .GroupBy(r => new
+                {
+                    r.UserId,
+                    r.User.UserName,
+                    r.User.AvatarUrl
+                })
+                .Select(g => new UserDTO.userRanking
+                {
+                    Username = g.Key.UserName,
+                    AvatarUrl = g.Key.AvatarUrl == null
+                        ? null
+                        : $"data:image/png;base64,{g.Key.AvatarUrl}",
+
+                    TotalTime = TimeSpan
+                        .FromSeconds(g.Sum(x => x.DurationSeconds))
+                        .ToString(@"hh\:mm\:ss"),
+
+                    CaloriesBurned = Math.Round(
+                        g.Sum(x => x.CaloriesBurned), 1)
+                })
+                .OrderByDescending(x => x.CaloriesBurned)
+                .Take(10)
+                .ToListAsync();
+
+            return result;
+        }
+
     }
 }

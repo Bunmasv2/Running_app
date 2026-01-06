@@ -36,6 +36,10 @@ class BottomNavBarComponent extends StatelessWidget {
             icon: Icon(Icons.person),
             label: "Cá nhân"
         ),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.leaderboard),
+            label: 'Ranking'
+        ),
       ],
     );
   }

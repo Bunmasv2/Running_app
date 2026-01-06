@@ -50,5 +50,13 @@ namespace server.DTO
             public string Email { get; set; }
             public string Token { get; set; }
         }
+
+        public class userRanking
+        {
+            public string Username { get; set; }
+            public string? AvatarUrl { get; set; }
+            public string TotalTime { get; set; }
+            public double CaloriesBurned { get; set; }
+        }
     }
 }

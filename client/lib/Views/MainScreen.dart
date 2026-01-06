@@ -4,6 +4,7 @@ import '../Components/BottomNavBarComponent.dart';
 import 'HomeView.dart';
 import 'HistoryView.dart';
 import 'ProfileView.dart'; // Bạn cần tạo file này
+import 'RankingView.dart';
 
 // Widget Placeholder tạm thời cho History và Profile nếu bạn chưa tạo file
 class PlaceholderView extends StatelessWidget {
@@ -33,6 +34,7 @@ class _MainScreenState extends State<MainScreen> {
       const HomeView(),                  // Tab 0
       const HistoryView(),  // Tab 1 (Thay bằng HistoryView sau này)
       const ProfileView(),  // Tab 2 (Thay bằng ProfileView sau này)
+      const RankingView(),
     ];
   }
 
