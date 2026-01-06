@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.SqlServer.Server;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Org.BouncyCastle.Tls;
 
 namespace server.Controllers;
 
@@ -134,8 +135,13 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetAllUser()
     {
         var users = await _context.Users.ToListAsync();
-        var result = _mapper.Map<List<UserDTO.Profile>>(users);
-        return Ok(new { mesenger = "", data = result });
+        // var result = _mapper.Map<List<UserDTO.Profile>>(users);
+        foreach (var user in users)
+        {
+            Console.WriteLine($"User: {user.UserName} | Email: {user.Email} | TotalTime: {user.TotalTimeSeconds} | TotalDistance: {user.TotalDistanceKm} km");
+        }
+
+        return Ok(new { mesenger = "", data = users });
     }
 
 }

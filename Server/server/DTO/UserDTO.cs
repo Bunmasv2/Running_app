@@ -55,8 +55,9 @@ namespace server.DTO
         {
             public string Username { get; set; }
             public string? AvatarUrl { get; set; }
+            public double TotalDurationSeconds { get; set; }
+            public double TotalDistanceKm { get; set; }
             public string TotalTime { get; set; }
-            public double CaloriesBurned { get; set; }
         }
     }
 }

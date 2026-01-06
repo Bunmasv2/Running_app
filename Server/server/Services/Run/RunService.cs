@@ -39,7 +39,8 @@ namespace server.Services
             };
 
             // B4: Cập nhật chỉ số tổng (Lifetime Stats) cho User
-            user.TotalDistanceKm += dto.DistanceKm;
+            // user.TotalDistanceKm += dto.DistanceKm;
+            user.TotalDistanceKm += 10;
             user.TotalTimeSeconds += dto.DurationSeconds;
 
             // B5: Lưu vào DB (Transaction: Cả 2 bảng cùng lưu hoặc cùng fail)
@@ -141,11 +142,16 @@ namespace server.Services
 
         public async Task<List<UserDTO.userRanking>> GetTop10WeeklyAsync()
         {
-            var fromDate = DateTime.UtcNow.AddDays(-7);
+            var today = DateTime.UtcNow.Date;
+
+            // Tính Thứ 2 -> Chủ nhật
+            int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+            var weekStart = today.AddDays(-diff);
+            var weekEnd = weekStart.AddDays(7).AddTicks(-1);
 
             var result = await _context.RunSessions
                 .Include(r => r.User)
-                .Where(r => r.StartTime >= fromDate)
+                .Where(r => r.EndTime >= weekStart && r.EndTime <= weekEnd)
                 .GroupBy(r => new
                 {
                     r.UserId,
@@ -159,19 +165,20 @@ namespace server.Services
                         ? null
                         : $"data:image/png;base64,{g.Key.AvatarUrl}",
 
+                    TotalDistanceKm = Math.Round(g.Sum(x => x.DistanceKm), 2),
+
+                    TotalDurationSeconds = g.Sum(x => x.DurationSeconds),
+
                     TotalTime = TimeSpan
                         .FromSeconds(g.Sum(x => x.DurationSeconds))
-                        .ToString(@"hh\:mm\:ss"),
-
-                    CaloriesBurned = Math.Round(
-                        g.Sum(x => x.CaloriesBurned), 1)
+                        .ToString(@"hh\:mm\:ss")
                 })
-                .OrderByDescending(x => x.CaloriesBurned)
+                .OrderByDescending(x => x.TotalDistanceKm)
+                .ThenBy(x => x.TotalDurationSeconds)
                 .Take(10)
                 .ToListAsync();
 
             return result;
         }
-
     }
 }

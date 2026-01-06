@@ -10,15 +10,15 @@ namespace server.DTO
         {
             [Required]
             public double DistanceKm { get; set; }
-            
+
             [Required]
             public double DurationSeconds { get; set; }
-            
+
             public DateTime StartTime { get; set; }
             public DateTime EndTime { get; set; }
-            
+
             // Chuỗi JSON tọa độ để vẽ lại map
-            public string RouteJson { get; set; } = string.Empty; 
+            public string RouteJson { get; set; } = string.Empty;
         }
 
         // 2. DTO trả về sau khi lưu thành công
