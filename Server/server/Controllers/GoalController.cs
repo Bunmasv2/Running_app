@@ -8,7 +8,7 @@ namespace server.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    // [Authorize]
+    [Authorize]
     public class GoalController : ControllerBase
     {
         private readonly IGoalService _goalService;
