@@ -54,7 +54,8 @@ class _RankingViewState extends State<RankingView> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Bảng Xếp Hạng', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+            'Bảng Xếp Hạng', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
@@ -89,7 +90,7 @@ class _RankingViewState extends State<RankingView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Chiến Binh Hệ Chạy – 7 Ngày Gần Nhất',
+            'Chiến Binh Hệ Chạy – 7 Ngày Trong Tuần',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
@@ -123,17 +124,23 @@ class _RankingViewState extends State<RankingView> {
         borderRadius: BorderRadius.circular(10),
       ),
       child: const Text(
-        '💪 Bạn đang vô địch chính cuộc đua của riêng mình! Cố gắng vào top 10 nhé!',
+        '💪 Chưa vào top 10? Bạn đang vô địch chính cuộc đua của riêng mình!',
         textAlign: TextAlign.center,
         style: TextStyle(fontStyle: FontStyle.italic, color: Colors.blue),
       ),
     );
   }
 
-  Widget _rankingRow({required int rank, required UserRanking user, required bool highlight}) {
+  Widget _rankingRow({
+    required int rank,
+    required UserRanking user,
+    required bool highlight,
+  }) {
     Color medalColor = Colors.transparent;
-    if (rank == 1) medalColor = Colors.amber;
-    else if (rank == 2) medalColor = Colors.grey.shade400;
+    if (rank == 1)
+      medalColor = Colors.amber;
+    else if (rank == 2)
+      medalColor = Colors.grey.shade400;
     else if (rank == 3) medalColor = Colors.brown.shade300;
 
     return Container(
@@ -143,30 +150,79 @@ class _RankingViewState extends State<RankingView> {
         color: highlight ? Colors.blue.shade50 : Colors.white,
         borderRadius: BorderRadius.circular(15),
         border: highlight ? Border.all(color: Colors.blue.shade200) : null,
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+          )
+        ],
       ),
       child: Row(
         children: [
+          // 🏆 Rank
           SizedBox(
-            width: 35,
+            width: 30,
             child: rank <= 3
-                ? Icon(Icons.emoji_events, color: medalColor)
-                : Text('$rank', style: const TextStyle(fontWeight: FontWeight.bold)),
+                ? Icon(Icons.emoji_events, color: medalColor, size: 20)
+                : Text(
+              '$rank',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
           ),
+
+          // 🧑 Avatar
           CircleAvatar(
-            backgroundImage: user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
-            child: user.avatarUrl == null ? const Icon(Icons.person) : null,
+            radius: 20,
+            backgroundColor: Colors.grey.shade200,
+            child: user.avatarUrl != null
+                ? ClipOval(
+              child: Image.memory(
+                Uri
+                    .parse(user.avatarUrl!)
+                    .data!
+                    .contentAsBytes(),
+                fit: BoxFit.cover,
+                width: 40,
+                height: 40,
+              ),
+            )
+                : const Icon(Icons.person),
           ),
+
           const SizedBox(width: 12),
+
+          // 👤 Username
           Expanded(
-            child: Text(user.username, style: const TextStyle(fontWeight: FontWeight.w600)),
+            flex: 2,
+            child: Text(
+              user.username,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(user.totalTime, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-              Text('${user.caloriesBurned.toInt()} kcal', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-            ],
+
+          // ⏱ TotalTime
+          Expanded(
+            child: Text(
+              user.totalTime,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+          ),
+
+          // 🏃 Distance
+          Expanded(
+            child: Text(
+              '${user.totalDistanceKm.toStringAsFixed(2)} km',
+              textAlign: TextAlign.end,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+              ),
+            ),
           ),
         ],
       ),
