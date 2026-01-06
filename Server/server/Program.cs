@@ -11,9 +11,6 @@ using server.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Kết nối SQL
-// builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 //MySQL Connection
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(
@@ -24,8 +21,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     )
 );
 
-
-// Đăng ký Identity
+// // Đăng ký Identity
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
@@ -60,7 +56,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
     ForwardedHeaders = ForwardedHeaders.XForwardedProto
 });
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 

@@ -7,6 +7,13 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using server.Configs;
+using System.Reflection.Metadata.Ecma335;
+using server.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.SqlServer.Server;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using Org.BouncyCastle.Tls;
 
 namespace server.Controllers;
 
@@ -18,18 +25,56 @@ public class UserController : ControllerBase
     private readonly IUserService _userServcie;
     private readonly IDailyGoalService _dailyGoalService;
     private readonly IConfiguration _configuration;
+    private readonly ApplicationDbContext _context;
+    private readonly IMapper _mapper;
 
     public UserController(
         IRunService runService,
         IUserService userServcie,
         IDailyGoalService dailyService,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        ApplicationDbContext context,
+        IMapper mapper)
     {
         _runService = runService;
         _userServcie = userServcie;
         _dailyGoalService = dailyService;
         _configuration = configuration;
+        _context = context;
+        _mapper = mapper;
     }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> Register([FromBody] UserDTO.RegisterDto dto)
+    {
+        Console.WriteLine($"EMailll: {dto.Email}");
+        Console.WriteLine($"Passss: {dto.Password}");
+
+        var result = await _userServcie.Register(dto);
+
+        if (!result)
+            throw new ErrorException(400, "Đăng ký thất bại");
+
+        return Ok(new
+        {
+            message = "Đăng ký thành công"
+        });
+    }
+
+
+
+    [HttpPost("signin")]
+    public async Task<IActionResult> SignIn([FromBody] UserDTO.SignIn signIn)
+    {
+        if (signIn == null)
+        {
+            throw new ErrorException(400, "Invalid sign-in data");
+        }
+
+        var result = await _userServcie.SignIn(signIn.Email, signIn.Password);
+        return Ok(new { message = "Sign-in endpoint", data = result });
+    }
+
 
     [HttpGet("signin-google")]
     public IActionResult SignGoogle(string returnUrl = "https://www.facebook.com/")
@@ -53,7 +98,7 @@ public class UserController : ControllerBase
     public async Task<ActionResult> GetUserProfile()
     {
         string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        UserDTO.Profile user = await _userServcie.GetUserProfile("cc04e4e8-12bd-45e8-9ef5-808a2c16de5e");
+        UserDTO.Profile user = await _userServcie.GetUserProfile(userId);
         return Ok(user);
     }
 
@@ -83,7 +128,20 @@ public class UserController : ControllerBase
         if (!result.Succeeded)
             throw new ErrorException(400, "Upload failed");
 
-        return Ok(new{ message = "Upload avatar successful" });
+        return Ok(new { message = "Upload avatar successful" });
+    }
+
+    [HttpGet("getAll")]
+    public async Task<IActionResult> GetAllUser()
+    {
+        var users = await _context.Users.ToListAsync();
+        // var result = _mapper.Map<List<UserDTO.Profile>>(users);
+        foreach (var user in users)
+        {
+            Console.WriteLine($"User: {user.UserName} | Email: {user.Email} | TotalTime: {user.TotalTimeSeconds} | TotalDistance: {user.TotalDistanceKm} km");
+        }
+
+        return Ok(new { mesenger = "", data = users });
     }
 
 }

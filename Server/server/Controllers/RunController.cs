@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using server.Configs;
 using server.DTO;
 using server.Services.Interfaces;
 
@@ -64,6 +65,18 @@ namespace server.Controllers
         {
             var stats = await _runService.GetTodayStatsAsync(GetUserId());
             return Ok(stats);
+        }
+
+        [HttpGet("top-weekly")]
+        public async Task<IActionResult> GetWeeklyRanking()
+        {
+            var result = await _runService.GetTop10WeeklyAsync();
+            return Ok(new
+            {
+                title = "Ranking Runner",
+                subtitle = "Những Chiến Binh Yêu Bản Thân – 7 Ngày Trong Tuần",
+                data = result
+            });
         }
     }
 }

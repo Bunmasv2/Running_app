@@ -5,18 +5,19 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/UserProfile.dart';
 import '../Views/GoogleWebView.dart'; // Bắt buộc phải import file WebView này
+import '../models/UserRanking.dart';
 
 class UserService {
   // URL Server Render của bạn
-  static const String _baseUrl = 'https://running-app-ywpg.onrender.com/user';
-
+  static const String _baseUrl = 'https://running-app-ywpg.onrender.com/User';
   // --- 1. QUẢN LÝ AUTH (ĐĂNG NHẬP / ĐĂNG XUẤT) ---
+  // static const String _baseUrl = 'http://10.0.2.2:5144/User';
 
   // A. ĐĂNG NHẬP THƯỜNG (EMAIL/PASS)
   Future<bool> login(String email, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('$_baseUrl/signin-google'), // Hoặc endpoint /login nếu bạn đã sửa backend
+        Uri.parse('$_baseUrl/signin'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "email": email,
@@ -24,15 +25,32 @@ class UserService {
         }),
       );
 
+      // if (response.statusCode == 200) {
+      //   final Map<String, dynamic> responseBody = jsonDecode(response.body);
+      //
+      //   // Phải vào trong node 'data' trước
+      //   final userData = responseBody['data'];
+      //
+      //   if (userData != null && userData['token'] != null) {
+      //     String token = userData['token'];
+      //
+      //     final prefs = await SharedPreferences.getInstance();
+      //     await prefs.setString('accessToken', token);
+      //
+      //     print("Đăng nhập thành công, đã lưu Token!");
+      //     return true;
+      //   }
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        String token = data['token'];
+        final fullResponse = jsonDecode(response.body);
+        // Phải lấy từ Map 'data' mà bạn đã bọc ở Controller
+        final userData = fullResponse['data'];
 
-        // Lưu Token
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accessToken', token);
-
-        return true;
+        if (userData != null && userData['token'] != null) {
+          String token = userData['token'];
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('accessToken', token);
+          return true;
+        }
       }
       return false;
     } catch (e) {
@@ -66,7 +84,7 @@ class UserService {
     }
   }
 
-  // 2. KIỂM TRA ĐÃ ĐĂNG NHẬP CHƯA
+  // 2. KIỂM TRA ĐÃ ĐĂNG NHẬP CHƯA (Cho Splash Screen)
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('accessToken');
@@ -102,6 +120,7 @@ class UserService {
       final response = await http.get(Uri.parse('$_baseUrl/profile'), headers: headers);
 
       if (response.statusCode == 200) {
+        print("Dữ liệu thật từ Server: ${response.body}");
         return UserProfile.fromJson(jsonDecode(response.body));
       }
       return null;
@@ -144,6 +163,48 @@ class UserService {
       return response.statusCode == 200;
     } catch (e) {
       return false;
+    }
+  }
+
+  Future<String?> register({
+    required String userName,
+    required String email,
+    required String password,
+    required double heightCm,
+    required double weightKg,
+  }) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/register'),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({
+          "userName": userName,
+          "email": email,
+          "password": password,
+          "confirmPass": password,
+          "heightCm": heightCm,
+          "weightKg": weightKg,
+          // "userName": "DatTran",
+          // "email": "trandat2280600642@gmail.com",
+          // "password": "Dat@1912",
+          // "confirmPass": "Dat@1912",
+          // "heightCm": 179,
+          // "weightKg": 78,
+        }),
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return null; // Thành công
+      } else {
+        // Parse tin nhắn lỗi từ Backend (do ErrorHandlingMiddleware trả về)
+        final errorData = jsonDecode(response.body);
+        return errorData['message'] ?? "Đã có lỗi xảy ra";
+      }
+    } catch (e) {
+      print("Register error: $e");
+      return "Không thể kết nối đến server";
     }
   }
 }

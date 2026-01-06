@@ -25,6 +25,8 @@ class _TrackingViewState extends State<TrackingView> {
   List<LatLng> _routePoints = [];
   double _distanceKm = 0.0;
   double _calories = 0.0;
+  late DateTime _startTime;
+  late DateTime _endTime;
 
   // Thời gian & Timer
   Duration _elapsed = Duration.zero;
@@ -69,6 +71,7 @@ class _TrackingViewState extends State<TrackingView> {
 
   // --- LOGIC TRACKING ---
   Future<void> _startTracking() async {
+    _startTime = DateTime.now().toUtc();
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return;
 
@@ -114,6 +117,7 @@ class _TrackingViewState extends State<TrackingView> {
     // A. Dừng theo dõi ngay lập tức
     _timer?.cancel();
     _positionStream?.cancel();
+    _endTime = DateTime.now().toUtc();
 
     // B. Hiển thị Loading
     setState(() => _isSaving = true);
@@ -124,7 +128,10 @@ class _TrackingViewState extends State<TrackingView> {
       calories: _calories,
       duration: _elapsed,
       routePoints: _routePoints,
+      startTime: _startTime,
+      endTime: _endTime
     );
+
 
     // D. Xử lý kết quả
     if (!mounted) return;

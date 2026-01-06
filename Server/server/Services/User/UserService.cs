@@ -7,6 +7,7 @@ using server.Configs;
 using server.DTO;
 using server.Models;
 using server.Services.Interfaces;
+using server.Util;
 
 namespace server.Services.Implements;
 
@@ -15,15 +16,18 @@ public class UserService : IUserService
     private readonly ApplicationDbContext _context;
     private readonly UserManager<AppUser> _userManager;
     private readonly IMapper _mapper;
+    private readonly IConfiguration _configuration;
 
     public UserService(
         ApplicationDbContext context,
         UserManager<AppUser> userManager,
-        IMapper mapper)
+        IMapper mapper,
+        IConfiguration configuration)
     {
         _context = context;
         _userManager = userManager;
         _mapper = mapper;
+        _configuration = configuration;
     }
 
     public async Task<AppUser> FindOrCreateUserByEmailAsync(string email, string name)
@@ -102,5 +106,65 @@ public class UserService : IUserService
         user.AvatarUrl = base64;
 
         return await _userManager.UpdateAsync(user);
+    }
+
+    public async Task<UserDTO.SignInResponse> SignIn(string email, string password)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null || !await _userManager.CheckPasswordAsync(user, password))
+        {
+            throw new ErrorException(400, "Invalid email or password");
+        }
+        var roles = await _userManager.GetRolesAsync(user);
+        var token = JwtUtils.GenerateToken(user, roles, 1, _configuration);
+        var refreshToken = JwtUtils.GenerateToken(user, roles, 8, _configuration);
+
+        // CookieUtils.SetCookie(Response, "token", token, 8);
+
+        // await _ .SaveRefreshToken(user, refreshToken);
+
+        return new UserDTO.SignInResponse
+        {
+            Email = user.Email,
+            Token = token
+        };
+    }
+
+    public async Task<bool> Register(UserDTO.RegisterDto registerDto)
+    {
+        if (registerDto.Password != registerDto.ConfirmPass)
+        {
+            throw new ErrorException(400, "Mật khẩu xác nhận không khớp");
+        }
+
+        // 2. Check email đã tồn tại
+        var existingUser = await _userManager.FindByEmailAsync(registerDto.Email);
+        if (existingUser != null)
+        {
+            throw new ErrorException(400, "Email đã được sử dụng");
+        }
+
+        // 3. Tạo user
+        var user = new AppUser
+        {
+            UserName = registerDto.UserName,
+            Email = registerDto.Email,
+            HeightCm = registerDto.HeightCm,
+            WeightKg = registerDto.WeightKg,
+            CreatedAt = DateTime.UtcNow,
+            EmailConfirmed = true
+        };
+
+        // 4. Tạo user + hash password
+        var result = await _userManager.CreateAsync(user, registerDto.Password);
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+            {
+                Console.WriteLine($"Identity error: {error.Code} - {error.Description}");
+            }
+            return false;
+        }
+        return true;
     }
 }

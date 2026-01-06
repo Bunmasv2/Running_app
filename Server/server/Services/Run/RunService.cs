@@ -39,7 +39,8 @@ namespace server.Services
             };
 
             // B4: Cập nhật chỉ số tổng (Lifetime Stats) cho User
-            user.TotalDistanceKm += dto.DistanceKm;
+            // user.TotalDistanceKm += dto.DistanceKm;
+            user.TotalDistanceKm += 10;
             user.TotalTimeSeconds += dto.DurationSeconds;
 
             // B5: Lưu vào DB (Transaction: Cả 2 bảng cùng lưu hoặc cùng fail)
@@ -137,6 +138,47 @@ namespace server.Services
                 TargetDistanceKm = target,
                 ProgressPercent = Math.Round(progress, 1)
             };
+        }
+
+        public async Task<List<UserDTO.userRanking>> GetTop10WeeklyAsync()
+        {
+            var today = DateTime.UtcNow.Date;
+
+            // Tính Thứ 2 -> Chủ nhật
+            int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+            var weekStart = today.AddDays(-diff);
+            var weekEnd = weekStart.AddDays(7).AddTicks(-1);
+
+            var result = await _context.RunSessions
+                .Include(r => r.User)
+                .Where(r => r.EndTime >= weekStart && r.EndTime <= weekEnd)
+                .GroupBy(r => new
+                {
+                    r.UserId,
+                    r.User.UserName,
+                    r.User.AvatarUrl
+                })
+                .Select(g => new UserDTO.userRanking
+                {
+                    Username = g.Key.UserName,
+                    AvatarUrl = g.Key.AvatarUrl == null
+                        ? null
+                        : $"data:image/png;base64,{g.Key.AvatarUrl}",
+
+                    TotalDistanceKm = Math.Round(g.Sum(x => x.DistanceKm), 2),
+
+                    TotalDurationSeconds = g.Sum(x => x.DurationSeconds),
+
+                    TotalTime = TimeSpan
+                        .FromSeconds(g.Sum(x => x.DurationSeconds))
+                        .ToString(@"hh\:mm\:ss")
+                })
+                .OrderByDescending(x => x.TotalDistanceKm)
+                .ThenBy(x => x.TotalDurationSeconds)
+                .Take(10)
+                .ToListAsync();
+
+            return result;
         }
     }
 }
