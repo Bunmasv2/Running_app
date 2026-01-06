@@ -5,26 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bc54e4c9-b60e-460d-87f5-6a9c68e4bc80" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/client/lib/Services/GoalService.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/lib/Views/GoogleWebView.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/lib/Views/RunDetailView.dart" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/lib/models/DailyGoalModel.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/android/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/client/android/settings.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Components/GoalProgressComponent.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Components/GoalProgressComponent.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Services/RunService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/RunService.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Services/UserService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/UserService.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/HistoryView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/HistoryView.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Services/GoalService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/GoalService.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/lib/Views/HomeView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/HomeView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/LoginView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/LoginView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/MainScreen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/MainScreen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/SplashView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/SplashView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/TrackingView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/TrackingView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/models/RunModel.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/models/RunModels.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/models/RunModels.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/client/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/client/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/client/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,7 +47,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "feature/core-app-flow",
+    "git-widget-placeholder": "maindev",
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "E:/Hoc_Tai_Nha/Running_app",
