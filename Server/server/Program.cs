@@ -22,6 +22,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 );
 
 // // Đăng ký Identity
+builder.Services.AddCloudinary(builder.Configuration);
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
@@ -30,6 +31,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRunService, RunService>();
 // builder.Services.AddScoped<IRun, RunService>();
 builder.Services.AddScoped<IDailyGoalService, DailyGoalService>();
+builder.Services.AddScoped<IGoalService, GoalService>();
 // Add services to the container.
 builder.Services.AddAutoMapper(typeof(AutoMapperConfig).Assembly);
 builder.Services.AddControllers();

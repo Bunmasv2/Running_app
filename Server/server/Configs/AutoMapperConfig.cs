@@ -10,7 +10,7 @@ namespace server.config
         {
             CreateMap<AppUser, UserDTO.Profile>()
                 .ForMember(dest => dest.AvatarUrl, opt => opt.MapFrom(
-                    src => src.AvatarUrl == null ? null : $"data:image/png;base64,{src.AvatarUrl}"
+                    src => src.AvatarUrl == null ? null : $"{src.AvatarUrl}"
                 ));
         }
     }

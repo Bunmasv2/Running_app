@@ -174,20 +174,14 @@ class _RankingViewState extends State<RankingView> {
           CircleAvatar(
             radius: 20,
             backgroundColor: Colors.grey.shade200,
-            child: user.avatarUrl != null
-                ? ClipOval(
-              child: Image.memory(
-                Uri
-                    .parse(user.avatarUrl!)
-                    .data!
-                    .contentAsBytes(),
-                fit: BoxFit.cover,
-                width: 40,
-                height: 40,
-              ),
-            )
-                : const Icon(Icons.person),
+            backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
+                ? NetworkImage(user.avatarUrl!)
+                : null,
+            child: user.avatarUrl == null || user.avatarUrl!.isEmpty
+                ? const Icon(Icons.person)
+                : null,
           ),
+
 
           const SizedBox(width: 12),
 

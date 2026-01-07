@@ -35,7 +35,7 @@ namespace server.Services
         }
 
         // 2. ĐẶT (HOẶC CẬP NHẬT) MỤC TIÊU HÔM NAY
-        public async Task<GoalDto.DailyGoalResponseDto> SetTodayGoalAsync(string userId, GoalDto.CreateGoalDto dto)
+        public async Task<GoalDto.DailyGoalResponseDto> SetTodayGoalAsync(string userId, double targetKm)
         {
             var today = DateTime.Today;
 
@@ -46,7 +46,7 @@ namespace server.Services
             if (existingGoal != null)
             {
                 // TRƯỜNG HỢP 1: Đã có -> Cập nhật lại số Km
-                existingGoal.TargetDistanceKm = dto.TargetDistanceKm;
+                existingGoal.TargetDistanceKm = targetKm;
                 _context.DailyGoals.Update(existingGoal);
             }
             else
@@ -56,7 +56,7 @@ namespace server.Services
                 {
                     UserId = userId,
                     Date = today, // Lưu ngày giờ hiện tại (nhưng phần giờ là 00:00:00)
-                    TargetDistanceKm = dto.TargetDistanceKm
+                    TargetDistanceKm = targetKm
                 };
                 _context.DailyGoals.Add(existingGoal);
             }
@@ -73,9 +73,9 @@ namespace server.Services
             };
         }
 
-        public Task<GoalDto.DailyGoalResponseDto> SetTodayGoalAsync(string userId, double targetKm)
-        {
-            throw new NotImplementedException();
-        }
+        // public Task<GoalDto.DailyGoalResponseDto> SetTodayGoalAsync(string userId, double targetKm)
+        // {
+        //     throw new NotImplementedException();
+        // }
     }
 }

@@ -163,7 +163,7 @@ namespace server.Services
                     Username = g.Key.UserName,
                     AvatarUrl = g.Key.AvatarUrl == null
                         ? null
-                        : $"data:image/png;base64,{g.Key.AvatarUrl}",
+                        : $"{g.Key.AvatarUrl}",
 
                     TotalDistanceKm = Math.Round(g.Sum(x => x.DistanceKm), 2),
 

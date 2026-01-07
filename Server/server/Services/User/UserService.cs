@@ -8,6 +8,8 @@ using server.DTO;
 using server.Models;
 using server.Services.Interfaces;
 using server.Util;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 
 namespace server.Services.Implements;
 
@@ -17,17 +19,20 @@ public class UserService : IUserService
     private readonly UserManager<AppUser> _userManager;
     private readonly IMapper _mapper;
     private readonly IConfiguration _configuration;
+    private readonly Cloudinary _cloudinary;
 
     public UserService(
         ApplicationDbContext context,
         UserManager<AppUser> userManager,
         IMapper mapper,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        Cloudinary cloudinary)
     {
         _context = context;
         _userManager = userManager;
         _mapper = mapper;
         _configuration = configuration;
+        _cloudinary = cloudinary;
     }
 
     public async Task<AppUser> FindOrCreateUserByEmailAsync(string email, string name)
@@ -77,10 +82,14 @@ public class UserService : IUserService
 
     public async Task<UserDTO.Profile?> GetUserProfile(string userId)
     {
-        return await _context.Users
-            .Where(u => u.Id == userId)
-            .ProjectTo<UserDTO.Profile>(_mapper.ConfigurationProvider)
-            .FirstOrDefaultAsync();
+
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Id == userId);
+        return _mapper.Map<UserDTO.Profile>(user);
+        // return await _context.Users
+        //     .Where(u => u.Id == userId)
+        //     .ProjectTo<UserDTO.Profile>(_mapper.ConfigurationProvider)
+        //     .FirstOrDefaultAsync();
     }
 
     public async Task<IdentityResult> UpdateProfile(string userId, UserDTO.UpdateProfile dto)
@@ -94,16 +103,54 @@ public class UserService : IUserService
         return await _userManager.UpdateAsync(user);
     }
 
-    public async Task<IdentityResult> UploadAvatar(string userId, IFormFile avatar)
-    {
-        var user = await _userManager.FindByIdAsync(userId)
-            ?? throw new ErrorException("User not found");
+    // public async Task<IdentityResult> UploadAvatar(string userId, IFormFile avatar)
+    // {
+    //     var user = await _userManager.FindByIdAsync(userId)
+    //         ?? throw new ErrorException("User not found");
 
-        using var memoryStream = new MemoryStream();
-        await avatar.CopyToAsync(memoryStream);
-        var imageData = memoryStream.ToArray();
-        var base64 = Convert.ToBase64String(imageData);
-        user.AvatarUrl = base64;
+    //     using var memoryStream = new MemoryStream();
+    //     await avatar.CopyToAsync(memoryStream);
+    //     var imageData = memoryStream.ToArray();
+    //     var base64 = Convert.ToBase64String(imageData);
+    //     user.AvatarUrl = base64;
+
+    //     return await _userManager.UpdateAsync(user);
+    // }
+
+    public async Task<IdentityResult> UpdateUserImage(IFormFile file, string userId)
+    {
+        var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+        if (user == null)
+            return null;
+
+        if (file == null || file.Length == 0)
+            throw new ArgumentException("No file uploaded");
+
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        ImageUploadResult imageResult = null;
+        Console.WriteLine($"[UPLOAD DEBUG] FileName: {file.FileName}, Extension: {ext}");
+
+        if (new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg" }.Contains(ext))
+        {
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(file.FileName, file.OpenReadStream()),
+                Folder = "ProjectManagement/Tasks",
+                PublicId = $"{userId}_{Guid.NewGuid()}"
+            };
+            imageResult = await _cloudinary.UploadAsync(uploadParams);
+        }
+
+        Console.WriteLine("Upload result: " + imageResult.ToString());
+        var fileUrl = imageResult?.SecureUrl?.ToString();
+        Console.WriteLine("Uploaded file URL: " + fileUrl);
+
+        if (string.IsNullOrEmpty(fileUrl))
+            throw new Exception("Upload failed or URL missing.");
+
+        user.AvatarUrl = fileUrl;
+        Console.WriteLine("AVAAAAAA: ", user.AvatarUrl);
+
 
         return await _userManager.UpdateAsync(user);
     }

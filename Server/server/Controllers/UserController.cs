@@ -123,10 +123,12 @@ public class UserController : ControllerBase
             throw new ErrorException(400, "Image is required");
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var result = await _userServcie.UploadAvatar(userId, avatar);
+        var result = await _userServcie.UpdateUserImage(avatar, userId);
 
         if (!result.Succeeded)
             throw new ErrorException(400, "Upload failed");
+
+        // Console.WriteLine("AVAAAAAA: ", result.A);
 
         return Ok(new { message = "Upload avatar successful" });
     }
