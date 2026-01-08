@@ -18,27 +18,31 @@ class BottomNavBarComponent extends StatelessWidget {
       selectedItemColor: Colors.orange, // Màu chủ đạo theo PRD
       unselectedItemColor: Colors.grey,
       type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       elevation: 10,
       items: const [
         // Tab 1: Home [cite: 70]
         BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
-            label: "Home"
+            icon: Icon(Icons.home),
+            label: "Trang chủ"
         ),
         // Tab 2: Lịch sử [cite: 95]
         BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            label: "Lịch sử"
+            icon: Icon(Icons.map_rounded),
+            label: "Bản đồ"
+        ),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.fiber_smart_record_rounded),
+            label: "Ghi đường"
+        ),
+        BottomNavigationBarItem(
+            icon: Icon(Icons.group_work_rounded),
+            label: "Nhóm"
         ),
         // Tab 3: Cá nhân [cite: 105]
         BottomNavigationBarItem(
-            icon: Icon(Icons.person),
+            icon: Icon(Icons.person_sharp),
             label: "Cá nhân"
-        ),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.leaderboard),
-            label: 'Ranking'
         ),
       ],
     );

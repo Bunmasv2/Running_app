@@ -1,10 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/RunModels.dart';
 import '../Services/GoalService.dart';
 import '../Services/UserService.dart';
 import '../Models/UserProfile.dart';
-import '../Components/GoalProgressComponent.dart';
-import 'TrackingView.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -19,248 +18,934 @@ class _HomeViewState extends State<HomeView> {
 
   UserProfile? _userProfile;
   DailyGoal? _dailyGoal;
-
-  // Các biến thống kê
-  double _todayKm = 0.0;
-  int _todayMinutes = 0; // Backend chưa trả về cái này trong Goal, cần API thống kê riêng
-  double _todayKcal = 0.0; // Backend chưa trả về cái này
-
   bool _isLoading = true;
+
+  // PageController cho slider
+  late PageController _slideController;
+  int _currentSlideIndex = 0;
+  Timer? _slideTimer;
 
   @override
   void initState() {
     super.initState();
+    _slideController = PageController();
+    _startAutoSlide();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _slideTimer?.cancel();
+    _slideController.dispose();
+    super.dispose();
+  }
+
+  void _startAutoSlide() {
+    _slideTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
+      if (_slideController.hasClients) {
+        int nextPage = (_currentSlideIndex + 1) % _slides.length;
+        _slideController.animateToPage(
+          nextPage,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
   }
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-
     try {
-      // Gọi song song để nhanh hơn
       final results = await Future.wait([
         _userService.getUserProfile(),
         _goalService.getTodayGoal(),
       ]);
-
       if (mounted) {
         setState(() {
           _userProfile = results[0] as UserProfile?;
           _dailyGoal = results[1] as DailyGoal?;
-
-          // Cập nhật số Km từ Goal (nếu có)
-          if (_dailyGoal != null) {
-            _todayKm = _dailyGoal!.currentDistanceKm;
-          } else {
-            _todayKm = 0.0;
-          }
-
           _isLoading = false;
         });
       }
     } catch (e) {
       print("Lỗi load data Home: $e");
-      if(mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  // Xử lý đặt mục tiêu
-  void _handleSetGoal() {
-    final TextEditingController controller = TextEditingController();
+  // Dữ liệu mẫu cho slides
+  List<SlideData> get _slides => [
+    SlideData(
+      title: 'Instant Workouts',
+      titleTag: 'PREVIEW',
+      linkText: 'See all',
+      icon: Icons.sports_gymnastics,
+      iconColor: Colors.purple,
+      mainText: 'Gentle Flow Yoga',
+      subText: 'Gentle yoga will help you recover, improve flexibility, and find men...',
+      duration: '30m',
+      onLinkTap: () => print('See all workouts'),
+      onButtonTap: () => print('Start yoga'),
+    ),
+    SlideData(
+      title: 'Quick Runs',
+      titleTag: 'NEW',
+      linkText: 'Explore',
+      icon: Icons.directions_run,
+      iconColor: Colors.orange,
+      mainText: 'Morning 5K Run',
+      subText: 'Start your day with an energizing 5K run through the city...',
+      duration: '25m',
+      onLinkTap: () => print('Explore runs'),
+      onButtonTap: () => print('Start run'),
+    ),
+    SlideData(
+      title: 'Recovery Sessions',
+      titleTag: 'RECOMMENDED',
+      linkText: 'View all',
+      icon: Icons.self_improvement,
+      iconColor: Colors.teal,
+      mainText: 'Deep Stretch',
+      subText: 'Perfect for post-workout recovery and relaxation...',
+      duration: '15m',
+      onLinkTap: () => print('View recovery'),
+      onButtonTap: () => print('Start stretch'),
+    ),
+  ];
 
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Đặt mục tiêu hôm nay"),
-        content: TextField(
-          controller: controller,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: "Số Km muốn chạy",
-            hintText: "Ví dụ: 5.0",
-            suffixText: "km",
-            border: OutlineInputBorder(),
+  // Dữ liệu mẫu cho challenges
+  List<ChallengeData> get _challenges => [
+    ChallengeData(
+      participantCount: 1025000,
+      title: 'January 400-minute x Runna Challenge',
+      description: 'Kick off the year by logging 400 minutes of movement',
+      badgeIcon: Icons.military_tech,
+      badgeText: '400',
+      hasReward: true,
+      onJoin: () => print('Join January challenge'),
+    ),
+    ChallengeData(
+      participantCount: 500000,
+      title: 'New Year Running Streak',
+      description: 'Run every day for 7 days straight',
+      badgeIcon: Icons.local_fire_department,
+      badgeText: '7',
+      hasReward: true,
+      onJoin: () => print('Join streak challenge'),
+    ),
+  ];
+
+  // Dữ liệu mẫu cho người theo dõi gợi ý
+  List<SuggestedUser> get _suggestedUsers => [
+    SuggestedUser(
+      name: 'Mattia Bertoncini',
+      subtitle: 'Fan favorite on Strava',
+      avatarUrl: null,
+      isVerified: true,
+      onFollow: () => print('Follow Mattia'),
+      onRemove: () => print('Remove Mattia'),
+    ),
+    SuggestedUser(
+      name: 'Nguyễn Minh',
+      subtitle: 'Local Legend',
+      avatarUrl: null,
+      isVerified: false,
+      onFollow: () => print('Follow Nguyen'),
+      onRemove: () => print('Remove Nguyen'),
+    ),
+    SuggestedUser(
+      name: 'Sarah Runner',
+      subtitle: 'Top 10 in your area',
+      avatarUrl: null,
+      isVerified: true,
+      onFollow: () => print('Follow Sarah'),
+      onRemove: () => print('Remove Sarah'),
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF1A1A1A),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator(color: Colors.orange))
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ============================================
+                  // CONTAINER 1: Instant Workouts Slider
+                  // ============================================
+                  _buildWorkoutsSlider(),
+
+                  // ============================================
+                  // CONTAINER 2: Suggested Challenges (Expanded)
+                  // ============================================
+                  _buildSuggestedChallenges(),
+
+                  // ============================================
+                  // CONTAINER 3: Who to Follow
+                  // ============================================
+                  _buildWhoToFollow(),
+
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+    );
+  }
+
+  // ============================================
+  // CONTAINER 1: Instant Workouts Slider
+  // ============================================
+  Widget _buildWorkoutsSlider() {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          // Slider
+          SizedBox(
+            height: 160,
+            child: PageView.builder(
+              controller: _slideController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentSlideIndex = index;
+                });
+              },
+              itemCount: _slides.length,
+              itemBuilder: (context, index) {
+                return _buildSlideItem(_slides[index]);
+              },
+            ),
           ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text("Hủy")),
-          ElevatedButton(
-            onPressed: () async {
-              final double? target = double.tryParse(controller.text);
-              if (target != null && target > 0) {
-                Navigator.pop(ctx); // Đóng dialog
+            const SizedBox(height: 12),
+            // Dots indicator
+            SizedBox(
+              height: 10,
+              child: _buildDotsIndicator(),
+            ),
+          ],
+      ),
+    );
+  }
 
-                setState(() => _isLoading = true); // Hiện loading
-                DailyGoal? newGoal = await _goalService.setTodayGoal(target);
-
-                if (mounted) {
-                  setState(() {
-                    _dailyGoal = newGoal;
-                    // Cập nhật lại UI ngay lập tức
-                    if (newGoal != null) {
-                      _todayKm = newGoal.currentDistanceKm;
-                    }
-                    _isLoading = false;
-                  });
-                }
-              }
-            },
-            child: const Text("Lưu"),
+  Widget _buildSlideItem(SlideData slide) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2D2D2D),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Row 1: Title + Tag + Link
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(Icons.flash_on, color: Colors.orange, size: 18),
+                  const SizedBox(width: 6),
+                  Text(
+                    slide.title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[700],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      slide.titleTag,
+                      style: const TextStyle(color: Colors.white70, fontSize: 10),
+                    ),
+                  ),
+                ],
+              ),
+              GestureDetector(
+                onTap: slide.onLinkTap,
+                child: Text(
+                  slide.linkText,
+                  style: const TextStyle(color: Colors.orange, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Row 2: Icon + Text + Button
+          Row(
+            children: [
+              // Icon with duration
+              Container(
+                width: 60,
+                height: 60,
+                decoration: BoxDecoration(
+                  color: slide.iconColor.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Stack(
+                  children: [
+                    Center(child: Icon(slide.icon, color: slide.iconColor, size: 30)),
+                    Positioned(
+                      bottom: 4,
+                      left: 0,
+                      right: 0,
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            slide.duration,
+                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Text content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      slide.mainText,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      slide.subText,
+                      style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              // Arrow button
+              GestureDetector(
+                onTap: slide.onButtonTap,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  child: const Icon(Icons.chevron_right, color: Colors.white, size: 24),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  // --- Các phần code UI bên dưới giữ nguyên ---
-  // (Start Running, Logout, Build UI...)
-  // ...
-
-  // Lưu ý: Nhớ thêm logic Logout để xóa Token thì lần sau vào mới Login lại được
-  void _handleLogout() async {
-    await _userService.logout(); // Hàm này cần có trong UserService (xóa SharedPreferences)
-    if (!mounted) return;
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+  Widget _buildDotsIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(_slides.length, (index) {
+        final isActive = index == _currentSlideIndex;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: isActive ? 8 : 6,
+          height: isActive ? 8 : 6,
+          decoration: BoxDecoration(
+            color: isActive ? Colors.white : Colors.grey[600],
+            shape: BoxShape.circle,
+          ),
+        );
+      }),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // ... Giữ nguyên code UI của bạn ...
-    // Copy lại phần build() từ code cũ của bạn vào đây
-    // Chỉ đảm bảo truyền đúng _dailyGoal vào GoalProgressComponent
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.grey[50],
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+  // ============================================
+  // CONTAINER 2: Suggested Challenges
+  // ============================================
+  Widget _buildSuggestedChallenges() {
+    return _SuggestedChallengesWidget(
+      challenges: _challenges,
+      formatNumber: _formatNumber,
+    );
+  }
+
+  // ============================================
+  // CONTAINER 3: Who to Follow
+  // ============================================
+  Widget _buildWhoToFollow() {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // HEADER
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Hôm nay, ${DateTime.now().day}/${DateTime.now().month}",
-                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "Hi, ${_userProfile?.userName ?? "Runner"}!",
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: _handleLogout,
-                        icon: const Icon(Icons.logout, color: Colors.redAccent),
-                      ),
-                      CircleAvatar(
-                        radius: 22,
-                        backgroundColor: Colors.blue[100],
-                        backgroundImage: _userProfile?.avatarUrl != null
-                            ? NetworkImage(_userProfile!.avatarUrl!)
-                            : null,
-                        child: _userProfile?.avatarUrl == null
-                            ? const Icon(Icons.person, color: Colors.blue)
-                            : null,
-                      )
-                    ],
-                  )
-                ],
-              ),
-
-              const SizedBox(height: 30),
-
-              // GOAL PROGRESS COMPONENT
-              Center(
-                child: GoalProgressComponent(
-                  goal: _dailyGoal,
-                  onSetGoal: _handleSetGoal,
+              const Text(
+                'Who to Follow',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-
-              const SizedBox(height: 30),
-
-              // THỐNG KÊ
-              const Text(
-                "Thống kê hôm nay",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 15),
-
-              Row(
-                children: [
-                  _buildStatCard(
-                    title: "Quãng đường",
-                    value: _todayKm.toStringAsFixed(1),
-                    unit: "km",
-                    icon: Icons.directions_run,
-                    color: Colors.blue,
-                  ),
-                  const SizedBox(width: 15),
-                  _buildStatCard(
-                    title: "Thời gian",
-                    value: _todayMinutes.toString(),
-                    unit: "phút",
-                    icon: Icons.timer,
-                    color: Colors.orange,
-                  ),
-                ],
-              ),
-
-              // ... Phần còn lại (Calo, Button Start) giữ nguyên ...
-              const SizedBox(height: 15),
-              // (Ví dụ thêm nút start)
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const TrackingView()));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black87,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: const Text("BẮT ĐẦU CHẠY"),
+              GestureDetector(
+                onTap: () => print('See all users'),
+                child: const Text(
+                  'See All',
+                  style: TextStyle(color: Colors.orange, fontSize: 14),
                 ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 16),
+          // User cards horizontal scroll
+          SizedBox(
+            height: 260,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: _suggestedUsers.length,
+              itemBuilder: (context, index) {
+                return _buildUserCard(_suggestedUsers[index]);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildStatCard({required String title, required String value, required String unit, required IconData icon, required Color color}) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10, offset: const Offset(0, 4))]),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 12),
-            Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Text("$unit • $title", style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-          ],
+  Widget _buildUserCard(SuggestedUser user) {
+    return Container(
+      width: 200,
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2D2D2D),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Avatar with verified badge
+          Stack(
+            children: [
+              CircleAvatar(
+                radius: 40,
+                backgroundColor: Colors.grey[700],
+                backgroundImage: user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
+                child: user.avatarUrl == null
+                    ? Icon(Icons.person, size: 40, color: Colors.grey[500])
+                    : null,
+              ),
+              if (user.isVerified)
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: const BoxDecoration(
+                      color: Colors.orange,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.check, color: Colors.white, size: 14),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Name
+          Text(
+            user.name,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          // Subtitle
+          Text(
+            user.subtitle,
+            style: TextStyle(color: Colors.grey[500], fontSize: 12),
+            textAlign: TextAlign.center,
+          ),
+          const Spacer(),
+          // Buttons
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: user.onFollow,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  ),
+                  child: const Text('Follow', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: user.onRemove,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    side: const BorderSide(color: Colors.grey),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  ),
+                  child: const Text('Remove', style: TextStyle(fontSize: 13)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Helper function
+  String _formatNumber(int number) {
+    if (number >= 1000000) {
+      return '${(number / 1000000).toStringAsFixed(1)}M';
+    } else if (number >= 1000) {
+      return '${(number / 1000).toStringAsFixed(0)},${(number % 1000).toString().padLeft(3, '0')}';
+    }
+    return number.toString();
+  }
+}
+
+// ============================================
+// WIDGET: Suggested Challenges (Stateful để quản lý focus)
+// ============================================
+class _SuggestedChallengesWidget extends StatefulWidget {
+  final List<ChallengeData> challenges;
+  final String Function(int) formatNumber;
+
+  const _SuggestedChallengesWidget({
+    required this.challenges,
+    required this.formatNumber,
+  });
+
+  @override
+  State<_SuggestedChallengesWidget> createState() => _SuggestedChallengesWidgetState();
+}
+
+class _SuggestedChallengesWidgetState extends State<_SuggestedChallengesWidget> {
+  late PageController _pageController;
+  double _currentPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(viewportFraction: 0.85);
+    _pageController.addListener(_onPageChanged);
+  }
+
+  @override
+  void dispose() {
+    _pageController.removeListener(_onPageChanged);
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _onPageChanged() {
+    setState(() {
+      _currentPage = _pageController.page ?? 0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          _buildHeader(),
+          const SizedBox(height: 16),
+          // Challenge cards với hiệu ứng focus
+          SizedBox(
+            height: 240,
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: widget.challenges.length,
+              itemBuilder: (context, index) {
+                return _buildAnimatedCard(index);
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Explore all link
+          _buildExploreLink(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Suggested Challenges',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Make accountability a little easier, more fun and earn rewards!',
+          style: TextStyle(color: Colors.grey[400], fontSize: 14),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAnimatedCard(int index) {
+    // Tính toán độ lệch so với card đang focus
+    double difference = (index - _currentPage).abs();
+    // Scale và opacity dựa trên khoảng cách
+    double scale = 1 - (difference * 0.1).clamp(0.0, 0.15);
+    double opacity = 1 - (difference * 0.4).clamp(0.0, 0.5);
+    double translateY = difference * 20; // Card không focus sẽ chìm xuống
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: scale, end: scale),
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Transform.translate(
+          offset: Offset(0, translateY),
+          child: Transform.scale(
+            scale: value,
+            child: Opacity(
+              opacity: opacity,
+              child: _ChallengeCard(
+                challenge: widget.challenges[index],
+                formatNumber: widget.formatNumber,
+                isFocused: difference < 0.5,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildExploreLink() {
+    return Center(
+      child: TextButton(
+        onPressed: () => print('Explore all challenges'),
+        child: const Text(
+          'Explore All Challenges',
+          style: TextStyle(color: Colors.orange, fontSize: 15, fontWeight: FontWeight.w500),
         ),
       ),
     );
   }
+}
+
+// ============================================
+// WIDGET: Challenge Card (Stateless, kích thước cố định)
+// ============================================
+class _ChallengeCard extends StatelessWidget {
+  final ChallengeData challenge;
+  final String Function(int) formatNumber;
+  final bool isFocused;
+
+  const _ChallengeCard({
+    required this.challenge,
+    required this.formatNumber,
+    this.isFocused = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2D2D2D),
+        borderRadius: BorderRadius.circular(16),
+        border: isFocused
+            ? Border.all(color: Colors.orange.withOpacity(0.3), width: 1)
+            : null,
+        boxShadow: isFocused
+            ? [
+                BoxShadow(
+                  color: Colors.orange.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ]
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Participant count
+          Text(
+            'More than ${formatNumber(challenge.participantCount)} athletes have alr...',
+            style: TextStyle(color: Colors.grey[400], fontSize: 12),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+          const SizedBox(height: 10),
+          // Badge + Info row - Expanded
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Badge - Fixed size
+                _buildBadge(),
+                const SizedBox(width: 14),
+                // Challenge info - Expanded
+                Expanded(child: _buildChallengeInfo()),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          // Join button
+          _buildJoinButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBadge() {
+    return Container(
+      width: 72,
+      height: 72,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.red[900]!, Colors.orange[800]!],
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Background pattern
+          Positioned.fill(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: CustomPaint(
+                painter: _BadgePatternPainter(),
+              ),
+            ),
+          ),
+          // Runna tag
+          Positioned(
+            top: 4,
+            right: 4,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+              decoration: BoxDecoration(
+                color: Colors.orange,
+                borderRadius: BorderRadius.circular(3),
+              ),
+              child: const Text(
+                'runna',
+                style: TextStyle(color: Colors.white, fontSize: 6, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          // Badge text
+          Text(
+            challenge.badgeText,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // _buildChallengeInfo is already updated
+  Widget _buildChallengeInfo() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title - Max 2 lines
+        Text(
+          challenge.title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            height: 1.2,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 4),
+        // Description - Max 2 lines
+        Text(
+          challenge.description,
+          style: TextStyle(color: Colors.grey[400], fontSize: 11, height: 1.3),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const Spacer(),
+        // Reward tag
+        if (challenge.hasReward)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: Colors.orange,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: const Text(
+              'Reward',
+              style: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildJoinButton() {
+    return SizedBox(
+      width: double.infinity,
+      height: 44,
+      child: ElevatedButton(
+        onPressed: challenge.onJoin,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.orange,
+          foregroundColor: Colors.black,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+        ),
+        child: const Text(
+          'Join Challenge',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+      ),
+    );
+  }
+}
+
+// Custom painter cho badge pattern
+class _BadgePatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.black.withOpacity(0.2)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+
+    // Vẽ pattern hình sao/medal
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width * 0.4;
+
+    for (int i = 0; i < 8; i++) {
+      final angle = (i * 45) * 3.14159 / 180;
+      final x = center.dx + radius * 0.8 * (i % 2 == 0 ? 1 : 0.6) *
+          (angle < 3.14159 ? 1 : -1) * (i < 4 ? 1 : -1);
+      final y = center.dy + radius * 0.8 * (i % 2 == 0 ? 1 : 0.6) *
+          (i % 4 < 2 ? -1 : 1);
+      canvas.drawCircle(Offset(x, y), 2, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ============================================
+// DATA MODELS
+// ============================================
+
+class SlideData {
+  final String title;
+  final String titleTag;
+  final String linkText;
+  final IconData icon;
+  final Color iconColor;
+  final String mainText;
+  final String subText;
+  final String duration;
+  final VoidCallback? onLinkTap;
+  final VoidCallback? onButtonTap;
+
+  SlideData({
+    required this.title,
+    required this.titleTag,
+    required this.linkText,
+    required this.icon,
+    required this.iconColor,
+    required this.mainText,
+    required this.subText,
+    required this.duration,
+    this.onLinkTap,
+    this.onButtonTap,
+  });
+}
+
+class ChallengeData {
+  final int participantCount;
+  final String title;
+  final String description;
+  final IconData badgeIcon;
+  final String badgeText;
+  final bool hasReward;
+  final VoidCallback? onJoin;
+
+  ChallengeData({
+    required this.participantCount,
+    required this.title,
+    required this.description,
+    required this.badgeIcon,
+    required this.badgeText,
+    this.hasReward = false,
+    this.onJoin,
+  });
+}
+
+class SuggestedUser {
+  final String name;
+  final String subtitle;
+  final String? avatarUrl;
+  final bool isVerified;
+  final VoidCallback? onFollow;
+  final VoidCallback? onRemove;
+
+  SuggestedUser({
+    required this.name,
+    required this.subtitle,
+    this.avatarUrl,
+    this.isVerified = false,
+    this.onFollow,
+    this.onRemove,
+  });
 }

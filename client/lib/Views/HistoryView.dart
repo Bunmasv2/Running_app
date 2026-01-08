@@ -57,13 +57,6 @@ class _HistoryViewState extends State<HistoryView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100], // Màu nền xám nhẹ
-      appBar: AppBar(
-        title: const Text("Lịch sử chạy bộ", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        centerTitle: true,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _historyList.isEmpty

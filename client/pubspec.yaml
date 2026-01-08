@@ -40,6 +40,10 @@ dependencies:
   google_sign_in: ^6.1.6
   image_picker: ^1.0.7       # Để chọn ảnh từ thư viện/camera
   shared_preferences: ^2.2.2 # Để lưu và lấy Token thật
+  dio: ^5.7.0
+  socket_io_client: ^3.0.2   # Chức năng Socket real-time
+  flutter_polyline_points: ^2.1.0 # Hỗ trợ vẽ và giải mã đường đi
+  fl_chart: ^0.69.0          # Thư viện vẽ biểu đồ
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -147,19 +147,6 @@ class _ProfileViewState extends State<ProfileView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: const Text("Hồ sơ", style: TextStyle(fontWeight: FontWeight.bold)),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.blue),
-            onPressed: _showEditDialog,
-            tooltip: "Sửa thông tin",
-          )
-        ],
-      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _userProfile == null
@@ -240,9 +227,19 @@ class _ProfileViewState extends State<ProfileView> {
           ),
         ),
         const SizedBox(height: 15),
-        Text(
-          _userProfile!.userName,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _userProfile!.userName,
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.blue),
+              onPressed: _showEditDialog,
+              tooltip: "Sửa thông tin",
+            )
+          ]
         ),
         Text(
           _userProfile!.email,
