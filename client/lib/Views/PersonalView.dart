@@ -4,6 +4,7 @@ import '../Components/HeaderComponent.dart';
 import '../models/BestEffort.dart';
 import '../models/TrainingDay.dart';
 import '../models/WeekData.dart';
+import '../Services/UserService.dart';
 
 class Personalview extends StatefulWidget {
   final ValueChanged<String?>? onSubtitleChanged;
@@ -16,6 +17,56 @@ class Personalview extends StatefulWidget {
 
 class _PersonalviewState extends State<Personalview> {
   int _selectedDotIndex = 6; // Mặc định chọn dot cuối cùng (tuần hiện tại)
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+
+    // TODO: gọi API khi cần
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+  }
+
+  // ====== LOGOUT ======
+  void _handleLogout() async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Đăng xuất"),
+        content: const Text("Bạn có muốn đăng xuất khỏi ứng dụng?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Hủy"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("Đăng xuất"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/login',
+            (route) => false,
+      );
+    }
+  }
 
   // Dữ liệu mẫu cho 12 tuần (Past 12 weeks)
   final List<WeekData> _weeklyData = [
@@ -37,7 +88,7 @@ class _PersonalviewState extends State<Personalview> {
   Widget build(BuildContext context) {
     return ScrollableHeaderTabsComponent(
       tabs: [
-        HeaderTabItem(label: 'Tiến trình', content: _buildProgressContent()),
+        HeaderTabItem(label: 'Tiến trình', content: _buildProgressContent(context)),
         HeaderTabItem(label: 'Hoạt động', content: _buildActivitiesContent()),
       ],
       backgroundColor: const Color(0xFF1A1A1A),
@@ -49,7 +100,7 @@ class _PersonalviewState extends State<Personalview> {
   }
 
   // --- Tab Tiến trình (Progress) ---
-  Widget _buildProgressContent() {
+  Widget _buildProgressContent(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,6 +110,30 @@ class _PersonalviewState extends State<Personalview> {
           const SizedBox(height: 20),
           // Widget 2: Cards nỗ lực (Best Efforts, Goals, Relative Effort, Training Log)
           _buildWidget2Cards(),
+  const SizedBox(height: 30),
+  Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 16),
+  child: SizedBox(
+  width: double.infinity,
+  child: ElevatedButton.icon(
+  icon: const Icon(Icons.logout),
+  label: const Text(
+  'Đăng xuất',
+  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+  ),
+  style: ElevatedButton.styleFrom(
+  backgroundColor: Colors.redAccent,
+  foregroundColor: Colors.white,
+  padding: const EdgeInsets.symmetric(vertical: 14),
+  shape: RoundedRectangleBorder(
+  borderRadius: BorderRadius.circular(12),
+  ),
+  ),
+  onPressed: _handleLogout,
+  ),
+  ),
+  ),
+  const SizedBox(height: 30),
         ],
       ),
     );

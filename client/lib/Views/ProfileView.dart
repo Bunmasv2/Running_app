@@ -130,6 +130,38 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
+  void _handleLogout() async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Đăng xuất"),
+        content: const Text("Bạn có muốn đăng xuất khỏi ứng dụng?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text("Hủy"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("Đăng xuất"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/login',
+            (route) => false,
+      );
+    }
+  }
+
   // --- HELPER FORMAT ---
   String _formatTotalTime(double totalSeconds) {
     int seconds = totalSeconds.toInt();

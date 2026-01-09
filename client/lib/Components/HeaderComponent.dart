@@ -264,8 +264,6 @@ class CollapsibleHeaderLayout extends StatelessWidget {
   final String title;
   final UserProfile? userProfile;
   final VoidCallback? onAvatarTap;
-  final VoidCallback? onChatTap;
-  final VoidCallback? onSearchTap;
   final VoidCallback? onNotificationTap;
 
   // Thuộc tính riêng cho Header Tabs
@@ -283,8 +281,6 @@ class CollapsibleHeaderLayout extends StatelessWidget {
     this.initialIndex = 0,
     this.userProfile,
     this.onAvatarTap,
-    this.onChatTap,
-    this.onSearchTap,
     this.onNotificationTap,
     this.backgroundColor = Colors.black,
     this.activeColor = Colors.orange,
@@ -325,8 +321,6 @@ class CollapsibleHeaderLayout extends StatelessWidget {
                 actions: buildAppBarActions(
                   userProfile: userProfile,
                   onAvatarTap: onAvatarTap,
-                  onChatTap: onChatTap,
-                  onSearchTap: onSearchTap,
                   onNotificationTap: onNotificationTap,
                 ),
 
