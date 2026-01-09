@@ -28,8 +28,8 @@ class BottomNavBarComponent extends StatelessWidget {
         ),
         // Tab 2: Lịch sử [cite: 95]
         BottomNavigationBarItem(
-            icon: Icon(Icons.map_rounded),
-            label: "Bản đồ"
+            icon: Icon(Icons.local_fire_department),
+            label: "Thử thách"
         ),
         BottomNavigationBarItem(
             icon: Icon(Icons.fiber_smart_record_rounded),
