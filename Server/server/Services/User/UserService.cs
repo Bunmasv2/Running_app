@@ -214,4 +214,15 @@ public class UserService : IUserService
         }
         return true;
     }
+
+    public async Task<List<AppUser>> GetSuggestedUser(string userId)
+    {
+        var users = await _context.Users
+            .Where(u => u.Id != userId)
+            .OrderBy(u => Guid.NewGuid())
+            .Take(10)
+            .ToListAsync();
+
+        return users;
+    }
 }

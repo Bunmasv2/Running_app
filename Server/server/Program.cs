@@ -29,7 +29,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRunService, RunService>();
-// builder.Services.AddScoped<IRun, RunService>();
+builder.Services.AddScoped<IChallengeService, ChallengeService>();
 builder.Services.AddScoped<IDailyGoalService, DailyGoalService>();
 builder.Services.AddScoped<IGoalService, GoalService>();
 // Add services to the container.

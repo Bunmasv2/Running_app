@@ -133,17 +133,17 @@ public class UserController : ControllerBase
         return Ok(new { message = "Upload avatar successful" });
     }
 
-    [HttpGet("getAll")]
-    public async Task<IActionResult> GetAllUser()
+    [HttpGet("suggests")]
+    public async Task<ActionResult> GetSuggestedUser()
     {
-        var users = await _context.Users.ToListAsync();
-        // var result = _mapper.Map<List<UserDTO.Profile>>(users);
-        foreach (var user in users)
-        {
-            Console.WriteLine($"User: {user.UserName} | Email: {user.Email} | TotalTime: {user.TotalTimeSeconds} | TotalDistance: {user.TotalDistanceKm} km");
-        }
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var users = await _userServcie.GetSuggestedUser(userId);
 
-        return Ok(new { mesenger = "", data = users });
+        if (users.Count() <= 0)
+            return Ok();
+
+        var usersDTO = _mapper.Map<List<UserDTO.Profile>>(users);
+
+        return Ok(usersDTO);
     }
-
 }

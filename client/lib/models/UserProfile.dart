@@ -1,4 +1,5 @@
 class UserProfile {
+  final String id;
   final String email;
   final String userName;
   final DateTime createdAt;
@@ -9,6 +10,7 @@ class UserProfile {
   final String? avatarUrl; // Có thể null
 
   UserProfile({
+    required this.id,
     required this.email,
     required this.userName,
     required this.createdAt,
@@ -22,6 +24,7 @@ class UserProfile {
   // Factory parse JSON an toàn, khớp với field bên C#
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
+      id: json['id'] ?? '',
       email: json['email'] ?? '',
       userName: json['userName'] ?? 'Unknown User',
       // Parse ngày tháng từ chuỗi ISO

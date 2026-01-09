@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/RunModels.dart';
+import '../models/Challenge.dart';
+import '../models/UserProfile.dart';
 import '../Services/GoalService.dart';
 import '../Services/UserService.dart';
 import '../Models/UserProfile.dart';
+import '../Models/ChallengeService.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -15,10 +18,13 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   final UserService _userService = UserService();
   final GoalService _goalService = GoalService();
+  final ChallengeService _challengeService = ChallengeService();
 
   UserProfile? _userProfile;
   DailyGoal? _dailyGoal;
   bool _isLoading = true;
+  List<UserProfile> _suggestedUsers = [];
+  List<Challenge> _challenges = [];
 
   // PageController cho slider
   late PageController _slideController;
@@ -59,11 +65,15 @@ class _HomeViewState extends State<HomeView> {
       final results = await Future.wait([
         _userService.getUserProfile(),
         _goalService.getTodayGoal(),
+        _userService.getSuggestedUser()
+        _challengeService.getChallenges()
       ]);
       if (mounted) {
         setState(() {
           _userProfile = results[0] as UserProfile?;
           _dailyGoal = results[1] as DailyGoal?;
+          _suggestedUsers = results[2] as UserProfile?;
+          _challenges = results[3] as Challenge?;
           _isLoading = false;
         });
       }
@@ -114,54 +124,54 @@ class _HomeViewState extends State<HomeView> {
   ];
 
   // Dữ liệu mẫu cho challenges
-  List<ChallengeData> get _challenges => [
-    ChallengeData(
-      participantCount: 1025000,
-      title: 'January 400-minute x Runna Challenge',
-      description: 'Kick off the year by logging 400 minutes of movement',
-      badgeIcon: Icons.military_tech,
-      badgeText: '400',
-      hasReward: true,
-      onJoin: () => print('Join January challenge'),
-    ),
-    ChallengeData(
-      participantCount: 500000,
-      title: 'New Year Running Streak',
-      description: 'Run every day for 7 days straight',
-      badgeIcon: Icons.local_fire_department,
-      badgeText: '7',
-      hasReward: true,
-      onJoin: () => print('Join streak challenge'),
-    ),
-  ];
+//   List<ChallengeData> get _challenges => [
+//     ChallengeData(
+//       participantCount: 1025000,
+//       title: 'January 400-minute x Runna Challenge',
+//       description: 'Kick off the year by logging 400 minutes of movement',
+//       badgeIcon: Icons.military_tech,
+//       badgeText: '400',
+//       hasReward: true,
+//       onJoin: () => print('Join January challenge'),
+//     ),
+//     ChallengeData(
+//       participantCount: 500000,
+//       title: 'New Year Running Streak',
+//       description: 'Run every day for 7 days straight',
+//       badgeIcon: Icons.local_fire_department,
+//       badgeText: '7',
+//       hasReward: true,
+//       onJoin: () => print('Join streak challenge'),
+//     ),
+//   ];
 
   // Dữ liệu mẫu cho người theo dõi gợi ý
-  List<SuggestedUser> get _suggestedUsers => [
-    SuggestedUser(
-      name: 'Mattia Bertoncini',
-      subtitle: 'Fan favorite on Strava',
-      avatarUrl: null,
-      isVerified: true,
-      onFollow: () => print('Follow Mattia'),
-      onRemove: () => print('Remove Mattia'),
-    ),
-    SuggestedUser(
-      name: 'Nguyễn Minh',
-      subtitle: 'Local Legend',
-      avatarUrl: null,
-      isVerified: false,
-      onFollow: () => print('Follow Nguyen'),
-      onRemove: () => print('Remove Nguyen'),
-    ),
-    SuggestedUser(
-      name: 'Sarah Runner',
-      subtitle: 'Top 10 in your area',
-      avatarUrl: null,
-      isVerified: true,
-      onFollow: () => print('Follow Sarah'),
-      onRemove: () => print('Remove Sarah'),
-    ),
-  ];
+//   List<SuggestedUser> get _suggestedUsers => [
+//     SuggestedUser(
+//       name: 'Mattia Bertoncini',
+//       subtitle: 'Fan favorite on Strava',
+//       avatarUrl: null,
+//       isVerified: true,
+//       onFollow: () => print('Follow Mattia'),
+//       onRemove: () => print('Remove Mattia'),
+//     ),
+//     SuggestedUser(
+//       name: 'Nguyễn Minh',
+//       subtitle: 'Local Legend',
+//       avatarUrl: null,
+//       isVerified: false,
+//       onFollow: () => print('Follow Nguyen'),
+//       onRemove: () => print('Remove Nguyen'),
+//     ),
+//     SuggestedUser(
+//       name: 'Sarah Runner',
+//       subtitle: 'Top 10 in your area',
+//       avatarUrl: null,
+//       isVerified: true,
+//       onFollow: () => print('Follow Sarah'),
+//       onRemove: () => print('Remove Sarah'),
+//     ),
+//   ];
 
   @override
   Widget build(BuildContext context) {
@@ -909,43 +919,5 @@ class SlideData {
     required this.duration,
     this.onLinkTap,
     this.onButtonTap,
-  });
-}
-
-class ChallengeData {
-  final int participantCount;
-  final String title;
-  final String description;
-  final IconData badgeIcon;
-  final String badgeText;
-  final bool hasReward;
-  final VoidCallback? onJoin;
-
-  ChallengeData({
-    required this.participantCount,
-    required this.title,
-    required this.description,
-    required this.badgeIcon,
-    required this.badgeText,
-    this.hasReward = false,
-    this.onJoin,
-  });
-}
-
-class SuggestedUser {
-  final String name;
-  final String subtitle;
-  final String? avatarUrl;
-  final bool isVerified;
-  final VoidCallback? onFollow;
-  final VoidCallback? onRemove;
-
-  SuggestedUser({
-    required this.name,
-    required this.subtitle,
-    this.avatarUrl,
-    this.isVerified = false,
-    this.onFollow,
-    this.onRemove,
   });
 }

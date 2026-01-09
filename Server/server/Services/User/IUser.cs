@@ -12,5 +12,6 @@ public interface IUserService
     Task<UserDTO.SignInResponse> SignIn(string email, string password);
     Task<IdentityResult> UpdateUserImage(IFormFile file, string userId);
     Task<bool> Register(UserDTO.RegisterDto registerDto);
+    Task<List<AppUser>> GetSuggestedUser(string userId);
 
 }
