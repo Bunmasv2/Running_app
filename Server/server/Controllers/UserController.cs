@@ -143,7 +143,6 @@ public class UserController : ControllerBase
             return Ok();
 
         var usersDTO = _mapper.Map<List<UserDTO.Profile>>(users);
-
-        return Ok(usersDTO);
+        return Ok(new { data = usersDTO });
     }
 }

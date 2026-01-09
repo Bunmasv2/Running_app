@@ -45,7 +45,7 @@ public class ChallengeController : ControllerBase
             return Ok();
 
         var challengesDTO = _mapper.Map<List<challengesDTO.Challenge>>(challenges);
-        
-        return Ok(challengesDTO);
+
+        return Ok(new { data = challengesDTO });
     }
 }
