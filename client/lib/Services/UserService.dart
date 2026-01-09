@@ -4,14 +4,13 @@ import 'package:flutter/material.dart'; // Cần import để dùng Navigator & 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/UserProfile.dart';
-import '../Views/GoogleWebView.dart'; // Bắt buộc phải import file WebView này
 import '../models/UserRanking.dart';
 
 class UserService {
   // URL Server Render của bạn
-  // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/User';
+  static const String _baseUrl = 'https://running-app-ywpg.onrender.com/User';
   // --- 1. QUẢN LÝ AUTH (ĐĂNG NHẬP / ĐĂNG XUẤT) ---
-  static const String _baseUrl = 'http://10.0.2.2:5144/User';
+  // static const String _baseUrl = 'http://10.0.2.2:5144/User';
 
   // A. ĐĂNG NHẬP THƯỜNG (EMAIL/PASS)
   Future<bool> login(String email, String password) async {
@@ -60,29 +59,29 @@ class UserService {
   }
 
   // B. ĐĂNG NHẬP GOOGLE (DÙNG WEBVIEW - KHÔNG CẦN FIREBASE)
-  Future<bool> loginGoogle(BuildContext context) async {
-    try {
-      // 1. Mở màn hình WebView và chờ kết quả trả về (Token)
-      final String? token = await Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const GoogleWebView()),
-      );
-
-      // 2. Nếu lấy được token (người dùng đăng nhập thành công và WebView bắt được link)
-      if (token != null && token.isNotEmpty) {
-        // Lưu token vào máy
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accessToken', token);
-        return true;
-      }
-
-      // Trường hợp người dùng tắt WebView hoặc không đăng nhập
-      return false;
-    } catch (e) {
-      print('Login Google WebView Error: $e');
-      return false;
-    }
-  }
+  // Future<bool> loginGoogle(BuildContext context) async {
+  //   try {
+  //     // 1. Mở màn hình WebView và chờ kết quả trả về (Token)
+  //     final String? token = await Navigator.push(
+  //       context,
+  //       MaterialPageRoute(builder: (context) => const GoogleWebView()),
+  //     );
+  //
+  //     // 2. Nếu lấy được token (người dùng đăng nhập thành công và WebView bắt được link)
+  //     if (token != null && token.isNotEmpty) {
+  //       // Lưu token vào máy
+  //       final prefs = await SharedPreferences.getInstance();
+  //       await prefs.setString('accessToken', token);
+  //       return true;
+  //     }
+  //
+  //     // Trường hợp người dùng tắt WebView hoặc không đăng nhập
+  //     return false;
+  //   } catch (e) {
+  //     print('Login Google WebView Error: $e');
+  //     return false;
+  //   }
+  // }
 
   // 2. KIỂM TRA ĐÃ ĐĂNG NHẬP CHƯA (Cho Splash Screen)
   Future<bool> isLoggedIn() async {

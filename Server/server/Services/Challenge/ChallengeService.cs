@@ -1,0 +1,120 @@
+using Microsoft.EntityFrameworkCore;
+using server.DTO;
+using server.Models;
+using server.Services.Interfaces;
+
+namespace server.Services
+{
+    public class ChallengeService : IChallengeService
+    {
+        private readonly ApplicationDbContext _context;
+
+        public ChallengeService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<List<ChallengeDto>> GetAllActiveChallenges()
+        {
+            // Lấy các challenge đang Active (Status = 1)
+            var challenges = await _context.Challenges
+                .Where(c => c.Status == ChallengeStatus.Active)
+                .OrderByDescending(c => c.StartDate)
+                .ToListAsync();
+
+            // Map sang DTO
+            return challenges.Select(c => new ChallengeDto
+            {
+                Id = c.Id,
+                Title = c.Title,
+                Description = c.Description,
+                ImageUrl = c.ImageUrl,
+                TargetDistanceKm = c.TargetDistanceKm,
+                StartDate = c.StartDate,
+                EndDate = c.EndDate,
+                ParticipantCount = c.ParticipantCount,
+                Status = (int)c.Status
+            }).ToList();
+        }
+
+        public async Task<List<UserChallengeProgressDto>> GetMyChallenges(string userId)
+        {
+            // Lấy bảng trung gian (Participant) kèm thông tin Challenge
+            var participants = await _context.ChallengeParticipants
+                .Include(cp => cp.Challenge)
+                .Where(cp => cp.UserId == userId)
+                .OrderByDescending(cp => cp.JoinedAt)
+                .ToListAsync();
+
+            return participants.Select(p => new UserChallengeProgressDto
+            {
+                Id = p.Id,
+                ChallengeId = p.ChallengeId,
+                CompletedDistanceKm = p.CompletedDistanceKm,
+                Status = (int)p.Status,
+                RewardClaimed = p.RewardClaimed,
+
+                // Tính toán % tiến độ tại đây để FE đỡ phải tính
+                ProgressPercent = (p.Challenge.TargetDistanceKm > 0)
+                    ? (p.CompletedDistanceKm / p.Challenge.TargetDistanceKm) * 100
+                    : 0,
+
+                // Map lồng ChallengeDto
+                Challenge = new ChallengeDto
+                {
+                    Id = p.Challenge.Id,
+                    Title = p.Challenge.Title,
+                    Description = p.Challenge.Description,
+                    ImageUrl = p.Challenge.ImageUrl,
+                    TargetDistanceKm = p.Challenge.TargetDistanceKm,
+                    StartDate = p.Challenge.StartDate,
+                    EndDate = p.Challenge.EndDate,
+                    Status = (int)p.Challenge.Status
+                }
+            }).ToList();
+        }
+
+        public async Task<bool> JoinChallenge(string userId, int challengeId)
+        {
+            // 1. Kiểm tra Challenge có tồn tại và đang mở không
+            var challenge = await _context.Challenges.FindAsync(challengeId);
+
+            if (challenge == null || challenge.Status != ChallengeStatus.Active)
+            {
+                return false; // Không tìm thấy hoặc đã đóng
+            }
+
+            // 2. Kiểm tra xem User đã tham gia chưa
+            var existing = await _context.ChallengeParticipants
+                .FirstOrDefaultAsync(cp => cp.UserId == userId && cp.ChallengeId == challengeId);
+
+            if (existing != null)
+            {
+                return false; // Đã tham gia rồi
+            }
+
+            // 3. Tạo mới Participant
+            var newParticipant = new ChallengeParticipant
+            {
+                UserId = userId,
+                ChallengeId = challengeId,
+                JoinedAt = DateTime.UtcNow,
+                Status = ParticipantStatus.InProgress,
+                CompletedDistanceKm = 0,
+                ProgressPercent = 0
+            };
+
+            _context.ChallengeParticipants.Add(newParticipant);
+
+            // 4. Tăng số lượng người tham gia trong bảng Challenge
+            challenge.ParticipantCount += 1;
+            _context.Challenges.Update(challenge);
+
+            // 5. Cập nhật "Thử thách hiện tại" cho User (nếu cần Logic này)
+            // var user = await _context.Users.FindAsync(userId);
+            // if (user != null) user.CurrentActiveChallengeId = challengeId;
+
+            return await _context.SaveChangesAsync() > 0;
+        }
+    }
+}

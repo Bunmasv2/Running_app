@@ -39,24 +39,24 @@ class _LoginViewState extends State<LoginView> {
     }
   }
 
-  // Xử lý đăng nhập Google (Dùng WebView)
-  void _handleGoogleLogin() async {
-    setState(() => _isLoading = true);
-
-    // TRUYỀN CONTEXT VÀO ĐÂY ĐỂ MỞ WEBVIEW
-    bool success = await _userService.loginGoogle(context);
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    if (success) {
-      Navigator.pushReplacementNamed(context, '/main');
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Đăng nhập thất bại hoặc bạn đã hủy thao tác.")),
-      );
-    }
-  }
+  // // Xử lý đăng nhập Google (Dùng WebView)
+  // void _handleGoogleLogin() async {
+  //   setState(() => _isLoading = true);
+  //
+  //   // TRUYỀN CONTEXT VÀO ĐÂY ĐỂ MỞ WEBVIEW
+  //   bool success = await _userService.loginGoogle(context);
+  //
+  //   if (!mounted) return;
+  //   setState(() => _isLoading = false);
+  //
+  //   if (success) {
+  //     Navigator.pushReplacementNamed(context, '/main');
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text("Đăng nhập thất bại hoặc bạn đã hủy thao tác.")),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -123,55 +123,6 @@ class _LoginViewState extends State<LoginView> {
                 child: _isLoading
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                     : const Text("Đăng nhập", style: TextStyle(fontSize: 18, color: Colors.white)),
-              ),
-
-              const SizedBox(height: 30),
-
-              // Dòng kẻ "Hoặc"
-              Row(
-                children: [
-                  Expanded(child: Divider(color: Colors.grey[400])),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Text("Hoặc đăng nhập bằng", style: TextStyle(color: Colors.grey[600])),
-                  ),
-                  Expanded(child: Divider(color: Colors.grey[400])),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Nút Google
-              OutlinedButton(
-                onPressed: _isLoading ? null : _handleGoogleLogin,
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  side: BorderSide(color: Colors.grey.shade300),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  backgroundColor: Colors.white,
-                  elevation: 2,
-                  shadowColor: Colors.black12,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.network(
-                      'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
-                      height: 24,
-                      width: 24,
-                      errorBuilder: (ctx, err, stack) => const Icon(Icons.public, color: Colors.red),
-                    ),
-                    const SizedBox(width: 12),
-                    const Text(
-                      "Google",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
               ),
               const SizedBox(height: 30),
 

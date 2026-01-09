@@ -5,11 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bc54e4c9-b60e-460d-87f5-6a9c68e4bc80" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/client/lib/Services/ChallengeService.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/lib/Views/ChallengeView.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/lib/models/ChallengeModels.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/client/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/server/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/appsettings.Development.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Components/BottomNavBarComponent.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Components/BottomNavBarComponent.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Properties/launchSettings.json" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Properties/launchSettings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Services/UserService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/UserService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Views/GoogleWebView.dart" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Views/LoginView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/LoginView.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Views/MainScreen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/MainScreen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Views/RecordView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/RecordView.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Views/TrackingView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/TrackingView.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/main.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
