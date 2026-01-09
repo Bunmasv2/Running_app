@@ -221,7 +221,7 @@ class UserService {
 
                 final List list = jsonData['data'];
 
-                return list.map((e) => UserRanking.fromJson(e)).toList();
+                return list.map((e) => UserProfile.fromJson(e)).toList();
             }
 
             return [];

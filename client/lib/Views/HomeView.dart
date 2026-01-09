@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/RunModels.dart';
-import '../models/Challenge.dart';
-import '../models/UserProfile.dart';
+import '../Models/UserProfile.dart';
 import '../Services/GoalService.dart';
 import '../Services/UserService.dart';
-import '../Models/UserProfile.dart';
-import '../Models/ChallengeService.dart';
+import '../models/Challenge.dart';
+import '../Services/ChallengeService.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -65,15 +64,20 @@ class _HomeViewState extends State<HomeView> {
       final results = await Future.wait([
         _userService.getUserProfile(),
         _goalService.getTodayGoal(),
-        _userService.getSuggestedUser()
+        _userService.getSuggestedUser(),
         _challengeService.getChallenges()
       ]);
       if (mounted) {
         setState(() {
           _userProfile = results[0] as UserProfile?;
           _dailyGoal = results[1] as DailyGoal?;
-          _suggestedUsers = results[2] as UserProfile?;
-          _challenges = results[3] as Challenge?;
+          if (results[2] != null) {
+            _suggestedUsers = List<UserProfile>.from(results[2] as List);
+          }
+
+          if (results[3] != null) {
+            _challenges = List<Challenge>.from(results[3] as List);
+          }
           _isLoading = false;
         });
       }
@@ -441,7 +445,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Widget _buildUserCard(SuggestedUser user) {
+  Widget _buildUserCard(UserProfile user) {
     return Container(
       width: 200,
       margin: const EdgeInsets.only(right: 12),
@@ -453,18 +457,21 @@ class _HomeViewState extends State<HomeView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Avatar with verified badge
+          // Avatar
           Stack(
             children: [
               CircleAvatar(
                 radius: 40,
                 backgroundColor: Colors.grey[700],
+                // Dùng user.avatarUrl từ model của bạn
                 backgroundImage: user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
                 child: user.avatarUrl == null
                     ? Icon(Icons.person, size: 40, color: Colors.grey[500])
                     : null,
               ),
-              if (user.isVerified)
+              // Vì model UserProfile không có field isVerified,
+              // tạm thời mình check nếu quãng đường > 100km thì hiện badge tích xanh
+              if (user.totalDistanceKm > 100)
                 Positioned(
                   bottom: 0,
                   right: 0,
@@ -480,9 +487,9 @@ class _HomeViewState extends State<HomeView> {
             ],
           ),
           const SizedBox(height: 12),
-          // Name
+          // Name: Sửa từ user.name thành user.userName cho đúng Model
           Text(
-            user.name,
+            user.userName,
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
@@ -493,19 +500,20 @@ class _HomeViewState extends State<HomeView> {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
-          // Subtitle
+          // Subtitle: Model không có subtitle, ta hiển thị quãng đường đã chạy
           Text(
-            user.subtitle,
+            'Total: ${user.totalDistanceKm.toStringAsFixed(1)} km',
             style: TextStyle(color: Colors.grey[500], fontSize: 12),
             textAlign: TextAlign.center,
           ),
           const Spacer(),
-          // Buttons
+          // Buttons: Logic xử lý bấm nút đặt tại đây
           Row(
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: user.onFollow,
+                  onPressed: () {
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     foregroundColor: Colors.black,
@@ -518,7 +526,8 @@ class _HomeViewState extends State<HomeView> {
               const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton(
-                  onPressed: user.onRemove,
+                  onPressed: () {
+                  },
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
                     side: const BorderSide(color: Colors.grey),
@@ -534,7 +543,6 @@ class _HomeViewState extends State<HomeView> {
       ),
     );
   }
-
   // Helper function
   String _formatNumber(int number) {
     if (number >= 1000000) {
@@ -550,7 +558,7 @@ class _HomeViewState extends State<HomeView> {
 // WIDGET: Suggested Challenges (Stateful để quản lý focus)
 // ============================================
 class _SuggestedChallengesWidget extends StatefulWidget {
-  final List<ChallengeData> challenges;
+  final List<Challenge> challenges;
   final String Function(int) formatNumber;
 
   const _SuggestedChallengesWidget({
@@ -684,7 +692,7 @@ class _SuggestedChallengesWidgetState extends State<_SuggestedChallengesWidget> 
 // WIDGET: Challenge Card (Stateless, kích thước cố định)
 // ============================================
 class _ChallengeCard extends StatelessWidget {
-  final ChallengeData challenge;
+  final Challenge challenge; // Dùng trực tiếp class Challenge từ model
   final String Function(int) formatNumber;
   final bool isFocused;
 
@@ -702,164 +710,77 @@ class _ChallengeCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFF2D2D2D),
         borderRadius: BorderRadius.circular(16),
-        border: isFocused
-            ? Border.all(color: Colors.orange.withOpacity(0.3), width: 1)
-            : null,
-        boxShadow: isFocused
-            ? [
-                BoxShadow(
-                  color: Colors.orange.withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ]
-            : null,
+        border: isFocused ? Border.all(color: Colors.orange.withOpacity(0.3), width: 1) : null,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Participant count
           Text(
-            'More than ${formatNumber(challenge.participantCount)} athletes have alr...',
+            '${formatNumber(challenge.totalParticipants)} athletes joined',
             style: TextStyle(color: Colors.grey[400], fontSize: 12),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
           ),
           const SizedBox(height: 10),
-          // Badge + Info row - Expanded
           Expanded(
             child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Badge - Fixed size
-                _buildBadge(),
+                // Badge hiển thị khoảng cách mục tiêu (VD: 5K, 10K)
+                _buildBadge(challenge.targetDistanceKm.toInt().toString()),
                 const SizedBox(width: 14),
-                // Challenge info - Expanded
-                Expanded(child: _buildChallengeInfo()),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        challenge.name,
+                        style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        challenge.description,
+                        style: TextStyle(color: Colors.grey[400], fontSize: 11),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
           const SizedBox(height: 10),
-          // Join button
           _buildJoinButton(),
         ],
       ),
     );
   }
 
-  Widget _buildBadge() {
+  Widget _buildBadge(String text) {
     return Container(
-      width: 72,
-      height: 72,
+      width: 72, height: 72,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Colors.red[900]!, Colors.orange[800]!],
-        ),
+        gradient: LinearGradient(colors: [Colors.red[900]!, Colors.orange[800]!]),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Background pattern
-          Positioned.fill(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: CustomPaint(
-                painter: _BadgePatternPainter(),
-              ),
-            ),
-          ),
-          // Runna tag
-          Positioned(
-            top: 4,
-            right: 4,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
-              decoration: BoxDecoration(
-                color: Colors.orange,
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: const Text(
-                'runna',
-                style: TextStyle(color: Colors.white, fontSize: 6, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          // Badge text
-          Text(
-            challenge.badgeText,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+      child: Center(
+        child: Text(
+          "$text\nKM",
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
       ),
-    );
-  }
-
-  // _buildChallengeInfo is already updated
-  Widget _buildChallengeInfo() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Title - Max 2 lines
-        Text(
-          challenge.title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            height: 1.2,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const SizedBox(height: 4),
-        // Description - Max 2 lines
-        Text(
-          challenge.description,
-          style: TextStyle(color: Colors.grey[400], fontSize: 11, height: 1.3),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        const Spacer(),
-        // Reward tag
-        if (challenge.hasReward)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: Colors.orange,
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: const Text(
-              'Reward',
-              style: TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold),
-            ),
-          ),
-      ],
     );
   }
 
   Widget _buildJoinButton() {
     return SizedBox(
       width: double.infinity,
-      height: 44,
+      height: 40,
       child: ElevatedButton(
-        onPressed: challenge.onJoin,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange,
-          foregroundColor: Colors.black,
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        ),
-        child: const Text(
-          'Join Challenge',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
+        onPressed: () => print("Joining ${challenge.id}"),
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.black),
+        child: const Text('Join Challenge', style: TextStyle(fontWeight: FontWeight.bold)),
       ),
     );
   }

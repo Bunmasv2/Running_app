@@ -20,7 +20,7 @@ class Challenge {
   factory Challenge.fromJson(Map<String, dynamic> json) {
     return Challenge(
       id: json['id'] ?? '',
-      name: json['name'] ?? 'Unknown Challenge',
+      name: json['name'] ?? '',
       description: json['description'] ?? '',
       targetDistanceKm: (json['targetDistanceKm'] as num?)?.toDouble() ?? 0.0,
       startDate: DateTime.tryParse(json['startDate'] ?? '') ?? DateTime.now(),

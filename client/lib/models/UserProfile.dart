@@ -27,9 +27,7 @@ class UserProfile {
       id: json['id'] ?? '',
       email: json['email'] ?? '',
       userName: json['userName'] ?? 'Unknown User',
-      // Parse ngày tháng từ chuỗi ISO
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
-      // Xử lý số: Backend có thể trả về int hoặc double, nên dùng num?.toDouble()
       heightCm: (json['heightCm'] as num?)?.toDouble() ?? 0.0,
       weightKg: (json['weightKg'] as num?)?.toDouble() ?? 0.0,
       totalDistanceKm: (json['totalDistanceKm'] as num?)?.toDouble() ?? 0.0,

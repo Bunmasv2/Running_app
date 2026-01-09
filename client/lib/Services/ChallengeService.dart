@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/Chanllenge.dart';
+import '../models/Challenge.dart';
+import '../models/UserRanking.dart';
 
 class ChallengeService {
   // 1. SỬA IP: Dùng đúng IP LAN của máy tính (không dùng localhost trên điện thoại)
-  static const String _baseUrl = 'https://running-app-ywpg.onrender.com/Challenge';
-  // static const String _baseUrl = 'http://10.0.2.2:5144/Goal';
+  // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/Challenge';
+  static const String _baseUrl = 'http://10.0.2.2:5144/Challenge';
+
   // 2. TẮT MOCK DATA: Đặt thành false để gọi API thật
   final bool useMockData = false;
   Future<String?> _getToken() async {
@@ -32,10 +34,11 @@ class ChallengeService {
 
             if (response.statusCode == 200) {
                 final jsonData = jsonDecode(response.body);
+                print("Raw Response Body: ${response.body}");
 
                 final List list = jsonData['data'];
 
-                return list.map((e) => UserRanking.fromJson(e)).toList();
+                return list.map((e) => Challenge.fromJson(e)).toList();
             }
 
             return [];
