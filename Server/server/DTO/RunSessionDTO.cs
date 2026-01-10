@@ -35,6 +35,7 @@ namespace server.DTO
         {
             public int Id { get; set; }
             public DateTime StartTime { get; set; }
+            public DateTime EndTime { get; set; }
             public double DistanceKm { get; set; }
             public double DurationSeconds { get; set; }
             public double CaloriesBurned { get; set; }

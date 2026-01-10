@@ -2,16 +2,19 @@ using Microsoft.EntityFrameworkCore;
 using server.DTO;
 using server.Models;
 using server.Services.Interfaces;
+using AutoMapper;
 
 namespace server.Services
 {
     public class RunService : IRunService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper _mapper;
 
-        public RunService(ApplicationDbContext context)
+        public RunService(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         // --- 1. LƯU BUỔI CHẠY ---
@@ -74,6 +77,7 @@ namespace server.Services
                 {
                     Id = r.Id,
                     StartTime = r.StartTime,
+                    EndTime = r.EndTime,
                     DistanceKm = r.DistanceKm,
                     DurationSeconds = r.DurationSeconds,
                     CaloriesBurned = r.CaloriesBurned
@@ -179,6 +183,58 @@ namespace server.Services
                 .ToListAsync();
 
             return result;
+        }
+
+        public async Task<List<RunSessionDto.RunHistoryItemDto>>
+    GetMonthlyRunSessionsAsync(string userId, int month, int year)
+        {
+            var result = await _context.RunSessions
+                .Where(r =>
+                    r.UserId == userId &&
+                    r.EndTime.Month == month &&
+                    r.EndTime.Year == year)
+                .GroupBy(r => r.EndTime.Date) // ✅ GROUP THEO NGÀY
+                .Select(g => new RunSessionDto.RunHistoryItemDto
+                {
+                    Id = g.First().Id,
+                    StartTime = g.Min(x => x.StartTime),
+                    EndTime = g.Max(x => x.EndTime),
+                    DistanceKm = g.Sum(x => x.DistanceKm),
+                    DurationSeconds = g.Sum(x => x.DurationSeconds),
+                    CaloriesBurned = g.Sum(x => x.CaloriesBurned)
+                })
+                .OrderBy(x => x.StartTime)
+                .ToListAsync();
+
+            return result;
+        }
+
+
+        public async Task<List<RunSessionDto.RunHistoryItemDto>> GetTop2RunSessionsAsync(string userId)
+        {
+            var top2Runs = await _context.RunSessions
+                .Where(r => r.UserId == userId)
+                .OrderByDescending(r => r.DistanceKm)
+                .Take(2)
+                .ToListAsync();
+
+            var top2RunDtos = _mapper.Map<List<RunSessionDto.RunHistoryItemDto>>(top2Runs);
+            return top2RunDtos;
+        }
+        public async Task<List<RunSessionDto.RunHistoryItemDto>> GetWeeklyRunSessionsAsync(string userId)
+        {
+            var today = DateTime.UtcNow.Date;
+
+            int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
+            var weekStart = today.AddDays(-diff);
+            var weekEnd = weekStart.AddDays(7).AddTicks(-1);
+
+            var weeklyRuns = await _context.RunSessions
+                .Where(r => r.UserId == userId && r.EndTime >= weekStart && r.EndTime <= weekEnd)
+                .ToListAsync();
+
+            var weeklyRunDtos = _mapper.Map<List<RunSessionDto.RunHistoryItemDto>>(weeklyRuns);
+            return weeklyRunDtos;
         }
     }
 }

@@ -12,6 +12,8 @@ namespace server.config
                 .ForMember(dest => dest.AvatarUrl, opt => opt.MapFrom(
                     src => src.AvatarUrl == null ? null : $"{src.AvatarUrl}"
                 ));
+
+            CreateMap<RunSession, RunSessionDto.RunHistoryItemDto>();
         }
     }
 }
