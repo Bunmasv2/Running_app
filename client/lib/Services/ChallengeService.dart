@@ -48,25 +48,27 @@ class ChallengeService {
         }
     }
 
-    Future<bool> joinChallenge(int challengeId) async {
-        try {
-            final headers = await _getHeaders();
+  Future<String?> joinChallenge(int challengeId) async {
+      try {
+        final headers = await _getHeaders();
 
-            final response = await http.post(
-                Uri.parse('$_baseUrl/$challengeId/join'),
-                headers: headers,
-            );
+        final response = await http.post(
+          Uri.parse('$_baseUrl/$challengeId/join'),
+          headers: headers,
+        );
 
-            if (response.statusCode == 200) {
-                print("Join challenge success: ${response.body}");
-                return true;
-            } else {
-                print("Join challenge failed: ${response.statusCode} - ${response.body}");
-                return false;
-            }
-        } catch (e) {
-            print("Join challenge error: $e");
-            return false;
+        final json = jsonDecode(response.body);
+
+        if (response.statusCode == 200) {
+          print("Join challenge success: ${response.body}");
+          return json["message"];
+        } else {
+          print("Join challenge failed: ${response.statusCode} - ${response.body}");
+          return json["message"] ?? "Join challenge failed";
         }
+      } catch (e) {
+        print("Join challenge error: $e");
+        return "System error, please try again";
+      }
     }
 }

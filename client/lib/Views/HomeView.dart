@@ -762,7 +762,7 @@ class _ChallengeCard extends StatelessWidget {
             ),
             ),
             const SizedBox(height: 10),
-            _buildJoinButton(),
+          _buildJoinButton(context),
         ],
         ),
     );
@@ -792,19 +792,12 @@ Widget _buildJoinButton(BuildContext context) {
         child: ElevatedButton(
             onPressed: () async {
                 final service = ChallengeService();
-                final success = await service.joinChallenge(challenge.id);
+                final message = await service.joinChallenge(challenge.id);
 
-                if (response.statusCode == 200) {
-                    final json = jsonDecode(response.body);
-                    final message = json["message"];
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(message)),
-                        );
-                } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text("Joined challenge falied")),
-                    );
+                if (message != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(message)),
+                  );
                 }
             },
             style: ElevatedButton.styleFrom(

@@ -1,5 +1,5 @@
 class Challenge {
-  final String id;
+  final int id;
   final String name;
   final String description;
   final double targetDistanceKm;
@@ -19,7 +19,7 @@ class Challenge {
 
   factory Challenge.fromJson(Map<String, dynamic> json) {
     return Challenge(
-      id: json['id'] ?? '',
+      id: json['id'] ?? 0,
       name: json['name'] ?? '',
       description: json['description'] ?? '',
       targetDistanceKm: (json['targetDistanceKm'] as num?)?.toDouble() ?? 0.0,
