@@ -36,7 +36,7 @@ public class ChallengeController : ControllerBase
     }
 
 
-    [HttpGet("")]
+    [HttpGet("suggests")]
     public async Task<ActionResult> GetChallenges()
     {
         var challenges = await _challengeService.GetChallenges();
@@ -49,60 +49,59 @@ public class ChallengeController : ControllerBase
         return Ok(new { data = challengesDTO });
     }
 
-    [HttpPost("{challengeId}/join")]
-    public async Task<ActionResult> JoinChallenge(int challengeId)
+    // [HttpPost("{challengeId}/join")]
+    // public async Task<ActionResult> JoinChallenge(int challengeId)
+    // {
+    //     // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    //     Challenge challenge = await _challengeService.FindChallengeById(challengeId)
+    //         ?? throw new ErrorException(404, "Challenge not found");
+
+    //     int result = await _challengeService.JoinChallenge(challengeId, "cc04e4e8-12bd-45e8-9ef5-808a2c16de5e");
+
+    //     if (result <= 0)
+    //         throw new ErrorException(400, "Joined challenge falied");
+
+    //     return Ok(new { message = "Joined challenge successfully" });
+    // }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
     {
-        // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        Challenge challenge = await _challengeService.FindChallengeById(challengeId)
-            ?? throw new ErrorException(404, "Challenge not found");
-
-        int result = await _challengeService.JoinChallenge(challengeId, "cc04e4e8-12bd-45e8-9ef5-808a2c16de5e");
-
-        if (result <= 0)
-            throw new ErrorException(400, "Joined challenge falied");
-
-        return Ok(new { message = "Joined challenge successfully" });
+        var result = await _challengeService.GetAllActiveChallenges();
+        return Ok(new { data = result });
     }
-    
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+
+    // GET: /Challenge/my-challenges
+    // Lấy danh sách của tôi (Tab "Của bạn")
+    [HttpGet("my-challenges")]
+    public async Task<IActionResult> GetMyChallenges()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null) return Unauthorized();
+
+        var result = await _challengeService.GetMyChallenges(userId);
+        return Ok(new { data = result });
+    }
+
+    // POST: /Challenge/join/5
+    // Tham gia thử thách
+    [HttpPost("join/{id}")]
+    public async Task<IActionResult> JoinChallenge(int id)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userId == null) return Unauthorized();
+
+        var success = await _challengeService.JoinChallenge(userId, id);
+
+        if (success)
         {
-            var result = await _challengeService.GetAllActiveChallenges();
-            return Ok(new { data = result });
+            return Ok(new { message = "Tham gia thử thách thành công!" });
         }
-
-        // GET: /Challenge/my-challenges
-        // Lấy danh sách của tôi (Tab "Của bạn")
-        [HttpGet("my-challenges")]
-        public async Task<IActionResult> GetMyChallenges()
+        else
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (userId == null) return Unauthorized();
-
-            var result = await _challengeService.GetMyChallenges(userId);
-            return Ok(new { data = result });
-        }
-
-        // POST: /Challenge/join/5
-        // Tham gia thử thách
-        [HttpPost("join/{id}")]
-        public async Task<IActionResult> JoinChallenge(int id)
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (userId == null) return Unauthorized();
-
-            var success = await _challengeService.JoinChallenge(userId, id);
-
-            if (success)
-            {
-                return Ok(new { message = "Tham gia thử thách thành công!" });
-            }
-            else
-            {
-                return BadRequest(new { message = "Không thể tham gia (Thử thách không tồn tại hoặc bạn đã tham gia rồi)." });
-            }
+            return BadRequest(new { message = "Không thể tham gia (Thử thách không tồn tại hoặc bạn đã tham gia rồi)." });
         }
     }
 }
