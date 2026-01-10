@@ -5,8 +5,8 @@ import 'package:latlong2/latlong.dart';
 
 class TrackingService {
 
-  static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run';
-  // static const String _baseUrl = 'http://10.0.2.2:5144/Run/history';
+  // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run';
+  static const String _baseUrl = 'http://10.0.2.2:5144/Run/history';
   Future<bool> saveRunSession({
     required double distanceKm,
     required double calories,
