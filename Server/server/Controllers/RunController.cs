@@ -19,23 +19,44 @@ namespace server.Controllers
             _runService = runService;
         }
 
-        private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
+        // RunController.cs
 
-        // POST: api/runs (Lưu bài chạy khi bấm Kết thúc)
+        // 1. Sửa hàm lấy ID để debug xem nó lấy ra cái gì
+        private string GetUserId()
+        {
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // [DEBUG QUAN TRỌNG] In ra màn hình đen (Console) của Server
+            Console.WriteLine($"---> DEBUG TOKEN: ID trích xuất từ Token là: '{id}'");
+
+            // Nếu ID null, thử tìm trong Claim khác xem sao
+            if (string.IsNullOrEmpty(id))
+            {
+                var altId = User.FindFirstValue("id"); // Thử tìm claim tên là "id" thường
+                Console.WriteLine($"---> DEBUG ALTERNATIVE: Thử tìm claim 'id' thường: '{altId}'");
+                return altId;
+            }
+            return id;
+        }
+
         [HttpPost]
         public async Task<IActionResult> SaveRun([FromBody] RunSessionDto.RunCreateDto dto)
         {
             try
             {
-                var result = await _runService.SaveRunSessionAsync(GetUserId(), dto);
+                var userId = GetUserId();
+                Console.WriteLine($"---> DEBUG SAVE RUN: Đang tìm User trong DB với ID = {userId}");
+
+                // Gọi Service
+                var result = await _runService.SaveRunSessionAsync(userId, dto);
                 return Ok(result);
             }
             catch (Exception ex)
             {
+                // In lỗi chi tiết ra console server
+                Console.WriteLine($"---> ERROR SERVER: {ex.Message}");
                 return BadRequest(new { error = ex.Message });
             }
         }
-
         // GET: api/runs/history?pageIndex=1&pageSize=10
         [HttpGet("history")]
         public async Task<IActionResult> GetHistory([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
