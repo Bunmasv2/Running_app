@@ -13,6 +13,8 @@ namespace server.config
                     src => src.AvatarUrl == null ? null : $"{src.AvatarUrl}"
                 ));
 
+            CreateMap<RunSession, RunSessionDto.RunHistoryItemDto>();
+
             CreateMap<Challenge, challengesDTO.Challenge>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Title))
                 .ForMember(dest => dest.TotalParticipants,

@@ -126,8 +126,6 @@ class _MainScreenState extends State<MainScreen> {
         subtitle: subtitle,
         userProfile: _userProfile,
         onAvatarTap: _handleAvatarTap,
-        onChatTap: _handleChatTap,
-        onSearchTap: _handleSearchTap,
         onNotificationTap: _handleNotiTap,
       ),
       body: currentContent,

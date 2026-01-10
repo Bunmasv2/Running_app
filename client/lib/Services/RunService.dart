@@ -6,7 +6,8 @@ import '../models/RunModels.dart';
 import '../models/UserRanking.dart';
 
 class RunService {
-  static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run';
+  // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run';
+   static const String _baseUrl = 'http://10.0.2.2:5144/Run';
   // static const String _baseUrl = 'http://192.168.173.173:5144/Run';
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -70,7 +71,6 @@ class RunService {
     }
   }
 
-  // 2. GET HISTORY
   Future<List<RunHistoryDto>> getRunHistory({int pageIndex = 1}) async {
     try {
       final headers = await _getHeaders();
@@ -87,12 +87,11 @@ class RunService {
       }
       return [];
     } catch (e) {
-      print("Lỗi Get History: $e"); // Log lỗi để debug
+      print("Lỗi Get History: $e");
       return [];
     }
   }
 
-  // 3. GET DETAIL
   Future<RunDetailDto?> getRunDetail(int id) async {
     try {
       final headers = await _getHeaders();
@@ -130,6 +129,78 @@ class RunService {
       }
     } catch (e) {
       print('Get ranking error: $e');
+      return [];
+    }
+  }
+
+  Future<List<RunHistoryDto>> getMonthlyRunSessions(int month, int year) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$_baseUrl/monthly-sessions/$month/$year'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        print("Dữ liệu Monthly Sessions: ${response.body}");
+        final decoded = jsonDecode(response.body);
+
+        final List listData = decoded['data'] ?? [];
+        return listData.map((e) => RunHistoryDto.fromJson(e)).toList();
+      } else {
+        print('Get Monthly Sessions failed: ${response.statusCode} - ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      print('Get Monthly Sessions error: $e');
+      return [];
+    }
+  }
+
+  Future<List<RunHistoryDto>> getTop2RunSessions() async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$_baseUrl/top2-sessions'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        print("Dữ liệu Top 2 Sessions: ${response.body}");
+        final decoded = jsonDecode(response.body);
+
+        final List listData = decoded['data'] ?? [];
+        return listData.map((e) => RunHistoryDto.fromJson(e)).toList();
+      } else {
+        print('Get Top 2 Sessions failed: ${response.statusCode} - ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      print('Get Top 2 Sessions error: $e');
+      return [];
+    }
+  }
+
+  Future<List<RunHistoryDto>> getWeeklyRunSessions(int month, int year) async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$_baseUrl/weekly-sessions/$month/$year'),
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        print("Dữ liệu Weekly Sessions: ${response.body}");
+        final decoded = jsonDecode(response.body);
+
+        final List listData = decoded['data'] ?? [];
+        return listData.map((e) => RunHistoryDto.fromJson(e)).toList();
+      } else {
+        print('Get Weekly Sessions failed: ${response.statusCode} - ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      print('Get Weekly Sessions error: $e');
       return [];
     }
   }

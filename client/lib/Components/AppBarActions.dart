@@ -4,8 +4,6 @@ import '../Models/UserProfile.dart';
 List<Widget> buildAppBarActions({
   required UserProfile? userProfile,
   VoidCallback? onAvatarTap,
-  VoidCallback? onChatTap,
-  VoidCallback? onSearchTap,
   VoidCallback? onNotificationTap,
 }) {
   return [
@@ -27,14 +25,6 @@ List<Widget> buildAppBarActions({
       ),
     ),
     // Icons
-    IconButton(
-      icon: const Icon(Icons.chat_bubble_outline, color: Colors.white),
-      onPressed: onChatTap,
-    ),
-    IconButton(
-      icon: const Icon(Icons.search, color: Colors.white),
-      onPressed: onSearchTap,
-    ),
     IconButton(
       icon: const Icon(Icons.notifications_none, color: Colors.white),
       onPressed: onNotificationTap,

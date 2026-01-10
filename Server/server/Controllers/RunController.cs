@@ -99,5 +99,25 @@ namespace server.Controllers
                 data = result
             });
         }
+
+        [HttpGet("monthly-sessions/{month}/{year}")]
+        public async Task<IActionResult> GetMonthlyRunSessions(int month, int year)
+        {
+            var result = await _runService.GetMonthlyRunSessionsAsync(GetUserId(), month, year);
+            return Ok(new { data = result });
+        }
+
+        [HttpGet("top2-sessions")]
+        public async Task<IActionResult> GetTop2RunSessions()
+        {
+            var result = await _runService.GetTop2RunSessionsAsync(GetUserId());
+            return Ok(new { data = result });
+        }
+        [HttpGet("weekly-sessions/{month}/{year}")]
+        public async Task<IActionResult> GetWeeklyRunSessions(int month, int year)
+        {
+            var result = await _runService.GetWeeklyRunSessionsAsync(GetUserId(), month, year);
+            return Ok(new { data = result });
+        }
     }
 }

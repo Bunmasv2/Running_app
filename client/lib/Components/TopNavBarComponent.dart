@@ -7,8 +7,6 @@ class TopNavBarComponent extends StatelessWidget implements PreferredSizeWidget 
   final String? subtitle; // Tab label khi header thu gọn
   final UserProfile? userProfile;
   final VoidCallback? onAvatarTap;
-  final VoidCallback? onChatTap;
-  final VoidCallback? onSearchTap;
   final VoidCallback? onNotificationTap;
 
   const TopNavBarComponent({
@@ -17,8 +15,6 @@ class TopNavBarComponent extends StatelessWidget implements PreferredSizeWidget 
     this.subtitle,
     this.userProfile,
     this.onAvatarTap,
-    this.onChatTap,
-    this.onSearchTap,
     this.onNotificationTap,
   });
 
@@ -68,8 +64,6 @@ class TopNavBarComponent extends StatelessWidget implements PreferredSizeWidget 
         actions: buildAppBarActions(
           userProfile: userProfile,
           onAvatarTap: onAvatarTap,
-          onChatTap: onChatTap,
-          onSearchTap: onSearchTap,
           onNotificationTap: onNotificationTap,
         ),
     );

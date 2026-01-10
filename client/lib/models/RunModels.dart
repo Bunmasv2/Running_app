@@ -34,6 +34,7 @@ class RunHistoryDto {
   final int durationSeconds;
   final double calories;
   final DateTime createdAt;
+  final DateTime endTime;
   final String? previewMapUrl;
 
   RunHistoryDto({
@@ -42,6 +43,7 @@ class RunHistoryDto {
     required this.durationSeconds,
     required this.calories,
     required this.createdAt,
+    required this.endTime,
     this.previewMapUrl,
   });
 
@@ -52,6 +54,7 @@ class RunHistoryDto {
       durationSeconds: json['durationSeconds'] ?? 0,
       calories: (json['calories'] as num?)?.toDouble() ?? 0.0,
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      endTime: DateTime.tryParse(json['endTime'] ?? '') ?? DateTime.now(),
       previewMapUrl: json['previewMapUrl'],
     );
   }
