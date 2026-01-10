@@ -4,11 +4,13 @@ import '../Components/BottomNavBarComponent.dart';
 import '../Components/TopNavBarComponent.dart';
 import '../Models/UserProfile.dart';
 import '../Services/UserService.dart';
-import 'GoogleWebView.dart';
 import 'GroupView.dart';
 import 'HomeView.dart';
 import 'ProfileView.dart';
 import 'RecordView.dart';
+import 'TrackingView.dart';
+import 'ChallengeView.dart';
+
 
 // Widget Placeholder tạm thời cho History và Profile nếu bạn chưa tạo file
 class PlaceholderView extends StatelessWidget {
@@ -99,10 +101,10 @@ class _MainScreenState extends State<MainScreen> {
         currentContent = const HomeView();
         break;
       case 1:
-        currentContent = const GoogleWebView();
+        currentContent = const ChallengeView();
         break;
       case 2:
-        currentContent = RecordView();
+        currentContent = TrackingView();
         break;
       case 3:
         currentContent = Groupview(onSubtitleChanged: _onSubtitleChanged);

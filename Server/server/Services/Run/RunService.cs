@@ -18,18 +18,17 @@ namespace server.Services
         }
 
         // --- 1. LƯU BUỔI CHẠY ---
+        // Trong RunService.cs (Server)
+
         public async Task<RunSessionDto.RunResponseDto> SaveRunSessionAsync(string userId, RunSessionDto.RunCreateDto dto)
         {
-            // B1: Lấy thông tin User để lấy Cân nặng (WeightKg)
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+
             if (user == null) throw new Exception("User not found");
 
-            // B2: Tính Calo = Cân nặng * Km * 1.036
-            // Nếu user chưa nhập cân nặng, lấy mặc định 65kg
             double weight = user.WeightKg > 0 ? user.WeightKg : 65.0;
             double calories = weight * dto.DistanceKm * 1.036;
 
-            // B3: Tạo Entity RunSession
             var runSession = new RunSession
             {
                 UserId = userId,
@@ -41,17 +40,17 @@ namespace server.Services
                 CaloriesBurned = calories
             };
 
-            // B4: Cập nhật chỉ số tổng (Lifetime Stats) cho User
-            // user.TotalDistanceKm += dto.DistanceKm;
-            user.TotalDistanceKm += 10;
+            // --- [SỬA LỖI TẠI ĐÂY] ---
+            // Cũ: user.TotalDistanceKm += 10;  <-- SAI (Hardcode)
+            // Mới:
+            user.TotalDistanceKm += dto.DistanceKm;
+
             user.TotalTimeSeconds += dto.DurationSeconds;
 
-            // B5: Lưu vào DB (Transaction: Cả 2 bảng cùng lưu hoặc cùng fail)
             _context.RunSessions.Add(runSession);
-            _context.Users.Update(user); // Đánh dấu user đã thay đổi
+            _context.Users.Update(user);
             await _context.SaveChangesAsync();
 
-            // B6: Trả về kết quả
             return new RunSessionDto.RunResponseDto
             {
                 Id = runSession.Id,
@@ -129,6 +128,7 @@ namespace server.Services
 
             // 3. Tính % hoàn thành
             double progress = 0;
+
             if (target > 0)
             {
                 progress = (totalDist / target) * 100;

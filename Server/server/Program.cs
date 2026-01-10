@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using server.config;
+using server.Services;
+using server.Services.Interfaces;
 using server.Configs;
 using server.Models;
-using server.Services;
 using server.Services.Implements;
-using server.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,9 +29,10 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRunService, RunService>();
-// builder.Services.AddScoped<IRun, RunService>();
+builder.Services.AddScoped<IChallengeService, ChallengeService>();
 builder.Services.AddScoped<IDailyGoalService, DailyGoalService>();
 builder.Services.AddScoped<IGoalService, GoalService>();
+builder.Services.AddScoped<IChallengeService, ChallengeService>();
 // Add services to the container.
 builder.Services.AddAutoMapper(typeof(AutoMapperConfig).Assembly);
 builder.Services.AddControllers();

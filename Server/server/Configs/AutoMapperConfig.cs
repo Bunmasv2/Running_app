@@ -14,6 +14,11 @@ namespace server.config
                 ));
 
             CreateMap<RunSession, RunSessionDto.RunHistoryItemDto>();
+
+            CreateMap<Challenge, challengesDTO.Challenge>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Title))
+                .ForMember(dest => dest.TotalParticipants,
+                    opt => opt.MapFrom(src => src.Participants.Count));
         }
     }
 }
