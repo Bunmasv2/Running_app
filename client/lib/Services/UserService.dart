@@ -48,7 +48,7 @@ class UserService {
           String token = userData['token'];
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('accessToken', token);
-          return true;
+          print("Đăng nhập thành công, đã lưu Token! $token");          return true;
         }
       }
       return false;

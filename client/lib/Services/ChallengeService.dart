@@ -5,7 +5,9 @@ import '../Models/ChallengeModels.dart';
 
 class ChallengeService {
   // Ưu tiên baseUrl của UIA_FE
-  static const String _baseUrl = 'http://192.168.173.173:5144/Challenge';
+  static const String _baseUrl = 'https://running-app-ywpg.onrender.com/Challenge';
+
+  // static const String _baseUrl = 'http://192.168.173.173:5144/Challenge';
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
