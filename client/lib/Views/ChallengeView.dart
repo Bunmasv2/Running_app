@@ -43,17 +43,26 @@ class _ChallengeViewState extends State<ChallengeView> with SingleTickerProvider
   }
 
   Future<void> _handleJoin(int challengeId) async {
-    bool success = await _challengeService.joinChallenge(challengeId);
+    // 1. Gọi API và nhận về kết quả (Map)
+    final result = await _challengeService.joinChallenge(challengeId);
+
+    // 2. Tách dữ liệu ra
+    bool isSuccess = result['success'];
+    String message = result['message'];
+
     if (mounted) {
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Đã tham gia thành công!"), backgroundColor: Colors.green),
-        );
-        _loadData(); // Reload lại để cập nhật list my challenges
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Lỗi khi tham gia"), backgroundColor: Colors.red),
-        );
+      // 3. Hiển thị SnackBar với nội dung từ Server
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message), // Hiển thị message server trả về
+          backgroundColor: isSuccess ? Colors.green : Colors.red, // Xanh nếu OK, Đỏ nếu lỗi
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      // 4. Nếu thành công thì reload lại danh sách
+      if (isSuccess) {
+        _loadData();
       }
     }
   }

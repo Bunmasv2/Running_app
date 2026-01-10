@@ -65,7 +65,7 @@ class _HomeViewState extends State<HomeView> {
         _userService.getUserProfile(),
         _goalService.getTodayGoal(),
         _userService.getSuggestedUser(),
-        _challengeService.getChallenges()
+        _challengeService.getAllChallenges()
       ]);
       if (mounted) {
         setState(() {
@@ -792,11 +792,11 @@ Widget _buildJoinButton(BuildContext context) {
         child: ElevatedButton(
             onPressed: () async {
                 final service = ChallengeService();
-                final message = await service.joinChallenge(challenge.id);
+                final result = await service.joinChallenge(challenge.id);
 
-                if (message != null) {
+                if (result['message'] != null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(message)),
+                    SnackBar(content: Text(result['message'])),
                   );
                 }
             },

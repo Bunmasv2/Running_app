@@ -58,7 +58,7 @@ class ChallengeService {
   }
 
   // 3. Tham gia thử thách (bắt message từ backend)
-  Future<String?> joinChallenge(int challengeId) async {
+  Future<Map<String, dynamic>> joinChallenge(int challengeId) async {
     try {
       final headers = await _getHeaders();
 
@@ -68,15 +68,27 @@ class ChallengeService {
       );
 
       final json = jsonDecode(response.body);
+      String serverMessage = json["message"] ?? "Có lỗi xảy ra";
 
-      if (response.statusCode == 200) {
-        return json["message"];
+      // Nếu code là 200/201 -> Thành công (True) + Message
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {
+          "success": true,
+          "message": serverMessage
+        };
       } else {
-        return json["message"] ?? "Join challenge failed";
+        // Nếu code lỗi -> Thất bại (False) + Message lỗi từ server
+        return {
+          "success": false,
+          "message": serverMessage
+        };
       }
     } catch (e) {
       print("Join challenge error: $e");
-      return "System error, please try again";
+      return {
+        "success": false,
+        "message": "Lỗi kết nối server"
+      };
     }
   }
 }

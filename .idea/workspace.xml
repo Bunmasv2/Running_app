@@ -6,12 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="bc54e4c9-b60e-460d-87f5-6a9c68e4bc80" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/server/Controllers/RunController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Controllers/RunController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/server/Services/Run/RunService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Services/Run/RunService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Services/RunService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/RunService.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Services/UserService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/UserService.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/SplashView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/SplashView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/TrackingView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/TrackingView.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Services/ChallengeService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/ChallengeService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Views/ChallengeView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/ChallengeView.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Views/HomeView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/HomeView.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
