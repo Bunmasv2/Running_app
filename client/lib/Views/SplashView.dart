@@ -19,6 +19,8 @@ class _SplashViewState extends State<SplashView> {
     final userService = UserService();
     bool loggedIn = await userService.isLoggedIn();
 
+    print("DEBUG: isLoggedIn trả về giá trị: $loggedIn");
+
     if (!mounted) return;
 
     if (loggedIn) {

@@ -7,7 +7,7 @@ import '../models/UserRanking.dart';
 
 class RunService {
   static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run';
-  // static const String _baseUrl = 'http://10.0.2.2:5144/Run';
+  // static const String _baseUrl = 'http://192.168.173.173:5144/Run';
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('accessToken');
@@ -38,12 +38,16 @@ class RunService {
         "startTime": startTime.toIso8601String(),
         "endTime": endTime.toIso8601String(),
         "routeJson": jsonEncode(
-          routePoints.map((p) => {
-            "latitude": p.latitude,
-            "longitude": p.longitude,
-          }).toList(),
+          routePoints
+              .map((p) => {
+                    "latitude": p.latitude,
+                    "longitude": p.longitude,
+                  })
+              .toList(),
         )
       };
+
+      print("Sending Body: ${jsonEncode(dto)}"); // [DEBUG] In ra xem gửi gì đi
 
       final response = await http.post(
         Uri.parse(_baseUrl),
@@ -51,12 +55,20 @@ class RunService {
         body: jsonEncode(dto),
       );
 
-      return response.statusCode == 200 || response.statusCode == 201;
+      // [QUAN TRỌNG] Kiểm tra và in lỗi từ server nếu có
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        print("SAVE FAILED! Status: ${response.statusCode}");
+        print(
+            "Server Response: ${response.body}"); // [DEBUG] Đọc lỗi server trả về ở đây
+        return false;
+      }
     } catch (e) {
+      print("Connection Error: $e");
       return false;
     }
   }
-
 
   // 2. GET HISTORY
   Future<List<RunHistoryDto>> getRunHistory({int pageIndex = 1}) async {
@@ -84,7 +96,8 @@ class RunService {
   Future<RunDetailDto?> getRunDetail(int id) async {
     try {
       final headers = await _getHeaders();
-      final response = await http.get(Uri.parse('$_baseUrl/$id'), headers: headers);
+      final response =
+          await http.get(Uri.parse('$_baseUrl/$id'), headers: headers);
 
       if (response.statusCode == 200) {
         return RunDetailDto.fromJson(jsonDecode(response.body));
@@ -110,9 +123,7 @@ class RunService {
 
         final List listData = decoded['data'];
 
-        return listData
-            .map((e) => UserRanking.fromJson(e))
-            .toList();
+        return listData.map((e) => UserRanking.fromJson(e)).toList();
       } else {
         print('Get ranking failed: ${response.body}');
         return [];
