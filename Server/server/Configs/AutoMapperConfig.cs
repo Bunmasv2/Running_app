@@ -12,6 +12,11 @@ namespace server.config
                 .ForMember(dest => dest.AvatarUrl, opt => opt.MapFrom(
                     src => src.AvatarUrl == null ? null : $"{src.AvatarUrl}"
                 ));
+
+            CreateMap<Challenge, challengesDTO.Challenge>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Title))
+                .ForMember(dest => dest.TotalParticipants,
+                    opt => opt.MapFrom(src => src.Participants.Count));
         }
     }
 }

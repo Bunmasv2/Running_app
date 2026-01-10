@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Models/ChallengeModels.dart';
 
 class ChallengeService {
+  // Ưu tiên baseUrl của UIA_FE
   static const String _baseUrl = 'http://192.168.173.173:5144/Challenge';
 
   Future<String?> _getToken() async {
@@ -23,12 +24,10 @@ class ChallengeService {
   Future<List<Challenge>> getAllChallenges() async {
     try {
       final headers = await _getHeaders();
-      // Giả sử API là GET /Challenge
       final response = await http.get(Uri.parse(_baseUrl), headers: headers);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> body = jsonDecode(response.body);
-        // Tùy cấu trúc API trả về, nếu data nằm trong 'data':
         final List<dynamic> data = body['data'] ?? [];
         return data.map((e) => Challenge.fromJson(e)).toList();
       }
@@ -39,12 +38,12 @@ class ChallengeService {
     }
   }
 
-  // 2. Lấy danh sách thử thách CỦA TÔI (Tab Thử thách của bạn)
+  // 2. Lấy danh sách thử thách CỦA TÔI
   Future<List<UserChallengeProgress>> getMyChallenges() async {
     try {
       final headers = await _getHeaders();
-      // Giả sử API là GET /Challenge/my-challenges
-      final response = await http.get(Uri.parse('$_baseUrl/my-challenges'), headers: headers);
+      final response =
+          await http.get(Uri.parse('$_baseUrl/my-challenges'), headers: headers);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> body = jsonDecode(response.body);
@@ -58,17 +57,26 @@ class ChallengeService {
     }
   }
 
-  // 3. Tham gia thử thách
-  Future<bool> joinChallenge(int challengeId) async {
+  // 3. Tham gia thử thách (bắt message từ backend)
+  Future<String?> joinChallenge(int challengeId) async {
     try {
       final headers = await _getHeaders();
+
       final response = await http.post(
-        Uri.parse('$_baseUrl/join/$challengeId'), // Endpoint giả định
+        Uri.parse('$_baseUrl/$challengeId/join'),
         headers: headers,
       );
-      return response.statusCode == 200 || response.statusCode == 201;
+
+      final json = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return json["message"];
+      } else {
+        return json["message"] ?? "Join challenge failed";
+      }
     } catch (e) {
-      return false;
+      print("Join challenge error: $e");
+      return "System error, please try again";
     }
   }
 }

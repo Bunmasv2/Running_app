@@ -1,15 +1,15 @@
+using Microsoft.AspNetCore.Identity;
 using server.DTO;
+using server.Models;
 
 namespace server.Services.Interfaces;
 
 public interface IChallengeService
 {
-    // Lấy danh sách tất cả thử thách đang mở
+    Task<List<Challenge>> GetChallenges();
+    Task<Challenge> FindChallengeById(int challengeId);
+    Task<int> JoinChallenge(int challengeId, string userId);
     Task<List<ChallengeDto>> GetAllActiveChallenges();
-
-    // Lấy danh sách thử thách CỦA TÔI
     Task<List<UserChallengeProgressDto>> GetMyChallenges(string userId);
-
-    // Tham gia thử thách
     Task<bool> JoinChallenge(string userId, int challengeId);
 }

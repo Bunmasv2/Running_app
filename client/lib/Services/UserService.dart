@@ -209,4 +209,27 @@ class UserService {
       return "Không thể kết nối đến server";
     }
   }
+
+    Future<List<UserProfile>> getSuggestedUser() async {
+        try {
+            final headers = await _getHeaders();
+            final response = await http.get(
+            Uri.parse('$_baseUrl/suggests'),
+                headers: headers,
+            );
+
+            if (response.statusCode == 200) {
+                final jsonData = jsonDecode(response.body);
+
+                final List list = jsonData['data'];
+
+                return list.map((e) => UserProfile.fromJson(e)).toList();
+            }
+
+            return [];
+        } catch (e) {
+            print("Get all users error: $e");
+            return [];
+        }
+    }
 }
