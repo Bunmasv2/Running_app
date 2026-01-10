@@ -57,8 +57,6 @@ class RunService {
     }
   }
 
-
-  // 2. GET HISTORY
   Future<List<RunHistoryDto>> getRunHistory({int pageIndex = 1}) async {
     try {
       final headers = await _getHeaders();
@@ -75,12 +73,11 @@ class RunService {
       }
       return [];
     } catch (e) {
-      print("Lỗi Get History: $e"); // Log lỗi để debug
+      print("Lỗi Get History: $e");
       return [];
     }
   }
 
-  // 3. GET DETAIL
   Future<RunDetailDto?> getRunDetail(int id) async {
     try {
       final headers = await _getHeaders();
@@ -123,7 +120,6 @@ class RunService {
     }
   }
 
-  // 1. Lấy danh sách chạy theo tháng
   Future<List<RunHistoryDto>> getMonthlyRunSessions(int month, int year) async {
     try {
       final headers = await _getHeaders();
@@ -136,7 +132,6 @@ class RunService {
         print("Dữ liệu Monthly Sessions: ${response.body}");
         final decoded = jsonDecode(response.body);
 
-        // Kiểm tra nếu 'data' null thì trả về list rỗng
         final List listData = decoded['data'] ?? [];
         return listData.map((e) => RunHistoryDto.fromJson(e)).toList();
       } else {
@@ -149,7 +144,6 @@ class RunService {
     }
   }
 
-// 2. Lấy 2 buổi chạy gần nhất/tốt nhất
   Future<List<RunHistoryDto>> getTop2RunSessions() async {
     try {
       final headers = await _getHeaders();
@@ -174,12 +168,11 @@ class RunService {
     }
   }
 
-// 3. Lấy danh sách chạy trong tuần
-  Future<List<RunHistoryDto>> getWeeklyRunSessions() async {
+  Future<List<RunHistoryDto>> getWeeklyRunSessions(int month, int year) async {
     try {
       final headers = await _getHeaders();
       final response = await http.get(
-        Uri.parse('$_baseUrl/weekly-sessions'),
+        Uri.parse('$_baseUrl/weekly-sessions/$month/$year'),
         headers: headers,
       );
 

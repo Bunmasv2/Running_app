@@ -83,10 +83,6 @@ namespace server.Controllers
         public async Task<IActionResult> GetMonthlyRunSessions(int month, int year)
         {
             var result = await _runService.GetMonthlyRunSessionsAsync(GetUserId(), month, year);
-            foreach (var session in result)
-            {
-                Console.WriteLine($"Session ID: {session.Id}, EndTime: {session.DistanceKm}");
-            }
             return Ok(new { data = result });
         }
 
@@ -94,20 +90,12 @@ namespace server.Controllers
         public async Task<IActionResult> GetTop2RunSessions()
         {
             var result = await _runService.GetTop2RunSessionsAsync(GetUserId());
-            foreach (var session in result)
-            {
-                Console.WriteLine($"Session ID11111: {session.Id}, EndTime: {session.DistanceKm}");
-            }
             return Ok(new { data = result });
         }
-        [HttpGet("weekly-sessions")]
-        public async Task<IActionResult> GetWeeklyRunSessions()
+        [HttpGet("weekly-sessions/{month}/{year}")]
+        public async Task<IActionResult> GetWeeklyRunSessions(int month, int year)
         {
-            var result = await _runService.GetWeeklyRunSessionsAsync(GetUserId());
-            foreach (var session in result)
-            {
-                Console.WriteLine($"Session ID2222: {session.Id}, EndTime: {session.DistanceKm}");
-            }
+            var result = await _runService.GetWeeklyRunSessionsAsync(GetUserId(), month, year);
             return Ok(new { data = result });
         }
     }

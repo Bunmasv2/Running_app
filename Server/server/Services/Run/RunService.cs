@@ -148,7 +148,6 @@ namespace server.Services
         {
             var today = DateTime.UtcNow.Date;
 
-            // Tính Thứ 2 -> Chủ nhật
             int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
             var weekStart = today.AddDays(-diff);
             var weekEnd = weekStart.AddDays(7).AddTicks(-1);
@@ -193,7 +192,7 @@ namespace server.Services
                     r.UserId == userId &&
                     r.EndTime.Month == month &&
                     r.EndTime.Year == year)
-                .GroupBy(r => r.EndTime.Date) // ✅ GROUP THEO NGÀY
+                .GroupBy(r => r.EndTime.Date)
                 .Select(g => new RunSessionDto.RunHistoryItemDto
                 {
                     Id = g.First().Id,
@@ -209,7 +208,6 @@ namespace server.Services
             return result;
         }
 
-
         public async Task<List<RunSessionDto.RunHistoryItemDto>> GetTop2RunSessionsAsync(string userId)
         {
             var top2Runs = await _context.RunSessions
@@ -221,20 +219,26 @@ namespace server.Services
             var top2RunDtos = _mapper.Map<List<RunSessionDto.RunHistoryItemDto>>(top2Runs);
             return top2RunDtos;
         }
-        public async Task<List<RunSessionDto.RunHistoryItemDto>> GetWeeklyRunSessionsAsync(string userId)
+        public async Task<List<RunSessionDto.RunHistoryItemDto>>
+    GetWeeklyRunSessionsAsync(string userId, int month, int year)
         {
-            var today = DateTime.UtcNow.Date;
-
-            int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
-            var weekStart = today.AddDays(-diff);
-            var weekEnd = weekStart.AddDays(7).AddTicks(-1);
-
-            var weeklyRuns = await _context.RunSessions
-                .Where(r => r.UserId == userId && r.EndTime >= weekStart && r.EndTime <= weekEnd)
+            return await _context.RunSessions
+                .Where(r =>
+                    r.UserId == userId &&
+                    r.EndTime.Month == month &&
+                    r.EndTime.Year == year)
+                .OrderBy(r => r.EndTime)
+                .Select(r => new RunSessionDto.RunHistoryItemDto
+                {
+                    Id = r.Id,
+                    StartTime = r.StartTime,
+                    EndTime = r.EndTime,
+                    DistanceKm = r.DistanceKm,
+                    DurationSeconds = r.DurationSeconds,
+                    CaloriesBurned = r.CaloriesBurned
+                })
                 .ToListAsync();
-
-            var weeklyRunDtos = _mapper.Map<List<RunSessionDto.RunHistoryItemDto>>(weeklyRuns);
-            return weeklyRunDtos;
         }
+
     }
 }

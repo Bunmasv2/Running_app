@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:intl/intl.dart';
 import '../Components/HeaderComponent.dart';
-import '../models/BestEffort.dart';
 import '../models/RunModels.dart';
 import '../Services/RunService.dart';
 import '../Components/BestEffortsCard.dart';
 import "../Components/MonthlyChartCard.dart";
 import "../Components/TrainingLogCard.dart";
+import '../Components/WeeklyGoalsCard.dart';
+import 'HistoryView.dart';
 
 class Personalview extends StatefulWidget {
   final ValueChanged<String?>? onSubtitleChanged;
@@ -22,14 +21,11 @@ class _PersonalviewState extends State<Personalview> {
   final RunService _runService = RunService();
   bool _isLoading = false;
 
-  // State cho Biểu đồ tháng
   DateTime _currentMonthView = DateTime.now();
   List<RunHistoryDto> _monthlySessions = [];
 
-  // State cho Best Efforts (Top 2)
   List<RunHistoryDto> _top2Sessions = [];
 
-  // State cho Training Log (Tuần)
   DateTime _currentWeekStart = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1));
   List<RunHistoryDto> _weeklySessions = [];
 
@@ -61,11 +57,10 @@ class _PersonalviewState extends State<Personalview> {
   }
 
   Future<void> _loadWeeklyData() async {
-    final data = await _runService.getWeeklyRunSessions();
+    final data = await _runService.getWeeklyRunSessions(_currentMonthView.month, _currentMonthView.year);
     setState(() => _weeklySessions = data);
   }
 
-  // --- Điều hướng thời gian ---
   void _changeMonth(int offset) {
     setState(() {
       _currentMonthView = DateTime(_currentMonthView.year, _currentMonthView.month + offset);
@@ -120,7 +115,6 @@ class _PersonalviewState extends State<Personalview> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // 1. Biểu đồ tháng (Đã tách)
           MonthlyChartCard(
             currentMonth: _currentMonthView,
             sessions: _monthlySessions,
@@ -130,24 +124,24 @@ class _PersonalviewState extends State<Personalview> {
 
           const SizedBox(height: 20),
 
-          // 2. Best Efforts Top 2 (Đã tách)
           BestEffortsCard(topSessions: _top2Sessions),
 
           const SizedBox(height: 16),
 
-          // 3. Goals & Relative Effort (Hàng ngang - Đã tách)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Expanded(child: _buildGoalsCard()),
+                Expanded(child:WeeklyGoalsCard(
+                  weeklySessions: _weeklySessions,
+                  weekStart: _currentWeekStart,
+                ),),
                 const SizedBox(width: 12),
                 Expanded(child: _buildRelativeEffortCard()),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          // 4. Training Log (Đã tách)
           TrainingLogCard(
             weekStart: _currentWeekStart,
             weeklySessions: _weeklySessions,
@@ -157,7 +151,6 @@ class _PersonalviewState extends State<Personalview> {
 
           const SizedBox(height: 30),
 
-          // Nút Đăng xuất
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SizedBox(
@@ -182,25 +175,6 @@ class _PersonalviewState extends State<Personalview> {
   }
 
 
-  Widget _buildGoalsCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: const Color(0xFF2D2D2D), borderRadius: BorderRadius.circular(12)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          const Text('Goals', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-          Icon(Icons.chevron_right, color: Colors.grey[600], size: 20),
-        ]),
-        const SizedBox(height: 12),
-        Container(width: 50, height: 50, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.grey[700]!, width: 3)), child: Center(child: Icon(Icons.directions_run, color: Colors.grey[500], size: 24))),
-        const SizedBox(height: 12),
-        const Text('Weekly Run Goal', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
-        const SizedBox(height: 4),
-        Text('1/4 runs', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
-      ]),
-    );
-  }
-
   Widget _buildRelativeEffortCard() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -218,5 +192,7 @@ class _PersonalviewState extends State<Personalview> {
     );
   }
 
-  Widget _buildActivitiesContent() => const Center(child: Text('Chưa có hoạt động nào', style: TextStyle(color: Colors.grey)));
+  Widget _buildActivitiesContent() {
+    return const HistoryView();
+  }
 }
