@@ -47,4 +47,26 @@ class ChallengeService {
             return [];
         }
     }
+
+    Future<bool> joinChallenge(int challengeId) async {
+        try {
+            final headers = await _getHeaders();
+
+            final response = await http.post(
+                Uri.parse('$_baseUrl/$challengeId/join'),
+                headers: headers,
+            );
+
+            if (response.statusCode == 200) {
+                print("Join challenge success: ${response.body}");
+                return true;
+            } else {
+                print("Join challenge failed: ${response.statusCode} - ${response.body}");
+                return false;
+            }
+        } catch (e) {
+            print("Join challenge error: $e");
+            return false;
+        }
+    }
 }

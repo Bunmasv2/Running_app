@@ -712,47 +712,59 @@ class _ChallengeCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         border: isFocused ? Border.all(color: Colors.orange.withOpacity(0.3), width: 1) : null,
       ),
-      child: Column(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '${formatNumber(challenge.totalParticipants)} athletes joined',
-            style: TextStyle(color: Colors.grey[400], fontSize: 12),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
+            Expanded(
             child: Row(
-              children: [
+                children: [
                 // Badge hiển thị khoảng cách mục tiêu (VD: 5K, 10K)
                 _buildBadge(challenge.targetDistanceKm.toInt().toString()),
                 const SizedBox(width: 14),
                 Expanded(
-                  child: Column(
+                    child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                        Text(
                         challenge.name,
-                        style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
                         challenge.description,
                         style: TextStyle(color: Colors.grey[400], fontSize: 11),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                      ),
+                        ),
+                        const SizedBox(height: 6),
+
+                        // 👉 totalParticipants bên dưới description
+                        Row(
+                        children: [
+                            const Icon(Icons.people, size: 14, color: Colors.grey),
+                            const SizedBox(width: 6),
+                            Text(
+                            '${formatNumber(challenge.totalParticipants)} athletes joined',
+                            style: TextStyle(color: Colors.grey[400], fontSize: 11),
+                            ),
+                        ],
+                        ),
                     ],
-                  ),
+                    ),
                 ),
-              ],
+                ],
             ),
-          ),
-          const SizedBox(height: 10),
-          _buildJoinButton(),
+            ),
+            const SizedBox(height: 10),
+            _buildJoinButton(),
         ],
-      ),
+        ),
     );
   }
 
@@ -773,17 +785,39 @@ class _ChallengeCard extends StatelessWidget {
     );
   }
 
-  Widget _buildJoinButton() {
+Widget _buildJoinButton(BuildContext context) {
     return SizedBox(
-      width: double.infinity,
-      height: 40,
-      child: ElevatedButton(
-        onPressed: () => print("Joining ${challenge.id}"),
-        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, foregroundColor: Colors.black),
-        child: const Text('Join Challenge', style: TextStyle(fontWeight: FontWeight.bold)),
-      ),
+        width: double.infinity,
+        height: 40,
+        child: ElevatedButton(
+            onPressed: () async {
+                final service = ChallengeService();
+                final success = await service.joinChallenge(challenge.id);
+
+                if (response.statusCode == 200) {
+                    final json = jsonDecode(response.body);
+                    final message = json["message"];
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(message)),
+                        );
+                } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Joined challenge falied")),
+                    );
+                }
+            },
+            style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.black,
+            ),
+            child: const Text(
+                'Join Challenge',
+                style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+        ),
     );
-  }
+    }
 }
 
 // Custom painter cho badge pattern

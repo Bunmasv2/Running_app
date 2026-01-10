@@ -48,4 +48,19 @@ public class ChallengeController : ControllerBase
 
         return Ok(new { data = challengesDTO });
     }
+
+    [HttpPost("{challengeId}/join")]
+    public async Task<ActionResult> JoinChallenge(int challengeId)
+    {
+        // var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        Challenge challenge = await _challengeService.FindChallengeById(challengeId)
+            ?? throw new ErrorException(404, "Challenge not found");
+
+        int result = await _challengeService.JoinChallenge(challengeId, "cc04e4e8-12bd-45e8-9ef5-808a2c16de5e");
+
+        if (result <= 0)
+            throw new ErrorException(400, "Joined challenge falied");
+
+        return Ok(new { message = "Joined challenge successfully" });
+    }
 }
