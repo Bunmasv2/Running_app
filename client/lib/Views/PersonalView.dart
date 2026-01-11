@@ -6,7 +6,9 @@ import '../Components/BestEffortsCard.dart';
 import "../Components/MonthlyChartCard.dart";
 import "../Components/TrainingLogCard.dart";
 import '../Components/WeeklyGoalsCard.dart';
+import '../Components/RelativeEffortCard.dart';
 import 'HistoryView.dart';
+import 'RankingView.dart';
 
 class Personalview extends StatefulWidget {
   final ValueChanged<String?>? onSubtitleChanged;
@@ -26,6 +28,8 @@ class _PersonalviewState extends State<Personalview> {
 
   List<RunHistoryDto> _top2Sessions = [];
 
+  List<RelativeEffort> _realativeEffort = [];
+
   DateTime _currentWeekStart = DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1));
   List<RunHistoryDto> _weeklySessions = [];
 
@@ -41,6 +45,7 @@ class _PersonalviewState extends State<Personalview> {
       _loadMonthlyData(),
       _loadTop2Data(),
       _loadWeeklyData(),
+      _loadRealativeEffort(),
     ]);
     if (mounted) setState(() => _isLoading = false);
   }
@@ -60,6 +65,11 @@ class _PersonalviewState extends State<Personalview> {
     final data = await _runService.getWeeklyRunSessions(_currentMonthView.month, _currentMonthView.year);
     setState(() => _weeklySessions = data);
   }
+
+  Future<void> _loadRealativeEffort() async {
+    final data = await _runService.getRelativeEffort();
+    setState(() => _realativeEffort = data);
+}
 
   void _changeMonth(int offset) {
     setState(() {
@@ -102,6 +112,7 @@ class _PersonalviewState extends State<Personalview> {
       tabs: [
         HeaderTabItem(label: 'Tiến trình', content: _buildProgressContent(context)),
         HeaderTabItem(label: 'Hoạt động', content: _buildActivitiesContent()),
+        HeaderTabItem(label: 'Xếp hạng', content: _buildRankContent()),
       ],
       backgroundColor: const Color(0xFF1A1A1A),
       activeColor: Colors.orange,
@@ -137,7 +148,7 @@ class _PersonalviewState extends State<Personalview> {
                   weekStart: _currentWeekStart,
                 ),),
                 const SizedBox(width: 12),
-                Expanded(child: _buildRelativeEffortCard()),
+                Expanded(child: RelativeEffortCard(efforts: _realativeEffort)),
               ],
             ),
           ),
@@ -175,24 +186,28 @@ class _PersonalviewState extends State<Personalview> {
   }
 
 
-  Widget _buildRelativeEffortCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: const Color(0xFF2D2D2D), borderRadius: BorderRadius.circular(12)),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          const Text('Relative Effort', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-          Icon(Icons.chevron_right, color: Colors.grey[600], size: 20),
-        ]),
-        const SizedBox(height: 12),
-        const Text('89', style: TextStyle(color: Colors.orange, fontSize: 32, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        Text('Jan 5 - Jan 11,\n2026', style: TextStyle(color: Colors.grey[500], fontSize: 11)),
-      ]),
-    );
-  }
+  // Widget _buildRelativeEffortCard() {
+  //   return Container(
+  //     padding: const EdgeInsets.all(16),
+  //     decoration: BoxDecoration(color: const Color(0xFF2D2D2D), borderRadius: BorderRadius.circular(12)),
+  //     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+  //       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+  //         const Text('Relative Effort', style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+  //         Icon(Icons.chevron_right, color: Colors.grey[600], size: 20),
+  //       ]),
+  //       const SizedBox(height: 12),
+  //       const Text('89', style: TextStyle(color: Colors.orange, fontSize: 32, fontWeight: FontWeight.bold)),
+  //       const SizedBox(height: 4),
+  //       Text('Jan 5 - Jan 11,\n2026', style: TextStyle(color: Colors.grey[500], fontSize: 11)),
+  //     ]),
+  //   );
+  // }
 
   Widget _buildActivitiesContent() {
     return const HistoryView();
+  }
+
+  Widget _buildRankContent() {
+    return const RankingView();
   }
 }

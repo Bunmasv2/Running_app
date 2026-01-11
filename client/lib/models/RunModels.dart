@@ -1,4 +1,5 @@
 import 'package:latlong2/latlong.dart';
+import 'dart:convert';
 
 // 1. DTO Save (Giữ nguyên của bạn)
 class RunCreateDto {
@@ -27,7 +28,6 @@ class RunCreateDto {
   }
 }
 
-// 2. DTO History List (Giữ nguyên của bạn)
 class RunHistoryDto {
   final int id;
   final double distanceKm;
@@ -35,6 +35,7 @@ class RunHistoryDto {
   final double calories;
   final DateTime createdAt;
   final DateTime endTime;
+  final double? targetDistance;
   final String? previewMapUrl;
 
   RunHistoryDto({
@@ -44,6 +45,7 @@ class RunHistoryDto {
     required this.calories,
     required this.createdAt,
     required this.endTime,
+    this.targetDistance,
     this.previewMapUrl,
   });
 
@@ -52,22 +54,22 @@ class RunHistoryDto {
       id: json['id'] ?? 0,
       distanceKm: (json['distanceKm'] as num?)?.toDouble() ?? 0.0,
       durationSeconds: json['durationSeconds'] ?? 0,
-      calories: (json['calories'] as num?)?.toDouble() ?? 0.0,
+      calories: (json['caloriesBurned'] as num?)?.toDouble() ?? 0.0,
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       endTime: DateTime.tryParse(json['endTime'] ?? '') ?? DateTime.now(),
+      targetDistance: (json['targetDistance'] as num?)?.toDouble() ?? 0.0,
       previewMapUrl: json['previewMapUrl'],
     );
   }
 }
 
-// 3. [MỚI] DTO Chi tiết (Dùng để vẽ lại Map theo Requirement 3.4)
 class RunDetailDto {
   final int id;
   final double distanceKm;
   final double calories;
   final int durationSeconds;
   final DateTime createdAt;
-  final List<LatLng> routePoints; // List tọa độ để vẽ map
+  final List<LatLng> routePoints;
 
   RunDetailDto({
     required this.id,
@@ -80,23 +82,24 @@ class RunDetailDto {
 
   factory RunDetailDto.fromJson(Map<String, dynamic> json) {
     List<LatLng> points = [];
-    // Parse 'routePoints' từ backend trả về
-    if (json['routePoints'] != null) {
+
+    if (json['routeJson'] != null && json['routeJson'].toString().isNotEmpty) {
       try {
-        var list = json['routePoints'] as List;
+        final List<dynamic> list = jsonDecode(json['routeJson']);
+
         points = list.map((p) => LatLng(
           (p['latitude'] ?? p['lat'] as num).toDouble(),
           (p['longitude'] ?? p['lng'] as num).toDouble(),
         )).toList();
       } catch (e) {
-        print("Lỗi parse route: $e");
+        // debugPrint("❌ Lỗi parse routeJson: $e");
       }
     }
 
     return RunDetailDto(
       id: json['id'] ?? 0,
       distanceKm: (json['distanceKm'] as num?)?.toDouble() ?? 0.0,
-      calories: (json['calories'] as num?)?.toDouble() ?? 0.0,
+      calories: (json['caloriesBurned'] as num?)?.toDouble() ?? 0.0,
       durationSeconds: json['durationSeconds'] ?? 0,
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       routePoints: points,
@@ -113,11 +116,10 @@ class DailyGoal {
     required this.currentDistanceKm,
   });
 
-  // Tính phần trăm (0.0 -> 1.0)
   double get progress {
     if (targetDistanceKm <= 0) return 0;
     double p = currentDistanceKm / targetDistanceKm;
-    return p > 1.0 ? 1.0 : p; // Không vượt quá 100%
+    return p > 1.0 ? 1.0 : p;
   }
 
   // Parse JSON từ Backend
@@ -125,6 +127,41 @@ class DailyGoal {
     return DailyGoal(
       targetDistanceKm: (json['targetDistanceKm'] as num?)?.toDouble() ?? 0.0,
       currentDistanceKm: (json['currentDistanceKm'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+}
+
+class RelativeEffort {
+  final int id;
+  final DateTime startTime;
+  final DateTime endTime;
+  final double distanceKm;
+  final double durationSeconds;
+  final double caloriesBurned;
+  final double targetDistanceKm;
+  final double progressPercent;
+
+  RelativeEffort({
+    required this.id,
+    required this.startTime,
+    required this.endTime,
+    required this.distanceKm,
+    required this.durationSeconds,
+    required this.caloriesBurned,
+    required this.targetDistanceKm,
+    required this.progressPercent,
+  });
+
+  factory RelativeEffort.fromJson(Map<String, dynamic> json) {
+    return RelativeEffort(
+      id: json['id'],
+      startTime: DateTime.parse(json['startTime']),
+      endTime: DateTime.parse(json['endTime']),
+      distanceKm: (json['distanceKm'] as num).toDouble(),
+      durationSeconds: (json['durationSeconds'] as num).toDouble(),
+      caloriesBurned: (json['caloriesBurned'] as num).toDouble(),
+      targetDistanceKm: (json['targetDistanceKm'] as num).toDouble(),
+      progressPercent: (json['progressPercent'] as num).toDouble(),
     );
   }
 }

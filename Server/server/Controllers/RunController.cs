@@ -119,5 +119,12 @@ namespace server.Controllers
             var result = await _runService.GetWeeklyRunSessionsAsync(GetUserId(), month, year);
             return Ok(new { data = result });
         }
+
+        [HttpGet("relative-effort")]
+        public async Task<IActionResult> GetRelativeEffort()
+        {
+            var result = await _runService.GetRelativeEffortAsync(GetUserId());
+            return Ok(new { data = result });
+        }
     }
 }

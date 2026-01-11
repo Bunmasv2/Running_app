@@ -55,5 +55,17 @@ namespace server.DTO
             public double TargetDistanceKm { get; set; } // Mục tiêu đề ra
             public double ProgressPercent { get; set; } // Đã đạt bao nhiêu %
         }
+
+        public class RealativeEffort
+        {
+            public int Id { get; set; }
+            public DateTime StartTime { get; set; }
+            public DateTime EndTime { get; set; }
+            public double DistanceKm { get; set; }
+            public double DurationSeconds { get; set; }
+            public double CaloriesBurned { get; set; }
+            public double TargetDistanceKm { get; set; }
+            public double ProgressPercent { get; set; }
+        }
     }
 }

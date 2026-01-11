@@ -204,4 +204,28 @@ class RunService {
       return [];
     }
   }
+
+   Future<List<RelativeEffort>> getRelativeEffort() async {
+     try {
+       final headers = await _getHeaders();
+       final response = await http.get(
+         Uri.parse('$_baseUrl/relative-effort'),
+         headers: headers,
+       );
+
+       if (response.statusCode == 200) {
+         print("Dữ liệu Realative Effort: ${response.body}");
+         final decoded = jsonDecode(response.body);
+
+         final List listData = decoded['data'] ?? [];
+         return listData.map((e) => RelativeEffort.fromJson(e)).toList();
+       } else {
+         print('Get Realative Effort failed: ${response.statusCode} - ${response.body}');
+         return [];
+       }
+     } catch (e) {
+       print('Get Realative Effort error: $e');
+       return [];
+     }
+   }
 }

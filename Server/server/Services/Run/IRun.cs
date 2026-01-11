@@ -12,4 +12,5 @@ public interface IRunService
     Task<List<RunSessionDto.RunHistoryItemDto>> GetMonthlyRunSessionsAsync(string userId, int month, int year);
     Task<List<RunSessionDto.RunHistoryItemDto>> GetTop2RunSessionsAsync(string userId);
     Task<List<RunSessionDto.RunHistoryItemDto>> GetWeeklyRunSessionsAsync(string userId, int month, int year);
+    Task<List<RunSessionDto.RealativeEffort>> GetRelativeEffortAsync(string userId);
 }
