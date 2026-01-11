@@ -16,6 +16,8 @@ public partial class RunSession
     public double DurationSeconds { get; set; } // Tổng giây chạy
     public double CaloriesBurned { get; set; }
 
+    public int? DailyGoalId { get; set; }
+    public DailyGoal? DailyGoal { get; set; }
     // Lưu json raw của mảng tọa độ
     public string RouteJson { get; set; }
 }

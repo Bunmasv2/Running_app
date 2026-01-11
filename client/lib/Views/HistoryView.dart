@@ -131,7 +131,7 @@ class _HistoryViewState extends State<HistoryView> {
                   ),
                   const SizedBox(width: 10),
                   Text(
-                    _formatDate(item.createdAt),
+                    _formatDate(item.endTime),
                     style: TextStyle(
                         color: Colors.grey[800],
                         fontSize: 14,

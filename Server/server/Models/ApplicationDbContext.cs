@@ -47,5 +47,11 @@ public class ApplicationDbContext : IdentityDbContext<AppUser>
             .WithMany(u => u.ChallengeHistory)
             .HasForeignKey(cp => cp.UserId)
             .OnDelete(DeleteBehavior.Cascade); // Xóa User -> Xóa lịch sử tham gia
+
+        builder.Entity<RunSession>()
+            .HasOne(rs => rs.DailyGoal)
+            .WithMany()
+            .HasForeignKey(rs => rs.DailyGoalId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

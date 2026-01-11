@@ -184,8 +184,7 @@ namespace server.Services
             return result;
         }
 
-        public async Task<List<RunSessionDto.RunHistoryItemDto>>
-    GetMonthlyRunSessionsAsync(string userId, int month, int year)
+        public async Task<List<RunSessionDto.RunHistoryItemDto>> GetMonthlyRunSessionsAsync(string userId, int month, int year)
         {
             var result = await _context.RunSessions
                 .Where(r =>
@@ -200,9 +199,9 @@ namespace server.Services
                     EndTime = g.Max(x => x.EndTime),
                     DistanceKm = g.Sum(x => x.DistanceKm),
                     DurationSeconds = g.Sum(x => x.DurationSeconds),
-                    CaloriesBurned = g.Sum(x => x.CaloriesBurned)
+                    CaloriesBurned = g.Sum(x => x.CaloriesBurned),
                 })
-                .OrderBy(x => x.StartTime)
+                .OrderBy(x => x.EndTime)
                 .ToListAsync();
 
             return result;
@@ -219,8 +218,7 @@ namespace server.Services
             var top2RunDtos = _mapper.Map<List<RunSessionDto.RunHistoryItemDto>>(top2Runs);
             return top2RunDtos;
         }
-        public async Task<List<RunSessionDto.RunHistoryItemDto>>
-    GetWeeklyRunSessionsAsync(string userId, int month, int year)
+        public async Task<List<RunSessionDto.RunHistoryItemDto>> GetWeeklyRunSessionsAsync(string userId, int month, int year)
         {
             return await _context.RunSessions
                 .Where(r =>
@@ -240,5 +238,29 @@ namespace server.Services
                 .ToListAsync();
         }
 
+        public async Task<List<RunSessionDto.RealativeEffort>> GetRelativeEffortAsync(string userId)
+        {
+            var runs = await _context.RunSessions
+                .Include(r => r.DailyGoal)
+                .Where(r => r.UserId == userId)
+                .OrderByDescending(r => r.StartTime)
+                .ToListAsync();
+
+            var relativeEfforts = runs.Select(r => new RunSessionDto.RealativeEffort
+            {
+                Id = r.Id,
+                StartTime = r.StartTime,
+                EndTime = r.EndTime,
+                DistanceKm = r.DistanceKm,
+                DurationSeconds = r.DurationSeconds,
+                CaloriesBurned = r.CaloriesBurned,
+                TargetDistanceKm = r.DailyGoal?.TargetDistanceKm ?? 0,
+                ProgressPercent = r.DailyGoal != null && r.DailyGoal.TargetDistanceKm > 0
+                    ? Math.Min((r.DistanceKm / r.DailyGoal.TargetDistanceKm) * 100, 100)
+                    : 0
+            }).ToList();
+
+            return relativeEfforts;
+        }
     }
 }
