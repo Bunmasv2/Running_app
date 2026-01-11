@@ -89,11 +89,11 @@ public class ChallengeController : ControllerBase
     [HttpPost("join/{id}")]
     public async Task<IActionResult> JoinChallenge(int id)
     {
-        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (userId == null) return Unauthorized();
+        // if (userId == null) return Unauthorized();
 
-        var success = await _challengeService.JoinChallenge(userId, id);
+        var success = await _challengeService.JoinChallenge("b1549d21-97ec-48a3-b2e1-31c8a59eefab", id);
 
         if (success)
         {

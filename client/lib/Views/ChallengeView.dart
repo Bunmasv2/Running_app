@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../Models/ChallengeModels.dart';
+import '../models/ChallengeModels.dart';
 import '../Services/ChallengeService.dart';
 
 class ChallengeView extends StatefulWidget {

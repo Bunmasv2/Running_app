@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Models/ChallengeModels.dart';
+import '../models/ChallengeModels.dart';
 
 class ChallengeService {
   // Ưu tiên baseUrl của UIA_FE
@@ -66,11 +66,12 @@ class ChallengeService {
       final headers = await _getHeaders();
 
       final response = await http.post(
-        Uri.parse('$_baseUrl/$challengeId/join'),
+        Uri.parse('$_baseUrl/join/$challengeId'),
         headers: headers,
       );
 
       final json = jsonDecode(response.body);
+      print(json);
       String serverMessage = json["message"] ?? "Có lỗi xảy ra";
 
       // Nếu code là 200/201 -> Thành công (True) + Message
