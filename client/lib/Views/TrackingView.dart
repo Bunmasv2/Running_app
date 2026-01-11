@@ -270,17 +270,70 @@ class _TrackingViewState extends State<TrackingView> {
   // --- 5. UI & CÁC WIDGET PHỤ --- (Giữ nguyên hoặc chỉnh sửa nhỏ)
 
   // Hàm đặt mục tiêu (Logic giữ nguyên như cũ)
-  void _handleSetGoal() {
+  Future<void> _handleSetGoal() async {
+    // 1. Không cho đặt mục tiêu khi đang chạy
     if (_isTracking) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Hãy dừng chạy trước khi đặt mục tiêu.")));
       return;
     }
-    // ... (Phần Dialog Set Goal giữ nguyên như code cũ của bạn)
-    // Để code ngắn gọn tôi không paste lại đoạn Dialog, bạn giữ nguyên nhé.
-    // Nếu mất thì bảo tôi gửi lại.
-  }
 
+    final TextEditingController controller = TextEditingController();
+
+    // 2. Hiển thị Dialog nhập số km
+    await showDialog(
+      context: context,
+      builder: (BuildContext ctx) => AlertDialog(
+        title: const Text("Đặt mục tiêu hôm nay"),
+        content: TextField(
+          controller: controller,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: "Số Km muốn chạy",
+            hintText: "Ví dụ: 5.0",
+            suffixText: "km",
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text("Hủy"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              // Parse dữ liệu chặt chẽ
+              final double? target = double.tryParse(controller.text);
+
+              if (target != null && target > 0) {
+                Navigator.pop(ctx); // Đóng dialog
+
+                // Gọi API set goal
+                // (Giả sử bạn muốn hiện loading thì có thể thêm setState _isSaving = true ở đây)
+                try {
+                  DailyGoal? newGoal = await _goalService.setTodayGoal(target);
+
+                  if (mounted && newGoal != null) {
+                    setState(() {
+                      _dailyGoal = newGoal;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Đã cập nhật mục tiêu!"),
+                      backgroundColor: Colors.green,
+                    ));
+                  }
+                } catch (e) {
+                  print("Lỗi set goal: $e");
+                }
+              }
+            },
+            child: const Text("Lưu"),
+          ),
+        ],
+      ),
+    );
+  }
   String _formatDuration(Duration d) {
     String twoDigits(int n) => n.toString().padLeft(2, "0");
     return "${twoDigits(d.inHours)}:${twoDigits(d.inMinutes.remainder(60))}:${twoDigits(d.inSeconds.remainder(60))}";
@@ -458,12 +511,7 @@ class _TrackingViewState extends State<TrackingView> {
                         // Set Goal (Giả lập nút, bạn gắn lại hàm _handleSetGoal vào đây)
                         GestureDetector(
                           onTap: () {
-                            // Gọi hàm hiển thị dialog set goal
-                            // _handleSetGoal();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text(
-                                        "Tính năng Set Goal (Đã có trong code cũ)")));
+                            _handleSetGoal();
                           },
                           child: Column(
                             children: [

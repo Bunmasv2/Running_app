@@ -19,37 +19,19 @@ class UserService {
       final response = await http.post(
         Uri.parse('$_baseUrl/signin'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "email": email,
-          "password": password
-        }),
+        body: jsonEncode({"email": email, "password": password}),
       );
 
-      // if (response.statusCode == 200) {
-      //   final Map<String, dynamic> responseBody = jsonDecode(response.body);
-      //
-      //   // Phải vào trong node 'data' trước
-      //   final userData = responseBody['data'];
-      //
-      //   if (userData != null && userData['token'] != null) {
-      //     String token = userData['token'];
-      //
-      //     final prefs = await SharedPreferences.getInstance();
-      //     await prefs.setString('accessToken', token);
-      //
-      //     print("Đăng nhập thành công, đã lưu Token!");
-      //     return true;
-      //   }
       if (response.statusCode == 200) {
         final fullResponse = jsonDecode(response.body);
-        // Phải lấy từ Map 'data' mà bạn đã bọc ở Controller
         final userData = fullResponse['data'];
 
         if (userData != null && userData['token'] != null) {
           String token = userData['token'];
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('accessToken', token);
-          print("Đăng nhập thành công, đã lưu Token! $token");          return true;
+          print("Đăng nhập thành công: $token");
+          return true;
         }
       }
       return false;
@@ -58,7 +40,6 @@ class UserService {
       return false;
     }
   }
-
   // B. ĐĂNG NHẬP GOOGLE (DÙNG WEBVIEW - KHÔNG CẦN FIREBASE)
   // Future<bool> loginGoogle(BuildContext context) async {
   //   try {
@@ -91,7 +72,32 @@ class UserService {
     if (token == null || token.isEmpty) {
       return false;
     }
-    return true;
+    try {
+      final response = await http.get(
+        Uri.parse('$_baseUrl/profile'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      // Nếu Server trả về 200 OK -> Token còn sống
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        // Nếu Server trả về 401 (Unauthorized) hoặc lỗi khác -> Token hết hạn
+        // Xóa token cũ đi để lần sau app biết là chưa đăng nhập
+        await prefs.remove('accessToken');
+        return false;
+      }
+    } catch (e) {
+      // Lỗi mạng hoặc server chết -> Tùy bạn xử lý
+      // Ở đây mình cho return false để an toàn, bắt đăng nhập lại hoặc hiện lỗi mạng
+      print("Lỗi kiểm tra token: $e");
+      // Nếu muốn cho phép dùng offline thì logic sẽ phức tạp hơn,
+      // nhưng với app cần mạng thì return false là an toàn nhất.
+      return false;
+    }
   }
 
   // 3. ĐĂNG XUẤT
@@ -125,8 +131,9 @@ class UserService {
       if (response.statusCode == 200) {
         print("Dữ liệu thật từ Server: ${response.body}");
         return UserProfile.fromJson(jsonDecode(response.body));
+      }else if (response.statusCode == 401) {
+        await logout();
       }
-      return null;
     } catch (e) {
       print('Error Get Profile: $e');
       return null;
@@ -162,7 +169,10 @@ class UserService {
       request.headers['Authorization'] = 'Bearer $token';
       request.files.add(await http.MultipartFile.fromPath('avatar', imageFile.path));
       var response = await request.send();
-
+      if (response.statusCode == 401) {
+        await logout();
+        return false;
+      }
       return response.statusCode == 200;
     } catch (e) {
       return false;
@@ -225,6 +235,9 @@ class UserService {
                 final List list = jsonData['data'];
 
                 return list.map((e) => UserProfile.fromJson(e)).toList();
+            }
+            if (response.statusCode == 401) {
+              await logout();
             }
 
             return [];
