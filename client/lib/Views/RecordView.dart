@@ -233,7 +233,7 @@ class _RecordViewState extends State<RecordView> {
               final double? target = double.tryParse(controller.text);
               if (target != null && target > 0) {
                 Navigator.pop(ctx);
-                DailyGoal? newGoal = await _goalService.setTodayGoal(target);
+                DailyGoal? newGoal = await _goalService.setTodayGoal(target, "");
                 if (mounted) setState(() => _dailyGoal = newGoal);
               }
             },

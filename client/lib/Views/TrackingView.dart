@@ -136,7 +136,7 @@ class _TrackingViewState extends State<TrackingView> {
       _calories = 0.0;
       _elapsed = Duration.zero;
       _currentSpeedKmh = 0.0;
-      _startTime = DateTime.now().toUtc();
+      _startTime = DateTime.now();
       _lastPointTime = DateTime.now(); // Mốc thời gian bắt đầu
     });
 
@@ -240,7 +240,7 @@ class _TrackingViewState extends State<TrackingView> {
       routePoints:
           _routePoints, // Truyền list này sang RunService để encode JSON
       startTime: _startTime,
-      endTime: DateTime.now().toUtc(),
+      endTime: DateTime.now(),
     );
 
     if (mounted) {
@@ -312,7 +312,7 @@ class _TrackingViewState extends State<TrackingView> {
                 // Gọi API set goal
                 // (Giả sử bạn muốn hiện loading thì có thể thêm setState _isSaving = true ở đây)
                 try {
-                  DailyGoal? newGoal = await _goalService.setTodayGoal(target);
+                  DailyGoal? newGoal = await _goalService.setTodayGoal(target, "dailyGoal");
 
                   if (mounted && newGoal != null) {
                     setState(() {
