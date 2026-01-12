@@ -70,6 +70,7 @@ public class UserService : IUserService
             }
 
             var roleResult = await _userManager.AddToRoleAsync(user, "User");
+
             if (!roleResult.Succeeded)
             {
                 var messages = string.Join(" | ", roleResult.Errors.Select(e => $"{e.Code}: {e.Description}"));
@@ -82,7 +83,6 @@ public class UserService : IUserService
 
     public async Task<UserDTO.Profile?> GetUserProfile(string userId)
     {
-
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Id == userId);
         return _mapper.Map<UserDTO.Profile>(user);
@@ -120,6 +120,7 @@ public class UserService : IUserService
     public async Task<IdentityResult> UpdateUserImage(IFormFile file, string userId)
     {
         var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+
         if (user == null)
             return null;
 
@@ -151,17 +152,18 @@ public class UserService : IUserService
         user.AvatarUrl = fileUrl;
         Console.WriteLine("AVAAAAAA: ", user.AvatarUrl);
 
-
         return await _userManager.UpdateAsync(user);
     }
 
     public async Task<UserDTO.SignInResponse> SignIn(string email, string password)
     {
         var user = await _userManager.FindByEmailAsync(email);
+
         if (user == null || !await _userManager.CheckPasswordAsync(user, password))
         {
             throw new ErrorException(400, "Invalid email or password");
         }
+
         var roles = await _userManager.GetRolesAsync(user);
         var token = JwtUtils.GenerateToken(user, roles, 1, _configuration);
         var refreshToken = JwtUtils.GenerateToken(user, roles, 8, _configuration);
@@ -179,19 +181,30 @@ public class UserService : IUserService
 
     public async Task<bool> Register(UserDTO.RegisterDto registerDto)
     {
+        // 1. Validate Confirm Password
         if (registerDto.Password != registerDto.ConfirmPass)
         {
             throw new ErrorException(400, "Mật khẩu xác nhận không khớp");
         }
 
-        // 2. Check email đã tồn tại
-        var existingUser = await _userManager.FindByEmailAsync(registerDto.Email);
-        if (existingUser != null)
+        // 2. Check Email đã tồn tại (Custom Message)
+        var existingEmail = await _userManager.FindByEmailAsync(registerDto.Email);
+
+        if (existingEmail != null)
         {
-            throw new ErrorException(400, "Email đã được sử dụng");
+            throw new ErrorException(400, $"Email '{registerDto.Email}' đã được sử dụng");
         }
 
-        // 3. Tạo user
+        // 3. Check Username đã tồn tại (Custom Message)
+        // Identity tự check cái này nhưng message là tiếng Anh, mình check trước để báo tiếng Việt
+        var existingUser = await _userManager.FindByNameAsync(registerDto.UserName);
+
+        if (existingUser != null)
+        {
+            throw new ErrorException(400, $"Tên đăng nhập '{registerDto.UserName}' đã tồn tại");
+        }
+
+        // 4. Tạo User Object
         var user = new AppUser
         {
             UserName = registerDto.UserName,
@@ -202,16 +215,27 @@ public class UserService : IUserService
             EmailConfirmed = true
         };
 
-        // 4. Tạo user + hash password
+        // 5. Tạo User + Hash Password
         var result = await _userManager.CreateAsync(user, registerDto.Password);
+
         if (!result.Succeeded)
         {
-            foreach (var error in result.Errors)
-            {
-                Console.WriteLine($"Identity error: {error.Code} - {error.Description}");
-            }
-            return false;
+            // Lấy lỗi đầu tiên hoặc gộp tất cả lỗi từ Identity trả về
+            // Ví dụ: PasswordTooShort, PasswordRequiresDigit...
+            var errorMsg = string.Join(", ", result.Errors.Select(e => e.Description));
+
+            // Nếu muốn việt hóa một số lỗi phổ biến của Identity:
+            if (result.Errors.Any(e => e.Code == "PasswordTooShort"))
+                errorMsg = "Mật khẩu quá ngắn";
+            if (result.Errors.Any(e => e.Code == "PasswordRequiresDigit"))
+                errorMsg = "Mật khẩu cần ít nhất 1 số";
+
+            throw new ErrorException(400, errorMsg);
         }
+
+        // 6. Gán Role mặc định (Quan trọng)
+        await _userManager.AddToRoleAsync(user, "User");
+
         return true;
     }
 

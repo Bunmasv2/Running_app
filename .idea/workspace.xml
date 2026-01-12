@@ -8,33 +8,14 @@
       <change afterPath="$PROJECT_DIR$/client/lib/models/SlideModel.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Server/server/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/appsettings.Development.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/android/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" afterPath="$PROJECT_DIR$/client/android/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/android/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/client/android/settings.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Components/BestEffortsCard.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Components/BestEffortsCard.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Components/MonthlyChartCard.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Components/MonthlyChartCard.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Components/RelativeEffortCard.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Components/RelativeEffortCard.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Components/TrainingLogCard.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Components/TrainingLogCard.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Components/WeeklyGoalsCard.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Components/WeeklyGoalsCard.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/ChallengeView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/ChallengeView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/HistoryView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/HistoryView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/HomeView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/HomeView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/MainScreen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/MainScreen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/PersonalView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/PersonalView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/ProfileView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/ProfileView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/RankingView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/RankingView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/TrackingView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/TrackingView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/models/BestEffort.dart" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/models/RunModels.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/models/RunModels.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/models/WeekData.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/models/WeekData.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/linux/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/client/linux/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/linux/flutter/generated_plugin_registrant.h" beforeDir="false" afterPath="$PROJECT_DIR$/client/linux/flutter/generated_plugin_registrant.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/linux/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/client/linux/flutter/generated_plugins.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/client/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/client/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/client/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/windows/flutter/generated_plugin_registrant.h" beforeDir="false" afterPath="$PROJECT_DIR$/client/windows/flutter/generated_plugin_registrant.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/client/windows/flutter/generated_plugins.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Configs/JWTConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Configs/JWTConfig.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Controllers/UserController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Controllers/UserController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Services/User/UserService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Services/User/UserService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Services/ChallengeService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/ChallengeService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Services/GoalService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/GoalService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Services/RunService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/RunService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Services/TrackingService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/TrackingService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Services/UserService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/UserService.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
