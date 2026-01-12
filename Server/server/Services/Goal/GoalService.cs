@@ -21,6 +21,7 @@ namespace server.Services
 
             // Tìm trong DB xem có dòng nào của user này và ngày == hôm nay không
             var goal = await _context.DailyGoals
+                .OrderByDescending(g => g.Id)
                 .FirstOrDefaultAsync(g => g.UserId == userId && g.Date.Date == today);
 
             if (goal == null) return null; // Chưa đặt mục tiêu
@@ -35,42 +36,72 @@ namespace server.Services
         }
 
         // 2. ĐẶT (HOẶC CẬP NHẬT) MỤC TIÊU HÔM NAY
-        public async Task<GoalDto.DailyGoalResponseDto> SetTodayGoalAsync(string userId, double targetKm)
+        // public async Task<GoalDto.DailyGoalResponseDto> SetTodayGoalAsync(string userId, double targetKm)
+        // {
+        //     var today = DateTime.Today;
+
+        //     // Kiểm tra xem đã có mục tiêu chưa
+        //     var existingGoal = await _context.DailyGoals
+        //         .FirstOrDefaultAsync(g => g.UserId == userId && g.Date.Date == today);
+
+        //     if (existingGoal != null)
+        //     {
+        //         // TRƯỜNG HỢP 1: Đã có -> Cập nhật lại số Km
+        //         existingGoal.TargetDistanceKm = targetKm;
+        //         _context.DailyGoals.Update(existingGoal);
+        //     }
+        //     else
+        //     {
+        //         // TRƯỜNG HỢP 2: Chưa có -> Tạo mới
+        //         existingGoal = new DailyGoal
+        //         {
+        //             UserId = userId,
+        //             Date = today, // Lưu ngày giờ hiện tại (nhưng phần giờ là 00:00:00)
+        //             TargetDistanceKm = targetKm
+        //         };
+        //         _context.DailyGoals.Add(existingGoal);
+        //     }
+
+        //     // Lưu vào DB
+        //     await _context.SaveChangesAsync();
+
+        //     return new GoalDto.DailyGoalResponseDto
+        //     {
+        //         Id = existingGoal.Id,
+        //         Date = existingGoal.Date,
+        //         TargetDistanceKm = existingGoal.TargetDistanceKm,
+        //         IsAchieved = false
+        //     };
+        // }
+
+        public async Task<GoalDto.DailyGoalResponseDto> SetTodayGoalAsync(string userId, double targetKm, string type)
         {
-            var today = DateTime.Today;
-
-            // Kiểm tra xem đã có mục tiêu chưa
-            var existingGoal = await _context.DailyGoals
-                .FirstOrDefaultAsync(g => g.UserId == userId && g.Date.Date == today);
-
-            if (existingGoal != null)
+            if (type == "dailyGoal")
             {
-                // TRƯỜNG HỢP 1: Đã có -> Cập nhật lại số Km
-                existingGoal.TargetDistanceKm = targetKm;
-                _context.DailyGoals.Update(existingGoal);
+                var today = DateTime.Now;
+
+                var createGoalService = new DailyGoal
+                {
+                    UserId = userId,
+                    Date = today,
+                    TargetDistanceKm = targetKm
+                };
+                _context.DailyGoals.Add(createGoalService);
+
+                await _context.SaveChangesAsync();
+
+                return new GoalDto.DailyGoalResponseDto
+                {
+                    Id = createGoalService.Id,
+                    Date = createGoalService.Date,
+                    TargetDistanceKm = createGoalService.TargetDistanceKm,
+                    IsAchieved = false
+                };
             }
             else
             {
-                // TRƯỜNG HỢP 2: Chưa có -> Tạo mới
-                existingGoal = new DailyGoal
-                {
-                    UserId = userId,
-                    Date = today, // Lưu ngày giờ hiện tại (nhưng phần giờ là 00:00:00)
-                    TargetDistanceKm = targetKm
-                };
-                _context.DailyGoals.Add(existingGoal);
+                return null;
             }
-
-            // Lưu vào DB
-            await _context.SaveChangesAsync();
-
-            return new GoalDto.DailyGoalResponseDto
-            {
-                Id = existingGoal.Id,
-                Date = existingGoal.Date,
-                TargetDistanceKm = existingGoal.TargetDistanceKm,
-                IsAchieved = false
-            };
         }
 
         // public Task<GoalDto.DailyGoalResponseDto> SetTodayGoalAsync(string userId, double targetKm)

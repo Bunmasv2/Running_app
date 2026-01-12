@@ -30,12 +30,12 @@ namespace server.Controllers
         }
 
         // POST: api/goals (Đặt mục tiêu mới)
-        [HttpPost]
-        public async Task<IActionResult> SetGoal([FromBody] GoalDto.CreateGoalDto dto)
+        [HttpPost("{type}")]
+        public async Task<IActionResult> SetGoal([FromBody] GoalDto.CreateGoalDto dto, string type)
         {
             try
             {
-                var result = await _goalService.SetTodayGoalAsync(GetUserId(), dto.TargetDistanceKm);
+                var result = await _goalService.SetTodayGoalAsync(GetUserId(), dto.TargetDistanceKm, type);
                 return Ok(result);
             }
             catch (Exception ex)
