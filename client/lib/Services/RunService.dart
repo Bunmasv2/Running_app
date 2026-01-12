@@ -7,8 +7,8 @@ import '../models/UserRanking.dart';
 
 class RunService {
   // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run';
-  //  static const String _baseUrl = 'http://10.0.2.2:5144/Run';
-  static const String _baseUrl = 'http://192.168.100.231:5144/Run';
+
+  static const String _baseUrl = 'http://10.0.2.2:5144/Run';
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('accessToken');

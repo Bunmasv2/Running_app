@@ -10,8 +10,7 @@ class UserService {
   // URL Server Render của bạn
   // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/User';
   // --- 1. QUẢN LÝ AUTH (ĐĂNG NHẬP / ĐĂNG XUẤT) ---
-  static const String _baseUrl = 'http://192.168.100.231:5144/User';
-  // static const String _baseUrl = 'http://10.0.2.2:5144/User';
+  static const String _baseUrl = 'http://10.0.2.2:5144/User';
 
   // A. ĐĂNG NHẬP THƯỜNG (EMAIL/PASS)
   Future<bool> login(String email, String password) async {
