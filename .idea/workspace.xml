@@ -6,9 +6,14 @@
   <component name="ChangeListManager">
     <list default="true" id="bc54e4c9-b60e-460d-87f5-6a9c68e4bc80" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Configs/JWTConfig.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Configs/JWTConfig.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Controllers/UserController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Controllers/UserController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/Services/User/UserService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/Services/User/UserService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Services/ChallengeService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/ChallengeService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Services/GoalService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/GoalService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Services/RunService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/RunService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Services/TrackingService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/TrackingService.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/lib/Services/UserService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/UserService.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Views/TrackingView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/TrackingView.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/client/pubspec.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

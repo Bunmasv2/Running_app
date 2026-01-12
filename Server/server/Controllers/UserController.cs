@@ -50,11 +50,7 @@ public class UserController : ControllerBase
         Console.WriteLine($"EMailll: {dto.Email}");
         Console.WriteLine($"Passss: {dto.Password}");
 
-        var result = await _userServcie.Register(dto);
-
-        if (!result)
-            throw new ErrorException(400, "Đăng ký thất bại");
-
+        await _userServcie.Register(dto);
         return Ok(new
         {
             message = "Đăng ký thành công"
@@ -77,21 +73,21 @@ public class UserController : ControllerBase
 
 
     [HttpGet("signin-google")]
-    public IActionResult SignGoogle(string returnUrl = "https://www.facebook.com/")
-    {
-        if (string.IsNullOrEmpty(returnUrl))
-        {
-            var configReturnUrl = _configuration["Authentication:Google:ReturnUrl"];
-            returnUrl = configReturnUrl ?? "/";
-        }
+    // public IActionResult SignGoogle(string returnUrl = "https://www.facebook.com/")
+    // {
+    //     if (string.IsNullOrEmpty(returnUrl))
+    //     {
+    //         var configReturnUrl = _configuration["Authentication:Google:ReturnUrl"];
+    //         returnUrl = configReturnUrl ?? "/";
+    //     }
 
-        var properties = new AuthenticationProperties
-        {
-            RedirectUri = Url.Action("GoogleCallback", "Auth", new { returnUrl }),
-        };
+    //     var properties = new AuthenticationProperties
+    //     {
+    //         RedirectUri = Url.Action("GoogleCallback", "Auth", new { returnUrl }),
+    //     };
 
-        return Challenge(properties, GoogleDefaults.AuthenticationScheme);
-    }
+    //     return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+    // }
 
     [HttpGet("profile")]
     // [Authorize]
