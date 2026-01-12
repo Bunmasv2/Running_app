@@ -10,8 +10,8 @@ class UserService {
   // URL Server Render của bạn
   // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/User';
   // --- 1. QUẢN LÝ AUTH (ĐĂNG NHẬP / ĐĂNG XUẤT) ---
-  // static const String _baseUrl = 'http://192.168.173.173:5144/User';
-  static const String _baseUrl = 'http://10.0.2.2:5144/User';
+  static const String _baseUrl = 'http://192.168.100.231:5144/User';
+  // static const String _baseUrl = 'http://10.0.2.2:5144/User';
 
   // A. ĐĂNG NHẬP THƯỜNG (EMAIL/PASS)
   Future<bool> login(String email, String password) async {
@@ -126,12 +126,13 @@ class UserService {
   Future<UserProfile?> getUserProfile() async {
     try {
       final headers = await _getHeaders();
-      final response = await http.get(Uri.parse('$_baseUrl/profile'), headers: headers);
+      final response =
+          await http.get(Uri.parse('$_baseUrl/profile'), headers: headers);
 
       if (response.statusCode == 200) {
         print("Dữ liệu thật từ Server: ${response.body}");
         return UserProfile.fromJson(jsonDecode(response.body));
-      }else if (response.statusCode == 401) {
+      } else if (response.statusCode == 401) {
         await logout();
       }
     } catch (e) {
@@ -140,7 +141,8 @@ class UserService {
     }
   }
 
-  Future<bool> updateProfile(String userName, double height, double weight) async {
+  Future<bool> updateProfile(
+      String userName, double height, double weight) async {
     try {
       final headers = await _getHeaders();
       final body = {
@@ -165,9 +167,11 @@ class UserService {
   Future<bool> uploadAvatar(File imageFile) async {
     try {
       String? token = await _getToken();
-      var request = http.MultipartRequest('POST', Uri.parse('$_baseUrl/avatar'));
+      var request =
+          http.MultipartRequest('POST', Uri.parse('$_baseUrl/avatar'));
       request.headers['Authorization'] = 'Bearer $token';
-      request.files.add(await http.MultipartFile.fromPath('avatar', imageFile.path));
+      request.files
+          .add(await http.MultipartFile.fromPath('avatar', imageFile.path));
       var response = await request.send();
       if (response.statusCode == 401) {
         await logout();
@@ -213,7 +217,7 @@ class UserService {
       } else {
         // Parse tin nhắn lỗi từ Backend (do ErrorHandlingMiddleware trả về)
         final errorData = jsonDecode(response.body);
-        return errorData['message'] ?? "Đã có lỗi xảy ra";
+        return errorData['ErrorMessage'] ?? "Đã có lỗi xảy ra";
       }
     } catch (e) {
       print("Register error: $e");
@@ -221,29 +225,29 @@ class UserService {
     }
   }
 
-    Future<List<UserProfile>> getSuggestedUser() async {
-        try {
-            final headers = await _getHeaders();
-            final response = await http.get(
-            Uri.parse('$_baseUrl/suggests'),
-                headers: headers,
-            );
+  Future<List<UserProfile>> getSuggestedUser() async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$_baseUrl/suggests'),
+        headers: headers,
+      );
 
-            if (response.statusCode == 200) {
-                final jsonData = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
 
-                final List list = jsonData['data'];
+        final List list = jsonData['data'];
 
-                return list.map((e) => UserProfile.fromJson(e)).toList();
-            }
-            if (response.statusCode == 401) {
-              await logout();
-            }
+        return list.map((e) => UserProfile.fromJson(e)).toList();
+      }
+      if (response.statusCode == 401) {
+        await logout();
+      }
 
-            return [];
-        } catch (e) {
-            print("Get all users error: $e");
-            return [];
-        }
+      return [];
+    } catch (e) {
+      print("Get all users error: $e");
+      return [];
     }
+  }
 }

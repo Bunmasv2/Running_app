@@ -1,44 +1,54 @@
 // lib/Services/TrackingService.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:latlong2/latlong.dart';
 
 class TrackingService {
+  Future<String?> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('accessToken');
+  }
+  Future<Map<String, String>> _getHeaders() async {
+    String? token = await _getToken();
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+  }
 
   // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run';
-  static const String _baseUrl = 'http://10.0.2.2:5144/Run/history';
+  static const String _baseUrl = 'http://192.168.100.231:5144/run';
   Future<bool> saveRunSession({
     required double distanceKm,
     required double calories,
     required Duration duration,
     required List<LatLng> routePoints,
+    required DateTime startTime,
+    required DateTime endTime,
   }) async {
     try {
-      // 1. Chuẩn bị dữ liệu body (theo format server bạn yêu cầu)
-      // Chuyển List<LatLng> thành List<Map> để gửi JSON
-      List<Map<String, double>> coordinates = routePoints.map((point) {
-        return {
-          'latitude': point.latitude,
-          'longitude': point.longitude,
-        };
-      }).toList();
+      final headers = await _getHeaders();
 
-      final Map<String, dynamic> body = {
-        'distance': distanceKm,
-        'calories': calories,
-        'duration_seconds': duration.inSeconds, // Gửi giây cho chuẩn
-        'route': coordinates,
-        'created_at': DateTime.now().toIso8601String(),
+      final dto = {
+        "distanceKm": distanceKm,
+        "durationSeconds": duration.inSeconds,
+        "startTime": startTime.toIso8601String(),
+        "endTime": endTime.toIso8601String(),
+        "routeJson": jsonEncode(
+          routePoints
+              .map((p) => {
+            "latitude": p.latitude,
+            "longitude": p.longitude,
+          })
+              .toList(),
+        )
       };
-
       // 2. Gọi API POST
       final http.Response response = await http.post(
         Uri.parse(_baseUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          // 'Authorization': 'Bearer ...' // Thêm token nếu server yêu cầu đăng nhập
-        },
-        body: jsonEncode(body),
+        headers: headers,
+        body: jsonEncode(dto),
       );
 
       // 3. Kiểm tra kết quả (200 hoặc 201 là thành công)

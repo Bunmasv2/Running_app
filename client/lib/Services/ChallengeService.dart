@@ -7,8 +7,8 @@ class ChallengeService {
   // Ưu tiên baseUrl của UIA_FE
   // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/Challenge';
 
-  // static const String _baseUrl = 'http://192.168.173.173:5144/Challenge';
-  static const String _baseUrl = 'http://10.0.2.2:5144/Challenge';
+  static const String _baseUrl = 'http://192.168.100.231:5144/Challenge';
+  // static const String _baseUrl = 'http://10.0.2.2:5144/Challenge';
 
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -45,8 +45,8 @@ class ChallengeService {
   Future<List<UserChallengeProgress>> getMyChallenges() async {
     try {
       final headers = await _getHeaders();
-      final response =
-          await http.get(Uri.parse('$_baseUrl/my-challenges'), headers: headers);
+      final response = await http.get(Uri.parse('$_baseUrl/my-challenges'),
+          headers: headers);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> body = jsonDecode(response.body);
@@ -76,23 +76,14 @@ class ChallengeService {
 
       // Nếu code là 200/201 -> Thành công (True) + Message
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return {
-          "success": true,
-          "message": serverMessage
-        };
+        return {"success": true, "message": serverMessage};
       } else {
         // Nếu code lỗi -> Thất bại (False) + Message lỗi từ server
-        return {
-          "success": false,
-          "message": serverMessage
-        };
+        return {"success": false, "message": serverMessage};
       }
     } catch (e) {
       print("Join challenge error: $e");
-      return {
-        "success": false,
-        "message": "Lỗi kết nối server"
-      };
+      return {"success": false, "message": "Lỗi kết nối server"};
     }
   }
 }

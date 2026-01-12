@@ -37,14 +37,28 @@ namespace server.Configs
                 {
                     OnMessageReceived = context =>
                     {
-                        Console.WriteLine("📩 OnMessageReceived triggered");
-                        var token = context.Request.Cookies["token"];
-                        Console.WriteLine($"Token from cookie: {token}");
-                        if (!string.IsNullOrEmpty(token))
+                        // 1. Lấy token từ Header (Cách chuẩn cho Flutter/Mobile App)
+                        string authorization = context.Request.Headers["Authorization"];
+
+                        // Nếu Header có dạng "Bearer xxxxx..."
+                        if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                         {
-                            context.Token = token;
+                            // Cắt bỏ chữ "Bearer " để lấy token
+                            context.Token = authorization.Substring("Bearer ".Length).Trim();
+                            Console.WriteLine($"✅ LOG: Tìm thấy Token trong Header: {context.Token.Substring(0, 10)}...");
                         }
-                        return System.Threading.Tasks.Task.CompletedTask;
+                        // 2. Nếu không có trong Header, mới tìm trong Cookie (Fallback cho Web)
+                        else if (context.Request.Cookies.ContainsKey("token"))
+                        {
+                            context.Token = context.Request.Cookies["token"];
+                            Console.WriteLine($"✅ LOG: Tìm thấy Token trong Cookie: {context.Token?.Substring(0, 10)}...");
+                        }
+                        else
+                        {
+                            Console.WriteLine("⚠️ LOG: Không tìm thấy Token trong cả Header và Cookie");
+                        }
+
+                        return Task.CompletedTask;
                     },
                     OnTokenValidated = async context =>
                     {
@@ -55,6 +69,7 @@ namespace server.Configs
                         Console.WriteLine("⛔ OnForbidden triggered");
                         context.Response.StatusCode = 403;
                         context.Response.ContentType = "application/json";
+
                         var message = "Only members have access!";
                         var response = new { ErrorMessage = message };
 

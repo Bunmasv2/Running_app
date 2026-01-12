@@ -7,8 +7,8 @@ import '../models/UserRanking.dart';
 
 class RunService {
   // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run';
-   static const String _baseUrl = 'http://10.0.2.2:5144/Run';
-  // static const String _baseUrl = 'http://192.168.173.173:5144/Run';
+  //  static const String _baseUrl = 'http://10.0.2.2:5144/Run';
+  static const String _baseUrl = 'http://192.168.100.231:5144/Run';
   Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('accessToken');
@@ -16,6 +16,7 @@ class RunService {
 
   Future<Map<String, String>> _getHeaders() async {
     String? token = await _getToken();
+    print("DEBUG TOKEN GỬI ĐI: 'Bearer $token'");
     return {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -148,7 +149,8 @@ class RunService {
         final List listData = decoded['data'] ?? [];
         return listData.map((e) => RunHistoryDto.fromJson(e)).toList();
       } else {
-        print('Get Monthly Sessions failed: ${response.statusCode} - ${response.body}');
+        print(
+            'Get Monthly Sessions failed: ${response.statusCode} - ${response.body}');
         return [];
       }
     } catch (e) {
@@ -172,7 +174,8 @@ class RunService {
         final List listData = decoded['data'] ?? [];
         return listData.map((e) => RunHistoryDto.fromJson(e)).toList();
       } else {
-        print('Get Top 2 Sessions failed: ${response.statusCode} - ${response.body}');
+        print(
+            'Get Top 2 Sessions failed: ${response.statusCode} - ${response.body}');
         return [];
       }
     } catch (e) {
@@ -196,7 +199,8 @@ class RunService {
         final List listData = decoded['data'] ?? [];
         return listData.map((e) => RunHistoryDto.fromJson(e)).toList();
       } else {
-        print('Get Weekly Sessions failed: ${response.statusCode} - ${response.body}');
+        print(
+            'Get Weekly Sessions failed: ${response.statusCode} - ${response.body}');
         return [];
       }
     } catch (e) {
@@ -205,27 +209,28 @@ class RunService {
     }
   }
 
-   Future<List<RelativeEffort>> getRelativeEffort() async {
-     try {
-       final headers = await _getHeaders();
-       final response = await http.get(
-         Uri.parse('$_baseUrl/relative-effort'),
-         headers: headers,
-       );
+  Future<List<RelativeEffort>> getRelativeEffort() async {
+    try {
+      final headers = await _getHeaders();
+      final response = await http.get(
+        Uri.parse('$_baseUrl/relative-effort'),
+        headers: headers,
+      );
 
-       if (response.statusCode == 200) {
-         print("Dữ liệu Realative Effort: ${response.body}");
-         final decoded = jsonDecode(response.body);
+      if (response.statusCode == 200) {
+        print("Dữ liệu Realative Effort: ${response.body}");
+        final decoded = jsonDecode(response.body);
 
-         final List listData = decoded['data'] ?? [];
-         return listData.map((e) => RelativeEffort.fromJson(e)).toList();
-       } else {
-         print('Get Realative Effort failed: ${response.statusCode} - ${response.body}');
-         return [];
-       }
-     } catch (e) {
-       print('Get Realative Effort error: $e');
-       return [];
-     }
-   }
+        final List listData = decoded['data'] ?? [];
+        return listData.map((e) => RelativeEffort.fromJson(e)).toList();
+      } else {
+        print(
+            'Get Realative Effort failed: ${response.statusCode} - ${response.body}');
+        return [];
+      }
+    } catch (e) {
+      print('Get Realative Effort error: $e');
+      return [];
+    }
+  }
 }
