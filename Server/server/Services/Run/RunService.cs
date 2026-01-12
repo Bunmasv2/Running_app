@@ -24,7 +24,7 @@ namespace server.Services
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             var DailyGoal = await _context.DailyGoals
-                .OrderByDescending(g => g.Date)
+                .OrderByDescending(g => g.Id)
                 .FirstOrDefaultAsync(g => g.UserId == userId);
             int? DailyGoalId = null;
 
