@@ -71,8 +71,19 @@ class _PersonalviewState extends State<Personalview> {
   }
 
   Future<void> _loadWeeklyData() async {
-    final data = await _runService.getWeeklyRunSessions(_currentMonthView.month, _currentMonthView.year);
-    setState(() => _weeklySessions = data);
+    DateTime start = _currentWeekStart;
+    DateTime end = start.add(const Duration(days: 6));
+    List<RunHistoryDto> sessions = [];
+
+    // Lấy dữ liệu tháng của ngày bắt đầu tuần
+    sessions.addAll(await _runService.getWeeklyRunSessions(start.month, start.year));
+
+    // Nếu tuần vắt qua tháng khác, lấy thêm dữ liệu tháng đó
+    if (start.month != end.month || start.year != end.year) {
+      sessions.addAll(await _runService.getWeeklyRunSessions(end.month, end.year));
+    }
+
+    setState(() => _weeklySessions = sessions);
   }
 
   Future<void> _loadRealativeEffort() async {

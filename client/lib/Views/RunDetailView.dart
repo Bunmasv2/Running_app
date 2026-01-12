@@ -57,11 +57,17 @@ class _RunDetailViewState extends State<RunDetailView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Chi tiết buổi chạy")),
+      backgroundColor: const Color(0xFF1A1A1A),
+      appBar: AppBar(
+        title: const Text("Chi tiết buổi chạy", style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF1A1A1A),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.orange))
           : _detail == null
-          ? const Center(child: Text("Không tìm thấy dữ liệu"))
+          ? const Center(child: Text("Không tìm thấy dữ liệu", style: TextStyle(color: Colors.white)))
           : Column(
         children: [
           // PHẦN 1: BẢN ĐỒ TĨNH
@@ -88,7 +94,7 @@ class _RunDetailViewState extends State<RunDetailView> {
                     Polyline(
                       points: _detail!.routePoints,
                       strokeWidth: 5.0,
-                      color: Colors.redAccent,
+                      color: Colors.orange,
                     ),
                   ],
                 ),
@@ -96,7 +102,7 @@ class _RunDetailViewState extends State<RunDetailView> {
                 if (_detail!.routePoints.isNotEmpty)
                   MarkerLayer(markers: [
                     Marker(point: _detail!.routePoints.first, child: const Icon(Icons.trip_origin, color: Colors.green)),
-                    Marker(point: _detail!.routePoints.last, child: const Icon(Icons.flag, color: Colors.red)),
+                    Marker(point: _detail!.routePoints.last, child: const Icon(Icons.flag, color: Colors.redAccent)),
                   ])
               ],
             ),
@@ -108,13 +114,13 @@ class _RunDetailViewState extends State<RunDetailView> {
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: const Offset(0, -5))],
+                color: const Color(0xFF2C2C2E),
+                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, -5))],
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: Column(
                 children: [
-                  const Text("Tổng kết", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const Text("Tổng kết", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -136,9 +142,9 @@ class _RunDetailViewState extends State<RunDetailView> {
   Widget _detailItem(String label, String value) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
+        Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.orange)),
         const SizedBox(height: 5),
-        Text(label, style: TextStyle(color: Colors.grey[600])),
+        Text(label, style: TextStyle(color: Colors.grey[400])),
       ],
     );
   }
