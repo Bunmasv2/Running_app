@@ -52,7 +52,7 @@ class GoalService {
   }
 
   // SET GOAL
-  Future<DailyGoal?> setTodayGoal(double km) async {
+  Future<DailyGoal?> setTodayGoal(double km, String type) async {
     if (useMockData) return DailyGoal(targetDistanceKm: km, currentDistanceKm: 0.0);
 
     try {
@@ -62,7 +62,7 @@ class GoalService {
       });
 
       final response = await http.post(
-          Uri.parse(_baseUrl),
+          Uri.parse('$_baseUrl/$type'),
           headers: headers,
           body: body
       );

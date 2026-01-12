@@ -23,6 +23,15 @@ namespace server.Services
         public async Task<RunSessionDto.RunResponseDto> SaveRunSessionAsync(string userId, RunSessionDto.RunCreateDto dto)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            var DailyGoal = await _context.DailyGoals
+                .OrderByDescending(g => g.Id)
+                .FirstOrDefaultAsync(g => g.UserId == userId);
+            int? DailyGoalId = null;
+
+            if (DailyGoal != null && DailyGoal.Date.Date == dto.StartTime.Date)
+            {
+                DailyGoalId = DailyGoal.Id;
+            }
 
             if (user == null) throw new Exception("User not found");
 
@@ -37,7 +46,8 @@ namespace server.Services
                 StartTime = dto.StartTime,
                 EndTime = dto.EndTime,
                 RouteJson = dto.RouteJson,
-                CaloriesBurned = calories
+                CaloriesBurned = calories,
+                DailyGoalId = DailyGoalId
             };
 
             // --- [SỬA LỖI TẠI ĐÂY] ---

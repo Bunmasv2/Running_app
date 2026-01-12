@@ -28,7 +28,7 @@ class TrackingService {
         'calories': calories,
         'duration_seconds': duration.inSeconds, // Gửi giây cho chuẩn
         'route': coordinates,
-        'created_at': DateTime.now().toIso8601String(),
+        'created_at': DateTime.now(),
       };
 
       // 2. Gọi API POST
