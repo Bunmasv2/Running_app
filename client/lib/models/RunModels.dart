@@ -53,7 +53,7 @@ class RunHistoryDto {
     return RunHistoryDto(
       id: json['id'] ?? 0,
       distanceKm: (json['distanceKm'] as num?)?.toDouble() ?? 0.0,
-      durationSeconds: json['durationSeconds'] ?? 0,
+      durationSeconds: (json['durationSeconds'] as num?)?.toInt() ?? 0, // Cast an toàn
       calories: (json['caloriesBurned'] as num?)?.toDouble() ?? 0.0,
       createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
       endTime: DateTime.tryParse(json['endTime'] ?? '') ?? DateTime.now(),
@@ -100,8 +100,8 @@ class RunDetailDto {
       id: json['id'] ?? 0,
       distanceKm: (json['distanceKm'] as num?)?.toDouble() ?? 0.0,
       calories: (json['caloriesBurned'] as num?)?.toDouble() ?? 0.0,
-      durationSeconds: json['durationSeconds'] ?? 0,
-      createdAt: DateTime.tryParse(json['createdAt'] ?? '') ?? DateTime.now(),
+      durationSeconds: (json['durationSeconds'] as num?)?.toInt() ?? 0, // Cast an toàn
+      createdAt: DateTime.tryParse(json['startTime'] ?? json['createdAt'] ?? '') ?? DateTime.now(),
       routePoints: points,
     );
   }

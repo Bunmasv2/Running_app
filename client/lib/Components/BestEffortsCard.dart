@@ -23,7 +23,7 @@ class BestEffortsCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Best Efforts',
+                'Những nỗ lực tốt nhất',
                 style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],
@@ -36,6 +36,21 @@ class BestEffortsCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatDuration(int seconds) {
+    int duration = seconds;
+    int hours = duration ~/ 3600;
+    int minutes = (duration % 3600) ~/ 60;
+    int secs = duration % 60;
+
+    if (hours > 0) {
+      return "${hours}h ${minutes}m ${secs}s";
+    } else if (minutes > 0) {
+      return "${minutes}m ${secs}s";
+    } else {
+      return "${secs}s";
+    }
   }
 
   Widget _buildEffortItem(RunHistoryDto session) {
@@ -61,11 +76,15 @@ class BestEffortsCard extends StatelessWidget {
                   DateFormat('MMM dd, yyyy').format(session.endTime),
                   style: TextStyle(color: Colors.grey[500], fontSize: 12),
                 ),
+                Text(
+                  _formatDuration(session.durationSeconds),
+                  style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                ),
               ],
             ),
           ),
           Text(
-            "${session.distanceKm.toStringAsFixed(1)} km",
+            "${session.distanceKm.toStringAsFixed(2)} km",
             style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ],

@@ -52,19 +52,21 @@ class _RankingViewState extends State<RankingView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
         title: const Text(
             'Bảng Xếp Hạng', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: const Color(0xFF1A1A1A),
+        foregroundColor: Colors.white,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.orange))
           : RefreshIndicator(
         onRefresh: _loadData,
+        backgroundColor: const Color(0xFF2D2D2D),
+        color: Colors.orange,
         child: _rankings.isEmpty
             ? _buildEmptyState()
             : _buildRankingList(),
@@ -76,7 +78,7 @@ class _RankingViewState extends State<RankingView> {
     return ListView( // Dùng ListView để RefreshIndicator hoạt động
       children: const [
         SizedBox(height: 100),
-        Center(child: Text("Chưa có dữ liệu xếp hạng tuần này")),
+        Center(child: Text("Chưa có dữ liệu xếp hạng tuần này", style: TextStyle(color: Colors.grey))),
       ],
     );
   }
@@ -91,7 +93,7 @@ class _RankingViewState extends State<RankingView> {
         children: [
           const Text(
             'Chiến Binh Hệ Chạy – 7 Ngày Trong Tuần',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 16),
           Expanded(
@@ -120,13 +122,14 @@ class _RankingViewState extends State<RankingView> {
       padding: const EdgeInsets.all(12),
       margin: const EdgeInsets.only(top: 10),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: const Color(0xFF2D2D2D),
         borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
       ),
       child: const Text(
         '💪 Chưa vào top 10? Bạn đang vô địch chính cuộc đua của riêng mình!',
         textAlign: TextAlign.center,
-        style: TextStyle(fontStyle: FontStyle.italic, color: Colors.blue),
+        style: TextStyle(fontStyle: FontStyle.italic, color: Colors.orange),
       ),
     );
   }
@@ -147,15 +150,9 @@ class _RankingViewState extends State<RankingView> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: highlight ? Colors.blue.shade50 : Colors.white,
+        color: highlight ? Colors.orange.withValues(alpha: 0.1) : const Color(0xFF2D2D2D),
         borderRadius: BorderRadius.circular(15),
-        border: highlight ? Border.all(color: Colors.blue.shade200) : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
-          )
-        ],
+        border: highlight ? Border.all(color: Colors.orange.withValues(alpha: 0.5)) : null,
       ),
       child: Row(
         children: [
@@ -163,22 +160,22 @@ class _RankingViewState extends State<RankingView> {
           SizedBox(
             width: 30,
             child: rank <= 3
-                ? Icon(Icons.emoji_events, color: medalColor, size: 20)
+                ? Icon(Icons.emoji_events, color: medalColor, size: 24)
                 : Text(
               '$rank',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
             ),
           ),
 
           // 🧑 Avatar
           CircleAvatar(
             radius: 20,
-            backgroundColor: Colors.grey.shade200,
+            backgroundColor: Colors.grey.shade700,
             backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
                 ? NetworkImage(user.avatarUrl!)
                 : null,
             child: user.avatarUrl == null || user.avatarUrl!.isEmpty
-                ? const Icon(Icons.person)
+                ? const Icon(Icons.person, color: Colors.grey)
                 : null,
           ),
 
@@ -190,7 +187,7 @@ class _RankingViewState extends State<RankingView> {
             flex: 2,
             child: Text(
               user.username,
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -202,7 +199,7 @@ class _RankingViewState extends State<RankingView> {
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.blue,
+                color: Colors.orange,
               ),
             ),
           ),
@@ -212,9 +209,9 @@ class _RankingViewState extends State<RankingView> {
             child: Text(
               '${user.totalDistanceKm.toStringAsFixed(2)} km',
               textAlign: TextAlign.end,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey,
+                color: Colors.grey[400],
               ),
             ),
           ),

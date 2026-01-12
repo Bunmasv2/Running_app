@@ -52,7 +52,7 @@ class WeeklyGoalsCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Goals',
+                'Mục tiêu',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 14,
@@ -94,7 +94,7 @@ class WeeklyGoalsCard extends StatelessWidget {
 
           const SizedBox(height: 16),
           const Text(
-            'Weekly Run Goal',
+            'Mục tiêu chạy bộ hàng tuần',
             style: TextStyle(
               color: Colors.white,
               fontSize: 14,
@@ -103,7 +103,7 @@ class WeeklyGoalsCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '$runDays/7 runs · ${(percent * 100).toStringAsFixed(0)}%',
+            '$runDays/7 cuộc chạy · ${(percent * 100).toStringAsFixed(0)}%',
             style: TextStyle(
               color: Colors.grey[500],
               fontSize: 12,

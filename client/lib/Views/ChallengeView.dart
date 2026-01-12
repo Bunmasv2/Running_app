@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import '../models/ChallengeModels.dart';
 import '../Services/ChallengeService.dart';
+import '../Components/HeaderComponent.dart';
 
 class ChallengeView extends StatefulWidget {
-  const ChallengeView({super.key});
+  final ValueChanged<String?>? onSubtitleChanged;
+
+  const ChallengeView({super.key, this.onSubtitleChanged});
 
   @override
   State<ChallengeView> createState() => _ChallengeViewState();
 }
 
-class _ChallengeViewState extends State<ChallengeView> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _ChallengeViewState extends State<ChallengeView> {
   final ChallengeService _challengeService = ChallengeService();
 
   List<Challenge> _allChallenges = [];
@@ -20,7 +22,6 @@ class _ChallengeViewState extends State<ChallengeView> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
     _loadData();
   }
 
@@ -72,43 +73,27 @@ class _ChallengeViewState extends State<ChallengeView> with SingleTickerProvider
     // Responsive Dimensions
     final size = MediaQuery.of(context).size;
 
-    return Scaffold(
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF1A1A1A),
+        body: Center(child: CircularProgressIndicator(color: Colors.deepOrange)),
+      );
+    }
+
+    return ScrollableHeaderTabsComponent(
       backgroundColor: const Color(0xFF1A1A1A),
-      body: Column(
-        children: [
-          // 1. HEADER TABS
-          Container(
-            color: Colors.black,
-            child: TabBar(
-              controller: _tabController,
-              indicatorColor: Colors.deepOrange,
-              labelColor: Colors.deepOrange,
-              unselectedLabelColor: Colors.grey,
-              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-              tabs: const [
-                Tab(text: "Danh sách"),
-                Tab(text: "Của bạn"),
-              ],
-            ),
-          ),
-
-          // 2. BODY CONTENT
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: Colors.deepOrange))
-                : TabBarView(
-              controller: _tabController,
-              children: [
-                // TAB 1: DANH SÁCH (GRID VIEW)
-                _buildAllChallengesGrid(size),
-
-                // TAB 2: CỦA BẠN (LIST VIEW WITH PROGRESS)
-                _buildMyChallengesList(size),
-              ],
-            ),
-          ),
-        ],
-      ),
+      activeColor: Colors.deepOrange,
+      tabs: [
+        HeaderTabItem(
+          label: "Danh sách",
+          content: _buildAllChallengesGrid(size),
+        ),
+        HeaderTabItem(
+          label: "Của bạn",
+          content: _buildMyChallengesList(size),
+        ),
+      ],
+      onTabLabelChanged: (label) => widget.onSubtitleChanged?.call(label),
     );
   }
 

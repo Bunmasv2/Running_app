@@ -40,7 +40,7 @@ class TrainingLogCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
               Text(
-                'Training Log',
+                'Log luyện tập',
                 style: TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold),
               ),

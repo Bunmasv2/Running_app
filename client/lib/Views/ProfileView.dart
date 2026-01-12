@@ -178,7 +178,13 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text("Hồ sơ cá nhân", style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF1A1A1A),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      backgroundColor: const Color(0xFF1A1A1A),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _userProfile == null
@@ -195,6 +201,25 @@ class _ProfileViewState extends State<ProfileView> {
               _buildStatsBoard(),
               const SizedBox(height: 25),
               _buildInfoSection(),
+              const SizedBox(height: 30),
+            Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.logout),
+                    label: const Text('Đăng xuất'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
+                      foregroundColor: Colors.redAccent,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: _handleLogout,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
             ],
           ),
         ),
@@ -207,9 +232,9 @@ class _ProfileViewState extends State<ProfileView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, color: Colors.red, size: 50),
+          const Icon(Icons.error_outline, color: Colors.orange, size: 50),
           const SizedBox(height: 10),
-          const Text("Lỗi kết nối hoặc không tìm thấy User"),
+          const Text("Lỗi kết nối hoặc không tìm thấy User", style: TextStyle(color: Colors.white)),
           ElevatedButton(onPressed: () {
             setState(() => _isLoading = true);
             _loadData();
@@ -229,12 +254,12 @@ class _ProfileViewState extends State<ProfileView> {
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 4),
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10)],
+                  border: Border.all(color: Colors.orange, width: 2),
+                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10)],
                 ),
                 child: CircleAvatar(
                   radius: 60,
-                  backgroundColor: Colors.grey[200],
+                  backgroundColor: Colors.grey[800],
                   backgroundImage: _userProfile!.avatarUrl != null && _userProfile!.avatarUrl!.isNotEmpty
                       ? NetworkImage(_userProfile!.avatarUrl!)
                       : null,
@@ -249,7 +274,7 @@ class _ProfileViewState extends State<ProfileView> {
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: const BoxDecoration(
-                    color: Colors.blue,
+                    color: Colors.orange,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
@@ -264,10 +289,10 @@ class _ProfileViewState extends State<ProfileView> {
           children: [
             Text(
               _userProfile!.userName,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             IconButton(
-              icon: const Icon(Icons.edit, color: Colors.blue),
+              icon: const Icon(Icons.edit, color: Colors.orange),
               onPressed: _showEditDialog,
               tooltip: "Sửa thông tin",
             )
@@ -275,7 +300,7 @@ class _ProfileViewState extends State<ProfileView> {
         ),
         Text(
           _userProfile!.email,
-          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+          style: TextStyle(fontSize: 14, color: Colors.grey[400]),
         ),
         const SizedBox(height: 15),
         Row(
@@ -294,15 +319,15 @@ class _ProfileViewState extends State<ProfileView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Colors.blueGrey),
+          Icon(icon, size: 18, color: Colors.orange),
           const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
         ],
       ),
     );
@@ -313,18 +338,15 @@ class _ProfileViewState extends State<ProfileView> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFF2C2C2E),
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 15, offset: const Offset(0, 5))
-        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _statItem("QUÃNG ĐƯỜNG", "${_userProfile!.totalDistanceKm.toStringAsFixed(2)} km", Colors.blue),
-          Container(width: 1, height: 50, color: Colors.grey[200]),
-          _statItem("THỜI GIAN", _formatTotalTime(_userProfile!.totalTimeSeconds), Colors.orange),
+          _statItem("QUÃNG ĐƯỜNG", "${_userProfile!.totalDistanceKm.toStringAsFixed(2)} km", Colors.orange),
+          Container(width: 1, height: 50, color: Colors.white.withValues(alpha: 0.1)),
+          _statItem("THỜI GIAN", _formatTotalTime(_userProfile!.totalTimeSeconds), Colors.white),
         ],
       ),
     );
@@ -335,7 +357,7 @@ class _ProfileViewState extends State<ProfileView> {
       children: [
         Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color)),
         const SizedBox(height: 5),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[500], letterSpacing: 1.2)),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[400], letterSpacing: 1.2)),
       ],
     );
   }
@@ -344,17 +366,17 @@ class _ProfileViewState extends State<ProfileView> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Container(
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(15)),
+        decoration: BoxDecoration(color: const Color(0xFF2C2C2E), borderRadius: BorderRadius.circular(15)),
         child: ListTile(
           leading: Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: Colors.purple.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-            child: const Icon(Icons.calendar_month, color: Colors.purple),
+            decoration: BoxDecoration(color: Colors.orange.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+            child: const Icon(Icons.calendar_month, color: Colors.orange),
           ),
-          title: const Text("Ngày tham gia"),
+          title: const Text("Ngày tham gia", style: TextStyle(color: Colors.grey)),
           trailing: Text(
             _formatDate(_userProfile!.createdAt),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
       ),
