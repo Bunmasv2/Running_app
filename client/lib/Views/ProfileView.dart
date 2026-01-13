@@ -25,7 +25,6 @@ class _ProfileViewState extends State<ProfileView> {
   }
 
   Future<void> _loadData() async {
-    // Không set isLoading = true ở đây để tránh nháy màn hình khi update xong
     UserProfile? user = await _userService.getUserProfile();
     if (mounted) {
       setState(() {
@@ -35,7 +34,6 @@ class _ProfileViewState extends State<ProfileView> {
     }
   }
 
-  // --- CHỨC NĂNG 1: UPLOAD AVATAR ---
   Future<void> _pickAndUploadAvatar() async {
     try {
       final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -50,21 +48,16 @@ class _ProfileViewState extends State<ProfileView> {
 
       if (!mounted) return;
       if (success) {
-        await _loadData(); // Load lại để thấy ảnh mới
+        await _loadData();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Đổi avatar thành công!'), backgroundColor: Colors.green),
         );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Lỗi tải ảnh.'), backgroundColor: Colors.red),
-        );
       }
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
-  // --- CHỨC NĂNG 2: SỬA THÔNG TIN ---
   void _showEditDialog() {
     if (_userProfile == null) return;
 
@@ -75,27 +68,15 @@ class _ProfileViewState extends State<ProfileView> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Cập nhật thông tin"),
+        backgroundColor: const Color(0xFF2C2C2E),
+        title: const Text("Cập nhật thông tin", style: TextStyle(color: Colors.white)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: "Tên hiển thị"),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: heightController,
-                decoration: const InputDecoration(labelText: "Chiều cao (cm)"),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: weightController,
-                decoration: const InputDecoration(labelText: "Cân nặng (kg)"),
-                keyboardType: TextInputType.number,
-              ),
+              _buildDialogField(nameController, "Tên hiển thị", TextInputType.text),
+              _buildDialogField(heightController, "Chiều cao (cm)", TextInputType.number),
+              _buildDialogField(weightController, "Cân nặng (kg)", TextInputType.number),
             ],
           ),
         ),
@@ -106,22 +87,11 @@ class _ProfileViewState extends State<ProfileView> {
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(context); // Đóng dialog trước
-
+              Navigator.pop(context);
               double h = double.tryParse(heightController.text) ?? 0;
               double w = double.tryParse(weightController.text) ?? 0;
-
               bool success = await _userService.updateProfile(nameController.text, h, w);
-
-              if (!mounted) return;
-              if (success) {
-                await _loadData(); // Load lại data
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Cập nhật thành công!'), backgroundColor: Colors.green));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Cập nhật thất bại'), backgroundColor: Colors.red));
-              }
+              if (success) await _loadData();
             },
             child: const Text("Lưu"),
           ),
@@ -130,96 +100,79 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
+  Widget _buildDialogField(TextEditingController controller, String label, TextInputType type) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: TextField(
+        controller: controller,
+        keyboardType: type,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.grey),
+          enabledBorder: const UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+        ),
+      ),
+    );
+  }
+
   void _handleLogout() async {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text("Đăng xuất"),
-        content: const Text("Bạn có muốn đăng xuất khỏi ứng dụng?"),
+        backgroundColor: const Color(0xFF2C2C2E),
+        title: const Text("Đăng xuất", style: TextStyle(color: Colors.white)),
+        content: const Text("Bạn có muốn đăng xuất khỏi ứng dụng?", style: TextStyle(color: Colors.white70)),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Hủy"),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Hủy")),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text("Đăng xuất"),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            child: const Text("Đăng xuất", style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
 
     if (confirm == true) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/login',
-            (route) => false,
-      );
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
     }
   }
 
-  // --- HELPER FORMAT ---
-  String _formatTotalTime(double totalSeconds) {
-    int seconds = totalSeconds.toInt();
-    int hours = seconds ~/ 3600;
-    int minutes = (seconds % 3600) ~/ 60;
-    return "${hours}h ${minutes}p";
-  }
-
-  String _formatDate(DateTime d) {
-    return "${d.day}/${d.month}/${d.year}";
-  }
-
-  // --- UI CHÍNH ---
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
+      backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
-        title: const Text("Hồ sơ cá nhân", style: TextStyle(color: Colors.white)),
+        title: const Text("Hồ sơ cá nhân", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      backgroundColor: const Color(0xFF1A1A1A),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.orange))
           : _userProfile == null
           ? _buildErrorState()
           : RefreshIndicator(
         onRefresh: _loadData,
+        color: Colors.orange,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: size.width * 0.05),
           child: Column(
             children: [
-              const SizedBox(height: 20),
-              _buildUserHeader(),
-              const SizedBox(height: 20),
-              _buildStatsBoard(),
-              const SizedBox(height: 25),
+              SizedBox(height: size.height * 0.02),
+              _buildUserHeader(size),
+              SizedBox(height: size.height * 0.03),
+              _buildStatsBoard(size),
+              SizedBox(height: size.height * 0.03),
               _buildInfoSection(),
-              const SizedBox(height: 30),
-            Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.logout),
-                    label: const Text('Đăng xuất'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent.withValues(alpha: 0.2),
-                      foregroundColor: Colors.redAccent,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    onPressed: _handleLogout,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
+              SizedBox(height: size.height * 0.04),
+              _buildLogoutButton(size),
+              SizedBox(height: size.height * 0.05),
             ],
           ),
         ),
@@ -227,24 +180,7 @@ class _ProfileViewState extends State<ProfileView> {
     );
   }
 
-  Widget _buildErrorState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, color: Colors.orange, size: 50),
-          const SizedBox(height: 10),
-          const Text("Lỗi kết nối hoặc không tìm thấy User", style: TextStyle(color: Colors.white)),
-          ElevatedButton(onPressed: () {
-            setState(() => _isLoading = true);
-            _loadData();
-          }, child: const Text("Thử lại"))
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUserHeader() {
+  Widget _buildUserHeader(Size size) {
     return Column(
       children: [
         GestureDetector(
@@ -255,16 +191,15 @@ class _ProfileViewState extends State<ProfileView> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.orange, width: 2),
-                  boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10)],
                 ),
                 child: CircleAvatar(
-                  radius: 60,
+                  radius: size.width * 0.15,
                   backgroundColor: Colors.grey[800],
-                  backgroundImage: _userProfile!.avatarUrl != null && _userProfile!.avatarUrl!.isNotEmpty
+                  backgroundImage: _userProfile!.avatarUrl?.isNotEmpty == true
                       ? NetworkImage(_userProfile!.avatarUrl!)
                       : null,
-                  child: _userProfile!.avatarUrl == null
-                      ? const Icon(Icons.person, size: 60, color: Colors.grey)
+                  child: _userProfile!.avatarUrl?.isEmpty ?? true
+                      ? Icon(Icons.person, size: size.width * 0.15, color: Colors.grey)
                       : null,
                 ),
               ),
@@ -273,41 +208,34 @@ class _ProfileViewState extends State<ProfileView> {
                 right: 0,
                 child: Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Colors.orange,
-                    shape: BoxShape.circle,
-                  ),
+                  decoration: const BoxDecoration(color: Colors.orange, shape: BoxShape.circle),
                   child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
                 ),
               )
             ],
           ),
         ),
-        const SizedBox(height: 15),
+        SizedBox(height: size.height * 0.02),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               _userProfile!.userName,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+              style: TextStyle(fontSize: size.width * 0.06, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             IconButton(
-              icon: const Icon(Icons.edit, color: Colors.orange),
+              icon: const Icon(Icons.edit, color: Colors.orange, size: 20),
               onPressed: _showEditDialog,
-              tooltip: "Sửa thông tin",
             )
-          ]
+          ],
         ),
-        Text(
-          _userProfile!.email,
-          style: TextStyle(fontSize: 14, color: Colors.grey[400]),
-        ),
-        const SizedBox(height: 15),
+        Text(_userProfile!.email, style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+        SizedBox(height: size.height * 0.02),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _chipInfo(Icons.height, "${_userProfile!.heightCm} cm"),
-            const SizedBox(width: 15),
+            const SizedBox(width: 12),
             _chipInfo(Icons.monitor_weight, "${_userProfile!.weightKg} kg"),
           ],
         )
@@ -317,36 +245,33 @@ class _ProfileViewState extends State<ProfileView> {
 
   Widget _chipInfo(IconData icon, String label) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: Colors.white.withOpacity(0.05),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: Colors.orange),
-          const SizedBox(width: 8),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white)),
+          Icon(icon, size: 16, color: Colors.orange),
+          const SizedBox(width: 6),
+          Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
         ],
       ),
     );
   }
 
-  Widget _buildStatsBoard() {
+  Widget _buildStatsBoard(Size size) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.symmetric(vertical: size.height * 0.025),
       decoration: BoxDecoration(
         color: const Color(0xFF2C2C2E),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _statItem("QUÃNG ĐƯỜNG", "${_userProfile!.totalDistanceKm.toStringAsFixed(2)} km", Colors.orange),
-          Container(width: 1, height: 50, color: Colors.white.withValues(alpha: 0.1)),
-          _statItem("THỜI GIAN", _formatTotalTime(_userProfile!.totalTimeSeconds), Colors.white),
+          Expanded(child: _statItem("QUÃNG ĐƯỜNG", "${_userProfile!.totalDistanceKm.toStringAsFixed(2)} km", Colors.orange)),
+          Container(width: 1, height: 40, color: Colors.white10),
+          Expanded(child: _statItem("THỜI GIAN", _formatTotalTime(_userProfile!.totalTimeSeconds), Colors.white)),
         ],
       ),
     );
@@ -355,31 +280,63 @@ class _ProfileViewState extends State<ProfileView> {
   Widget _statItem(String label, String value, Color color) {
     return Column(
       children: [
-        Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color)),
-        const SizedBox(height: 5),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[400], letterSpacing: 1.2)),
+        Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
+        const SizedBox(height: 4),
+        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey[500], letterSpacing: 1.1)),
       ],
     );
   }
 
   Widget _buildInfoSection() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        decoration: BoxDecoration(color: const Color(0xFF2C2C2E), borderRadius: BorderRadius.circular(15)),
-        child: ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: Colors.orange.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-            child: const Icon(Icons.calendar_month, color: Colors.orange),
-          ),
-          title: const Text("Ngày tham gia", style: TextStyle(color: Colors.grey)),
-          trailing: Text(
-            _formatDate(_userProfile!.createdAt),
-            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-          ),
+    return Container(
+      decoration: BoxDecoration(color: const Color(0xFF2C2C2E), borderRadius: BorderRadius.circular(15)),
+      child: ListTile(
+        leading: const Icon(Icons.calendar_month, color: Colors.orange),
+        title: const Text("Ngày tham gia", style: TextStyle(color: Colors.grey, fontSize: 14)),
+        trailing: Text(
+          _formatDate(_userProfile!.createdAt),
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
     );
   }
+
+  Widget _buildLogoutButton(Size size) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        icon: const Icon(Icons.logout, size: 20),
+        label: const Text('Đăng xuất', style: TextStyle(fontWeight: FontWeight.bold)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.redAccent.withOpacity(0.1),
+          foregroundColor: Colors.redAccent,
+          padding: EdgeInsets.symmetric(vertical: size.height * 0.018),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 0,
+        ),
+        onPressed: _handleLogout,
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, color: Colors.orange, size: 48),
+          const SizedBox(height: 16),
+          const Text("Không thể tải thông tin", style: TextStyle(color: Colors.white)),
+          TextButton(onPressed: _loadData, child: const Text("Thử lại", style: TextStyle(color: Colors.orange)))
+        ],
+      ),
+    );
+  }
+
+  String _formatTotalTime(double totalSeconds) {
+    int s = totalSeconds.toInt();
+    return "${s ~/ 3600}h ${(s % 3600) ~/ 60}p";
+  }
+
+  String _formatDate(DateTime d) => "${d.day}/${d.month}/${d.year}";
 }

@@ -10,14 +10,12 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   final UserService _userService = UserService();
-
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
 
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Xử lý đăng nhập thường
   void _handleLogin() async {
     setState(() {
       _isLoading = true;
@@ -39,114 +37,144 @@ class _LoginViewState extends State<LoginView> {
     }
   }
 
-  // // Xử lý đăng nhập Google (Dùng WebView)
-  // void _handleGoogleLogin() async {
-  //   setState(() => _isLoading = true);
-  //
-  //   // TRUYỀN CONTEXT VÀO ĐÂY ĐỂ MỞ WEBVIEW
-  //   bool success = await _userService.loginGoogle(context);
-  //
-  //   if (!mounted) return;
-  //   setState(() => _isLoading = false);
-  //
-  //   if (success) {
-  //     Navigator.pushReplacementNamed(context, '/main');
-  //   } else {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text("Đăng nhập thất bại hoặc bạn đã hủy thao tác.")),
-  //     );
-  //   }
-  // }
-
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFF1A1A1A),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 60.0),
+        child: Container(
+          width: size.width,
+          height: size.height,
+          padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.directions_run, size: 80, color: Colors.blue),
-              const SizedBox(height: 20),
-              const Text(
-                "ĐĂNG NHẬP",
+              Icon(
+                  Icons.directions_run_rounded,
+                  size: size.width * 0.25,
+                  color: Colors.deepOrange
+              ),
+              SizedBox(height: size.height * 0.02),
+              Text(
+                "RUN TRACKER",
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    fontSize: size.width * 0.07,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                    letterSpacing: 2
+                ),
               ),
-              const SizedBox(height: 40),
+              SizedBox(height: size.height * 0.01),
+              Text(
+                "Chinh phục mọi cung đường",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: size.width * 0.035,
+                    color: Colors.grey[500]
+                ),
+              ),
+              SizedBox(height: size.height * 0.06),
 
-              // Email Input
-              TextField(
+              _buildTextField(
                 controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: "Email",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.email),
-                ),
+                label: "Email",
+                icon: Icons.email_outlined,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: size.height * 0.025),
 
-              // Password Input
-              TextField(
+              _buildTextField(
                 controller: _passController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: "Mật khẩu",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock),
-                ),
+                label: "Mật khẩu",
+                icon: Icons.lock_outline_rounded,
+                isPassword: true,
               ),
 
               if (_errorMessage != null)
                 Padding(
-                  padding: const EdgeInsets.only(top: 10),
+                  padding: const EdgeInsets.only(top: 15),
                   child: Text(
                     _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
+                    style: const TextStyle(color: Colors.redAccent, fontSize: 13),
                     textAlign: TextAlign.center,
                   ),
                 ),
 
-              const SizedBox(height: 30),
+              SizedBox(height: size.height * 0.05),
 
-              // Login Button
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  backgroundColor: Colors.deepOrange,
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.deepOrange.withOpacity(0.5),
+                  padding: EdgeInsets.symmetric(vertical: size.height * 0.02),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
                 ),
                 child: _isLoading
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text("Đăng nhập", style: TextStyle(fontSize: 18, color: Colors.white)),
+                    ? SizedBox(
+                    height: size.height * 0.025,
+                    width: size.height * 0.025,
+                    child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                )
+                    : const Text(
+                    "Đăng nhập",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                ),
               ),
-              const SizedBox(height: 30),
+
+              SizedBox(height: size.height * 0.03),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Chưa có tài khoản? "),
+                  Text("Chưa có tài khoản? ", style: TextStyle(color: Colors.grey[400])),
                   TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/register');
-                    },
+                    onPressed: () => Navigator.pushNamed(context, '/register'),
                     child: const Text(
-                      "Đăng ký",
+                      "Đăng ký ngay",
                       style: TextStyle(
+                        color: Colors.deepOrange,
                         fontWeight: FontWeight.bold,
-                        fontSize: 16,
                       ),
                     ),
                   ),
                 ],
               ),
-
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    bool isPassword = false,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.grey),
+        prefixIcon: Icon(icon, color: Colors.deepOrange, size: 20),
+        filled: true,
+        fillColor: const Color(0xFF2C2C2C),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.deepOrange, width: 1),
         ),
       ),
     );

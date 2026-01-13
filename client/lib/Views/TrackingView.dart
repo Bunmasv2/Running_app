@@ -31,10 +31,9 @@ class _TrackingViewState extends State<TrackingView> {
   double _calories = 0.0;
   Duration _elapsed = Duration.zero;
 
-  DateTime? _lastPointTime; // Thời gian ghi nhận điểm cuối cùng
-  double _currentSpeedKmh = 0.0; // Tốc độ hiện tại để hiển thị (nếu cần)
+  DateTime? _lastPointTime;
+  double _currentSpeedKmh = 0.0;
 
-  // Trạng thái hệ thống
   bool _isTracking = false;
   bool _isSaving = false;
 
@@ -95,7 +94,6 @@ class _TrackingViewState extends State<TrackingView> {
     }
   }
 
-  // Hàm kiểm tra quyền chặt chẽ trước khi Start
   Future<bool> _ensurePermissions() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
@@ -128,7 +126,6 @@ class _TrackingViewState extends State<TrackingView> {
   }
 
   Future<void> _startRun() async {
-    // Reset toàn bộ thông số
     setState(() {
       _isTracking = true;
       _routePoints.clear();
@@ -137,7 +134,7 @@ class _TrackingViewState extends State<TrackingView> {
       _elapsed = Duration.zero;
       _currentSpeedKmh = 0.0;
       _startTime = DateTime.now();
-      _lastPointTime = DateTime.now(); // Mốc thời gian bắt đầu
+      _lastPointTime = DateTime.now();
     });
 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -146,13 +143,11 @@ class _TrackingViewState extends State<TrackingView> {
       });
     });
 
-    // 2. Cấu hình GPS để nhận diện thay đổi nhỏ & liên tục
     final locationSettings = const LocationSettings(
-      accuracy: LocationAccuracy.bestForNavigation, // Độ chính xác cao nhất
-      distanceFilter: 0, // Nhận mọi thay đổi dù là nhỏ nhất (để vẽ mượt)
+      accuracy: LocationAccuracy.bestForNavigation,
+      distanceFilter: 0,
     );
 
-    // 3. Lắng nghe stream
     _positionStream =
         Geolocator.getPositionStream(locationSettings: locationSettings)
             .listen((Position position) {
@@ -160,9 +155,7 @@ class _TrackingViewState extends State<TrackingView> {
     });
   }
 
-  // --- LOGIC QUAN TRỌNG: CẬP NHẬT VỊ TRÍ & ANTI-CHEAT ---
   void _updatePosition(Position pos) {
-    // 1. Lọc nhiễu GPS cơ bản (Nếu sai số > 30m thì bỏ qua)
     if (pos.accuracy > 30.0) return;
 
     DateTime now = DateTime.now();
@@ -173,42 +166,30 @@ class _TrackingViewState extends State<TrackingView> {
         final double distMeters =
             const Distance().as(LengthUnit.Meter, _routePoints.last, newPoint);
 
-        // Tính thời gian trôi qua giữa 2 điểm (tính bằng giây)
-        // Dùng _lastPointTime để chính xác hơn so với Timer
         int timeDiffSeconds = now.difference(_lastPointTime!).inSeconds;
-        if (timeDiffSeconds == 0) timeDiffSeconds = 1; // Tránh chia cho 0
+        if (timeDiffSeconds == 0) timeDiffSeconds = 1;
 
-        // --- ANTI-CHEAT: KIỂM TRA TỐC ĐỘ ---
-        // Vận tốc (m/s) = Quãng đường / Thời gian
         double speedMps = distMeters / timeDiffSeconds;
-        double speedKmh = speedMps * 3.6; // Đổi sang km/h
+        double speedKmh = speedMps * 3.6;
 
-        // Cập nhật tốc độ hiện tại lên UI (để user biết)
         _currentSpeedKmh = speedKmh;
 
-        // Nếu tốc độ > 35km/h => Khả năng cao là đi xe hoặc GPS nhảy điểm ảo
         if (speedKmh > 35.0) {
-          // Có thể hiện thông báo nhỏ nếu muốn
-          // print("Phát hiện di chuyển quá nhanh ($speedKmh km/h) - Bỏ qua");
           return;
         }
 
-        // --- LƯU ĐIỂM HỢP LỆ ---
-        // Chỉ cộng dồn nếu di chuyển > 0.5 mét (tránh nhiễu khi đứng yên lắc lư)
         if (distMeters > 0.5) {
           _distanceKm += (distMeters / 1000);
           _calories = _userWeightKg * _distanceKm * 1.036;
 
-          _routePoints.add(newPoint); // Lưu vào list cục bộ
-          _lastPointTime = now; // Cập nhật mốc thời gian cho điểm này
+          _routePoints.add(newPoint);
+          _lastPointTime = now;
         }
       } else {
-        // Điểm đầu tiên
         _routePoints.add(newPoint);
         _lastPointTime = now;
       }
 
-      // Camera luôn đi theo
       _mapController.move(newPoint, 17.0);
     });
   }
@@ -217,28 +198,17 @@ class _TrackingViewState extends State<TrackingView> {
     _timer?.cancel();
     _positionStream?.cancel();
 
-    // Check chạy quá ngắn
-    // if (_distanceKm < 0.05) {
-    //   // < 50 mét
-    //   setState(() => _isTracking = false);
-    //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-    //       content: Text("Quãng đường quá ngắn (<50m), không lưu.")));
-    //   return;
-    // }
-
     setState(() {
       _isTracking = false;
       _isSaving = true;
     });
 
-    // --- GỌI API LƯU 1 LẦN DUY NHẤT ---
-    // List<LatLng> _routePoints đang chứa toàn bộ chuỗi JSON các điểm hợp lệ
     bool success = await _runService.saveRun(
       distance: _distanceKm,
       calories: _calories,
       duration: _elapsed,
       routePoints:
-          _routePoints, // Truyền list này sang RunService để encode JSON
+          _routePoints,
       startTime: _startTime,
       endTime: DateTime.now(),
     );
@@ -246,12 +216,11 @@ class _TrackingViewState extends State<TrackingView> {
     if (mounted) {
       setState(() => _isSaving = false);
       if (success) {
-        _loadInitialData(); // Reload goal
+        _loadInitialData();
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text("Thành tích đã được lưu!"),
             backgroundColor: Colors.green));
 
-        // Reset về 0
         setState(() {
           _distanceKm = 0;
           _calories = 0;
@@ -267,11 +236,7 @@ class _TrackingViewState extends State<TrackingView> {
     }
   }
 
-  // --- 5. UI & CÁC WIDGET PHỤ --- (Giữ nguyên hoặc chỉnh sửa nhỏ)
-
-  // Hàm đặt mục tiêu (Logic giữ nguyên như cũ)
   Future<void> _handleSetGoal() async {
-    // 1. Không cho đặt mục tiêu khi đang chạy
     if (_isTracking) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text("Hãy dừng chạy trước khi đặt mục tiêu.")));
@@ -280,7 +245,6 @@ class _TrackingViewState extends State<TrackingView> {
 
     final TextEditingController controller = TextEditingController();
 
-    // 2. Hiển thị Dialog nhập số km
     await showDialog(
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
@@ -303,14 +267,11 @@ class _TrackingViewState extends State<TrackingView> {
           ),
           ElevatedButton(
             onPressed: () async {
-              // Parse dữ liệu chặt chẽ
               final double? target = double.tryParse(controller.text);
 
               if (target != null && target > 0) {
-                Navigator.pop(ctx); // Đóng dialog
+                Navigator.pop(ctx);
 
-                // Gọi API set goal
-                // (Giả sử bạn muốn hiện loading thì có thể thêm setState _isSaving = true ở đây)
                 try {
                   DailyGoal? newGoal = await _goalService.setTodayGoal(target, "dailyGoal");
 
@@ -341,7 +302,6 @@ class _TrackingViewState extends State<TrackingView> {
 
   @override
   Widget build(BuildContext context) {
-    // Tính toán progress Goal
     double progress = 0.0;
     if (_dailyGoal != null && _dailyGoal!.targetDistanceKm > 0) {
       double totalKm =
@@ -352,7 +312,6 @@ class _TrackingViewState extends State<TrackingView> {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. MAP
           FlutterMap(
             mapController: _mapController,
             options: const MapOptions(
@@ -391,7 +350,6 @@ class _TrackingViewState extends State<TrackingView> {
             ],
           ),
 
-          // 2. PANEL INFO
           Positioned(
             bottom: 0,
             left: 0,
@@ -414,7 +372,6 @@ class _TrackingViewState extends State<TrackingView> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  // Hàng hiển thị tốc độ hiện tại (Để user biết mình có đang bị tính là đi xe không)
                   if (_isTracking)
                     Text(
                       "Speed: ${_currentSpeedKmh.toStringAsFixed(1)} km/h",
@@ -441,7 +398,6 @@ class _TrackingViewState extends State<TrackingView> {
                     ),
                   ),
 
-                  // Nút bấm
                   Padding(
                     padding:
                         const EdgeInsets.only(bottom: 30, left: 30, right: 30),
@@ -449,7 +405,6 @@ class _TrackingViewState extends State<TrackingView> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        // Goal Progress
                         Column(
                           children: [
                             Stack(
@@ -476,7 +431,6 @@ class _TrackingViewState extends State<TrackingView> {
                           ],
                         ),
 
-                        // START / STOP BUTTON
                         GestureDetector(
                           onTap: _isSaving ? null : _toggleTracking,
                           child: Container(
@@ -508,7 +462,6 @@ class _TrackingViewState extends State<TrackingView> {
                           ),
                         ),
 
-                        // Set Goal (Giả lập nút, bạn gắn lại hàm _handleSetGoal vào đây)
                         GestureDetector(
                           onTap: () {
                             _handleSetGoal();
@@ -541,7 +494,6 @@ class _TrackingViewState extends State<TrackingView> {
             ),
           ),
 
-          // Nút Re-center
           Positioned(
             bottom: 280,
             right: 20,

@@ -1,4 +1,3 @@
-// lib/Views/RunDetailView.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -6,7 +5,7 @@ import '../Services/RunService.dart';
 import '../models/RunModels.dart';
 
 class RunDetailView extends StatefulWidget {
-  final int runId; // Nhận ID từ màn hình danh sách
+  final int runId;
   const RunDetailView({super.key, required this.runId});
 
   @override
@@ -25,7 +24,6 @@ class _RunDetailViewState extends State<RunDetailView> {
   }
 
   Future<void> _loadDetail() async {
-    //[cite: 102]: Gọi API lấy chi tiết
     final data = await _runService.getRunDetail(widget.runId);
     if (mounted) {
       setState(() {
@@ -35,103 +33,108 @@ class _RunDetailViewState extends State<RunDetailView> {
     }
   }
 
-  // Tính toán khung nhìn bản đồ để bao trọn toàn bộ đường chạy
   LatLngBounds _getBounds(List<LatLng> points) {
     if (points.isEmpty) {
       return LatLngBounds(const LatLng(10.7, 106.6), const LatLng(10.8, 106.7));
     }
-    double minLat = points.first.latitude;
-    double maxLat = points.first.latitude;
-    double minLng = points.first.longitude;
-    double maxLng = points.first.longitude;
-
-    for (var p in points) {
-      if (p.latitude < minLat) minLat = p.latitude;
-      if (p.latitude > maxLat) maxLat = p.latitude;
-      if (p.longitude < minLng) minLng = p.longitude;
-      if (p.longitude > maxLng) maxLng = p.longitude;
-    }
-    return LatLngBounds(LatLng(minLat, minLng), LatLng(maxLat, maxLng));
+    return LatLngBounds.fromPoints(points);
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
-        title: const Text("Chi tiết buổi chạy", style: TextStyle(color: Colors.white)),
+        title: const Text("Chi tiết buổi chạy",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
         centerTitle: true,
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
+      extendBodyBehindAppBar: true,
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: Colors.orange))
+          ? const Center(child: CircularProgressIndicator(color: Colors.deepOrange))
           : _detail == null
-          ? const Center(child: Text("Không tìm thấy dữ liệu", style: TextStyle(color: Colors.white)))
+          ? _buildErrorState()
           : Column(
         children: [
-          // PHẦN 1: BẢN ĐỒ TĨNH
           Expanded(
-            flex: 2, // Map chiếm 2/3 màn hình
+            flex: 5,
             child: FlutterMap(
               options: MapOptions(
-                // Tự động zoom vừa khít đường chạy
                 initialCameraFit: CameraFit.bounds(
                   bounds: _getBounds(_detail!.routePoints),
-                  padding: const EdgeInsets.all(50),
-                ),
-                interactionOptions: const InteractionOptions(
-                  flags: InteractiveFlag.all, // Vẫn cho phép zoom/pan xem lại
+                  padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 50),
                 ),
               ),
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.example.runningapp',
+                  tileBuilder: (context, tileWidget, tile) => ColorFiltered(
+                    colorFilter: const ColorFilter.matrix([
+                      -1, 0, 0, 0, 255,
+                      0, -1, 0, 0, 255,
+                      0, 0, -1, 0, 255,
+                      0, 0, 0, 1, 0,
+                    ]),
+                    child: tileWidget,
+                  ),
                 ),
                 PolylineLayer(
                   polylines: [
                     Polyline(
                       points: _detail!.routePoints,
                       strokeWidth: 5.0,
-                      color: Colors.orange,
+                      color: Colors.deepOrange,
                     ),
                   ],
                 ),
-                // Marker điểm đầu và cuối
                 if (_detail!.routePoints.isNotEmpty)
                   MarkerLayer(markers: [
-                    Marker(point: _detail!.routePoints.first, child: const Icon(Icons.trip_origin, color: Colors.green)),
-                    Marker(point: _detail!.routePoints.last, child: const Icon(Icons.flag, color: Colors.redAccent)),
+                    Marker(
+                        point: _detail!.routePoints.first,
+                        child: const Icon(Icons.location_on, color: Colors.greenAccent, size: 30)
+                    ),
+                    Marker(
+                        point: _detail!.routePoints.last,
+                        child: const Icon(Icons.flag_rounded, color: Colors.redAccent, size: 30)
+                    ),
                   ])
               ],
             ),
           ),
 
-          // PHẦN 2: THÔNG SỐ CHI TIẾT [cite: 104]
-          Expanded(
-            flex: 1,
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2E),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, -5))],
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Column(
-                children: [
-                  const Text("Tổng kết", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _detailItem("Quãng đường", "${_detail!.distanceKm.toStringAsFixed(2)} km"),
-                      _detailItem("Thời gian", "${(_detail!.durationSeconds / 60).toStringAsFixed(0)} phút"),
-                      _detailItem("Calo", "${_detail!.calories.toStringAsFixed(0)} kcal"),
-                    ],
-                  ),
-                ],
-              ),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(24, 30, 24, size.height * 0.05),
+            decoration: const BoxDecoration(
+              color: Color(0xFF2C2C2E),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(color: Colors.grey[700], borderRadius: BorderRadius.circular(2)),
+                ),
+                const SizedBox(height: 20),
+                const Text("KẾT QUẢ CUỐI CÙNG",
+                    style: TextStyle(fontSize: 12, letterSpacing: 1.5, color: Colors.grey, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 25),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStat(size, "Quãng đường", "${_detail!.distanceKm.toStringAsFixed(2)}", "km"),
+                    _buildStat(size, "Thời gian", "${(_detail!.durationSeconds / 60).toStringAsFixed(0)}", "phút"),
+                    _buildStat(size, "Calo", "${_detail!.calories.toStringAsFixed(0)}", "kcal"),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -139,13 +142,32 @@ class _RunDetailViewState extends State<RunDetailView> {
     );
   }
 
-  Widget _detailItem(String label, String value) {
+  Widget _buildStat(Size size, String label, String value, String unit) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.orange)),
-        const SizedBox(height: 5),
-        Text(label, style: TextStyle(color: Colors.grey[400])),
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                  text: value,
+                  style: TextStyle(fontSize: size.width * 0.065, fontWeight: FontWeight.w900, color: Colors.white)
+              ),
+              TextSpan(
+                  text: " $unit",
+                  style: const TextStyle(fontSize: 12, color: Colors.deepOrange, fontWeight: FontWeight.bold)
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(label.toUpperCase(), style: TextStyle(color: Colors.grey[500], fontSize: 10, letterSpacing: 0.5)),
       ],
+    );
+  }
+
+  Widget _buildErrorState() {
+    return const Center(
+      child: Text("Không tìm thấy dữ liệu", style: TextStyle(color: Colors.white70)),
     );
   }
 }
