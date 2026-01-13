@@ -29,7 +29,6 @@ class TrackingService {
   }) async {
     try {
       final headers = await _getHeaders();
-
       final dto = {
         "distanceKm": distanceKm,
         "durationSeconds": duration.inSeconds,
@@ -44,14 +43,12 @@ class TrackingService {
               .toList(),
         )
       };
-      // 2. Gọi API POST
       final http.Response response = await http.post(
         Uri.parse(_baseUrl),
         headers: headers,
         body: jsonEncode(dto),
       );
 
-      // 3. Kiểm tra kết quả (200 hoặc 201 là thành công)
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       } else {

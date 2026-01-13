@@ -6,5 +6,5 @@ public interface IGoalService
 {
     Task<GoalDto.DailyGoalResponseDto?> GetTodayGoalAsync(string userId);
 
-    Task<GoalDto.DailyGoalResponseDto> SetTodayGoalAsync(string userId, double targetKm);
+    Task<GoalDto.DailyGoalResponseDto> SetTodayGoalAsync(string userId, double targetKm, string type);
 }
