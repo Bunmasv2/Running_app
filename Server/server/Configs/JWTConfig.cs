@@ -29,8 +29,8 @@ namespace server.Configs
                     ValidIssuer = configuration["JWT:ISSUSER"],
                     ValidAudience = configuration["JWT:AUDIENCE"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:KEY"])),
-                    // ClockSkew = TimeSpan.FromMinutes(5)
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.FromMinutes(5)
+                    // ClockSkew = TimeSpan.Zero
                 };
 
                 options.Events = new JwtBearerEvents

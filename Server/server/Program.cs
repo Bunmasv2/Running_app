@@ -36,13 +36,13 @@ builder.Services.AddScoped<IChallengeService, ChallengeService>();
 // Add services to the container.
 builder.Services.AddAutoMapper(typeof(AutoMapperConfig).Assembly);
 builder.Services.AddControllers();
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddGoogleAuth(builder.Configuration)
-.AddJWT(builder.Configuration);
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJWT(builder.Configuration)          // ⬅️ JWT ƯU TIÊN
+    .AddGoogleAuth(builder.Configuration);  // ⬅️ Sau cùng
+
+builder.Services.AddAuthorization();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
@@ -56,7 +56,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedProto
+    ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto
 });
 
 //app.UseHttpsRedirection();

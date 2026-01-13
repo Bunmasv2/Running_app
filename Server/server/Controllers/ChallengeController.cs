@@ -73,6 +73,7 @@ public class ChallengeController : ControllerBase
 
     // GET: /Challenge/my-challenges
     // Lấy danh sách của tôi (Tab "Của bạn")
+    [Authorize]
     [HttpGet("my-challenges")]
     public async Task<IActionResult> GetMyChallenges()
     {
@@ -85,15 +86,15 @@ public class ChallengeController : ControllerBase
     }
 
     // POST: /Challenge/join/5
-    // Tham gia thử thách
+    [Authorize]
     [HttpPost("join/{id}")]
     public async Task<IActionResult> JoinChallenge(int id)
     {
-        // var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        // if (userId == null) return Unauthorized();
+        if (userId == null) return Unauthorized();
 
-        var success = await _challengeService.JoinChallenge("b1549d21-97ec-48a3-b2e1-31c8a59eefab", id);
+        var success = await _challengeService.JoinChallenge(userId, id);
 
         if (success)
         {

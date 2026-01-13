@@ -17,8 +17,10 @@ class TrackingService {
     };
   }
 
-  // static const String _baseUrl = 'https://running-app-ywpg.onrender.com/run';
-  static const String _baseUrl = 'http://10.0.2.2:5144/run';
+  static const String _baseUrl = 'https://running-app-ywpg.onrender.com/Run';
+  // static const String _baseUrl = 'http://192.168.100.231:5144/run';
+//   static const String _baseUrl = 'http://10.0.2.2:5144/run';
+
   Future<bool> saveRunSession({
     required double distanceKm,
     required double calories,

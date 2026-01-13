@@ -9,7 +9,7 @@ namespace server.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    // [Authorize]
+    [Authorize]
     public class RunController : ControllerBase
     {
         private readonly IRunService _runService;
