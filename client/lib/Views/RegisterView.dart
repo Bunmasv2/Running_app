@@ -10,7 +10,6 @@ class RegisterView extends StatefulWidget {
 
 class _RegisterViewState extends State<RegisterView> {
   final UserService _userService = UserService();
-
   final _formKey = GlobalKey<FormState>();
 
   final _userNameController = TextEditingController();
@@ -24,9 +23,7 @@ class _RegisterViewState extends State<RegisterView> {
   String? _errorMessage;
 
   void _handleRegister() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     if (_passwordController.text != _confirmPassController.text) {
       setState(() => _errorMessage = "Mật khẩu xác nhận không khớp");
@@ -50,67 +47,75 @@ class _RegisterViewState extends State<RegisterView> {
     setState(() => _isLoading = false);
 
     if (errorFromBE == null) {
-      // Đăng ký thành công
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Đăng ký thành công!")),
+        const SnackBar(content: Text("Đăng ký thành công!"), backgroundColor: Colors.green),
       );
       Navigator.pop(context);
     } else {
-      // Hiển thị lỗi cụ thể từ Backend (Ví dụ: Email đã tồn tại)
       setState(() => _errorMessage = errorFromBE);
     }
-
-
-    // if (success == null ) {
-    //   Navigator.pop(context); // Quay lại Login
-    // } else {
-    //   setState(() => _errorMessage = "Đăng ký thất bại, vui lòng kiểm tra lại!");
-    // }
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(title: const Text("Đăng ký")),
+      backgroundColor: const Color(0xFF1A1A1A),
+      appBar: AppBar(
+        title: const Text("Tạo tài khoản mới", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        // 3. Bọc toàn bộ vào Widget Form
+        padding: EdgeInsets.symmetric(horizontal: size.width * 0.08),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Icon(Icons.person_add, size: 80, color: Colors.blue),
-              const SizedBox(height: 20),
+              SizedBox(height: size.height * 0.02),
+              Icon(Icons.person_add_rounded, size: size.width * 0.2, color: Colors.deepOrange),
+              SizedBox(height: size.height * 0.04),
 
-              _buildInput(_userNameController, "Tên người dùng", Icons.person),
-              _buildInput(_emailController, "Email", Icons.email, keyboardType: TextInputType.emailAddress),
+              _buildInput(_userNameController, "Tên người dùng", Icons.person_outline, size),
+              _buildInput(_emailController, "Email", Icons.email_outlined, size, keyboardType: TextInputType.emailAddress),
 
-              _buildInput(_passwordController, "Mật khẩu", Icons.lock, isPassword: true),
-              _buildInput(_confirmPassController, "Xác nhận mật khẩu", Icons.lock_outline, isPassword: true),
+              Row(
+                children: [
+                  Expanded(child: _buildInput(_heightController, "Cao (cm)", Icons.height, size, keyboardType: TextInputType.number)),
+                  const SizedBox(width: 15),
+                  Expanded(child: _buildInput(_weightController, "Nặng (kg)", Icons.monitor_weight_outlined, size, keyboardType: TextInputType.number)),
+                ],
+              ),
 
-              _buildInput(_heightController, "Chiều cao (cm)", Icons.height, keyboardType: TextInputType.number),
-              _buildInput(_weightController, "Cân nặng (kg)", Icons.monitor_weight, keyboardType: TextInputType.number),
+              _buildInput(_passwordController, "Mật khẩu", Icons.lock_outline, size, isPassword: true),
+              _buildInput(_confirmPassController, "Xác nhận mật khẩu", Icons.lock_reset, size, isPassword: true),
 
               if (_errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
-                  child: Text(_errorMessage!, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center),
+                  child: Text(_errorMessage!, style: const TextStyle(color: Colors.redAccent, fontSize: 13), textAlign: TextAlign.center),
                 ),
 
-              const SizedBox(height: 20),
+              SizedBox(height: size.height * 0.04),
 
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleRegister,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.deepOrange,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: size.height * 0.02),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
                 ),
                 child: _isLoading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Đăng ký", style: TextStyle(fontSize: 18, color: Colors.white)),
+                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    : const Text("Hoàn tất đăng ký", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
+              SizedBox(height: size.height * 0.05),
             ],
           ),
         ),
@@ -121,32 +126,33 @@ class _RegisterViewState extends State<RegisterView> {
   Widget _buildInput(
       TextEditingController controller,
       String label,
-      IconData icon, {
+      IconData icon,
+      Size size, {
         bool isPassword = false,
         TextInputType keyboardType = TextInputType.text,
       }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextFormField( // Đổi từ TextField thành TextFormField
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
         controller: controller,
         obscureText: isPassword,
         keyboardType: keyboardType,
-        // Logic kiểm tra dữ liệu nằm ở đây
+        style: const TextStyle(color: Colors.white, fontSize: 14),
         validator: (value) {
-          if (value == null || value.trim().isEmpty) {
-            return "Vui lòng nhập $label";
-          }
-          // Bạn có thể thêm kiểm tra định dạng email ở đây nếu muốn
-          if (label == "Email" && !value.contains("@")) {
-            return "Email không hợp lệ";
-          }
-          return null; // Trả về null nghĩa là hợp lệ
+          if (value == null || value.trim().isEmpty) return "Nhập $label";
+          if (label == "Email" && !value.contains("@")) return "Email không hợp lệ";
+          return null;
         },
         decoration: InputDecoration(
           labelText: label,
-          prefixIcon: Icon(icon),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          contentPadding: const EdgeInsets.symmetric(vertical: 15),
+          labelStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+          prefixIcon: Icon(icon, color: Colors.deepOrange, size: 20),
+          filled: true,
+          fillColor: const Color(0xFF2C2C2C),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.deepOrange, width: 1)),
+          errorStyle: const TextStyle(color: Colors.redAccent),
+          contentPadding: const EdgeInsets.symmetric(vertical: 16),
         ),
       ),
     );

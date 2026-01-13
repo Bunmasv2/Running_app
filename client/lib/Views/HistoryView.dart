@@ -11,7 +11,6 @@ class HistoryView extends StatefulWidget {
 }
 
 class _HistoryViewState extends State<HistoryView> {
-  // Khởi tạo Service
   final RunService _runService = RunService();
 
   List<RunHistoryDto> _historyList = [];
@@ -23,9 +22,8 @@ class _HistoryViewState extends State<HistoryView> {
     _loadHistory();
   }
 
-  // Hàm load dữ liệu (sẽ gọi Mock Data từ Service)
   Future<void> _loadHistory() async {
-    setState(() => _isLoading = true); // Hiện loading khi refresh
+    setState(() => _isLoading = true);
 
     final data = await _runService.getRunHistory();
 
@@ -37,7 +35,6 @@ class _HistoryViewState extends State<HistoryView> {
     }
   }
 
-  // Helper: Format giây sang giờ:phút
   String _formatDuration(int seconds) {
     int h = seconds ~/ 3600;
     int m = (seconds % 3600) ~/ 60;
@@ -48,7 +45,6 @@ class _HistoryViewState extends State<HistoryView> {
     return "${s}s";
   }
 
-  // Helper: Format ngày tháng
   String _formatDate(DateTime dt) {
     return "Ngày ${dt.day}/${dt.month}/${dt.year} • ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}";
   }
@@ -56,7 +52,7 @@ class _HistoryViewState extends State<HistoryView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A), // Màu nền xám đậm
+      backgroundColor: const Color(0xFF1A1A1A),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.orange))
           : _historyList.isEmpty
@@ -66,7 +62,7 @@ class _HistoryViewState extends State<HistoryView> {
         color: Colors.orange,
         backgroundColor: const Color(0xFF2D2D2D),
         child: ListView.separated(
-          physics: const AlwaysScrollableScrollPhysics(), // Để có thể kéo refresh kể cả khi list ngắn
+          physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
           itemCount: _historyList.length,
           separatorBuilder: (ctx, index) => const SizedBox(height: 12),
@@ -100,16 +96,15 @@ class _HistoryViewState extends State<HistoryView> {
 
   Widget _buildHistoryCard(RunHistoryDto item) {
     return Card(
-      elevation: 0, // Flat style hiện đại hơn
-      color: const Color(0xFF2D2D2D), // Màu card tối
+      elevation: 0,
+      color: const Color(0xFF2D2D2D),
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: Colors.white10) // Viền mỏng sáng nhẹ
+          side: const BorderSide(color: Colors.white10)
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
-          // Chuyển sang trang chi tiết (Nhớ là bạn phải có file RunDetailView.dart nhé)
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => RunDetailView(runId: item.id)),
@@ -120,7 +115,6 @@ class _HistoryViewState extends State<HistoryView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header: Icon + Ngày tháng
               Row(
                 children: [
                   Container(
@@ -149,7 +143,6 @@ class _HistoryViewState extends State<HistoryView> {
                 child: Divider(height: 1, color: Colors.white12),
               ),
 
-              // Body: 3 Thông số chính
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -157,12 +150,12 @@ class _HistoryViewState extends State<HistoryView> {
                       "${item.distanceKm.toStringAsFixed(2)}", "km",
                       Colors.white
                   ),
-                  Container(width: 1, height: 30, color: Colors.white12), // Vạch ngăn cách
+                  Container(width: 1, height: 30, color: Colors.white12),
                   _statItem(
                       _formatDuration(item.durationSeconds), "Thời gian",
                       Colors.white
                   ),
-                  Container(width: 1, height: 30, color: Colors.white12), // Vạch ngăn cách
+                  Container(width: 1, height: 30, color: Colors.white12),
                   _statItem(
                       "${item.calories.toStringAsFixed(0)}", "Kcal",
                       Colors.white

@@ -11,8 +11,6 @@ import 'RecordView.dart';
 import 'TrackingView.dart';
 import 'ChallengeView.dart';
 
-
-// Widget Placeholder tạm thời cho History và Profile nếu bạn chưa tạo file
 class PlaceholderView extends StatelessWidget {
   final String title;
   const PlaceholderView(this.title, {super.key});
@@ -31,7 +29,7 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   final UserService _userService = UserService();
   UserProfile? _userProfile;
-  String? _currentSubtitle; // Subtitle từ tab đang chọn
+  String? _currentSubtitle;
 
   @override
   void initState() {
@@ -51,7 +49,6 @@ class _MainScreenState extends State<MainScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      // Reset subtitle khi chuyển tab, các trang có tabs sẽ cập nhật lại
       if (index != 1 && index != 3 && index != 4) {
         _currentSubtitle = null;
       }
@@ -66,9 +63,7 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  // --- TopNavBar Handlers ---
   void _handleAvatarTap() {
-    // Navigate to ProfileView
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const ProfileView()),
@@ -76,23 +71,19 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _handleChatTap() {
-    // Navigate to chat screen
     print("Tap Chat");
   }
 
   void _handleSearchTap() {
-    // Navigate to search friends screen
     print("Tap Search");
   }
 
   void _handleNotiTap() {
-    // Navigate to notifications screen
     print("Tap Notification");
   }
 
   @override
   Widget build(BuildContext context) {
-    // Lấy title và content tương ứng với tab hiện tại
     String currentTitle = ['Trang chủ', 'Thử thách', 'Ghi đường', 'Nhóm', 'Cá nhân'][_selectedIndex];
     Widget currentContent;
 
@@ -116,7 +107,6 @@ class _MainScreenState extends State<MainScreen> {
         currentContent = const Center(child: Text("Error"));
     }
 
-    // Chỉ hiển thị subtitle cho các trang có tabs (Thử thách, Nhóm, Cá nhân)
     String? subtitle = (_selectedIndex == 1 || _selectedIndex == 3 || _selectedIndex == 4) ? _currentSubtitle : null;
 
     return Scaffold(

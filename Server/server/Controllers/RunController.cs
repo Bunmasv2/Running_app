@@ -72,6 +72,7 @@ namespace server.Controllers
             try
             {
                 var detail = await _runService.GetRunDetailAsync(id, GetUserId());
+                Console.WriteLine($"---> DEBUG RUN DETAIL: Lấy chi tiết bài chạy với ID = {detail.Id} thành công.");
                 return Ok(detail);
             }
             catch (KeyNotFoundException)

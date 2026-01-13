@@ -24,16 +24,14 @@ class _RankingViewState extends State<RankingView> {
     _loadData();
   }
 
-  // --- CHỨC NĂNG CHÍNH: TẢI DỮ LIỆU ---
   Future<void> _loadData() async {
     try {
-      // Gọi đồng thời cả 2 API
       final results = await Future.wait([
         _userService.getUserProfile(),
         _runService.getWeeklyRanking(),
       ]);
 
-      final profile = results[0] as dynamic; // UserProfile
+      final profile = results[0] as dynamic;
       final rankings = results[1] as List<UserRanking>;
 
       if (mounted) {
@@ -44,21 +42,23 @@ class _RankingViewState extends State<RankingView> {
         });
       }
     } catch (e) {
-      print("Lỗi RankingView: $e");
+      debugPrint("Lỗi RankingView: $e");
       if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
       appBar: AppBar(
-        title: const Text(
-            'Bảng Xếp Hạng', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Bảng Xếp Hạng',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: const Color(0xFF1A1A1A),
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
       ),
       body: _isLoading
@@ -67,69 +67,84 @@ class _RankingViewState extends State<RankingView> {
         onRefresh: _loadData,
         backgroundColor: const Color(0xFF2D2D2D),
         color: Colors.orange,
-        child: _rankings.isEmpty
-            ? _buildEmptyState()
-            : _buildRankingList(),
+        child: _rankings.isEmpty ? _buildEmptyState() : _buildRankingList(size),
       ),
     );
   }
 
   Widget _buildEmptyState() {
-    return ListView( // Dùng ListView để RefreshIndicator hoạt động
-      children: const [
-        SizedBox(height: 100),
-        Center(child: Text("Chưa có dữ liệu xếp hạng tuần này", style: TextStyle(color: Colors.grey))),
+    return ListView(
+      children: [
+        SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+        const Center(
+          child: Text("Chưa có dữ liệu xếp hạng tuần này",
+              style: TextStyle(color: Colors.grey)),
+        ),
       ],
     );
   }
 
-  Widget _buildRankingList() {
+  Widget _buildRankingList(Size size) {
     final bool isInTop = _rankings.any((r) => r.username == _currentUsername);
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(horizontal: size.width * 0.04),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Chiến Binh Hệ Chạy – 7 Ngày Trong Tuần',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(
+              'Chiến Binh Hệ Chạy – 7 Ngày Qua',
+              style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey[400]),
+            ),
           ),
-          const SizedBox(height: 16),
           Expanded(
             child: ListView.builder(
               itemCount: _rankings.length,
+              padding: const EdgeInsets.only(bottom: 20),
               itemBuilder: (context, index) {
                 final user = _rankings[index];
-                final isCurrentUser = user.username == _currentUsername;
                 return _rankingRow(
                   rank: index + 1,
                   user: user,
-                  highlight: isCurrentUser,
+                  highlight: user.username == _currentUsername,
+                  size: size,
                 );
               },
             ),
           ),
           if (!isInTop && _currentUsername.isNotEmpty)
-            _buildEncouragementBox(),
+            _buildEncouragementBox(size),
         ],
       ),
     );
   }
 
-  Widget _buildEncouragementBox() {
+  Widget _buildEncouragementBox(Size size) {
     return Container(
       padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.only(top: 10),
+      margin: EdgeInsets.only(bottom: size.height * 0.02),
       decoration: BoxDecoration(
-        color: const Color(0xFF2D2D2D),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+        color: Colors.orange.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.orange.withOpacity(0.3)),
       ),
-      child: const Text(
-        '💪 Chưa vào top 10? Bạn đang vô địch chính cuộc đua của riêng mình!',
-        textAlign: TextAlign.center,
-        style: TextStyle(fontStyle: FontStyle.italic, color: Colors.orange),
+      child: const Row(
+        children: [
+          Icon(Icons.bolt, color: Colors.orange, size: 20),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Chua vào top 10? Bạn đang vô địch cuộc đua của riêng mình!',
+              style: TextStyle(
+                  fontSize: 13, color: Colors.orange, fontWeight: FontWeight.w500),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -138,81 +153,70 @@ class _RankingViewState extends State<RankingView> {
     required int rank,
     required UserRanking user,
     required bool highlight,
+    required Size size,
   }) {
-    Color medalColor = Colors.transparent;
-    if (rank == 1)
-      medalColor = Colors.amber;
-    else if (rank == 2)
-      medalColor = Colors.grey.shade400;
-    else if (rank == 3) medalColor = Colors.brown.shade300;
+    Color? medalColor;
+    if (rank == 1) medalColor = Colors.amber;
+    if (rank == 2) medalColor = const Color(0xFFC0C0C0);
+    if (rank == 3) medalColor = const Color(0xFFCD7F32);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: highlight ? Colors.orange.withValues(alpha: 0.1) : const Color(0xFF2D2D2D),
-        borderRadius: BorderRadius.circular(15),
-        border: highlight ? Border.all(color: Colors.orange.withValues(alpha: 0.5)) : null,
+        color: highlight ? Colors.orange.withOpacity(0.15) : const Color(0xFF2D2D2D),
+        borderRadius: BorderRadius.circular(12),
+        border: highlight ? Border.all(color: Colors.orange.withOpacity(0.5)) : null,
       ),
       child: Row(
         children: [
-          // 🏆 Rank
           SizedBox(
-            width: 30,
+            width: size.width * 0.08,
             child: rank <= 3
-                ? Icon(Icons.emoji_events, color: medalColor, size: 24)
+                ? Icon(Icons.emoji_events, color: medalColor, size: 22)
                 : Text(
               '$rank',
-              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.white54),
             ),
           ),
-
-          // 🧑 Avatar
           CircleAvatar(
-            radius: 20,
-            backgroundColor: Colors.grey.shade700,
-            backgroundImage: user.avatarUrl != null && user.avatarUrl!.isNotEmpty
+            radius: 18,
+            backgroundColor: Colors.grey[800],
+            backgroundImage: user.avatarUrl?.isNotEmpty == true
                 ? NetworkImage(user.avatarUrl!)
                 : null,
-            child: user.avatarUrl == null || user.avatarUrl!.isEmpty
-                ? const Icon(Icons.person, color: Colors.grey)
+            child: user.avatarUrl?.isEmpty ?? true
+                ? const Icon(Icons.person, color: Colors.white24, size: 20)
                 : null,
           ),
-
-
           const SizedBox(width: 12),
-
-          // 👤 Username
           Expanded(
-            flex: 2,
+            flex: 3,
             child: Text(
               user.username,
-              style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+              style: TextStyle(
+                  fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
+                  color: Colors.white,
+                  fontSize: 14),
               overflow: TextOverflow.ellipsis,
             ),
           ),
-
-          // ⏱ TotalTime
           Expanded(
-            child: Text(
-              user.totalTime,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.orange,
-              ),
-            ),
-          ),
-
-          // 🏃 Distance
-          Expanded(
-            child: Text(
-              '${user.totalDistanceKm.toStringAsFixed(2)} km',
-              textAlign: TextAlign.end,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[400],
-              ),
+            flex: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  user.totalTime,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.orange, fontSize: 13),
+                ),
+                Text(
+                  '${user.totalDistanceKm.toStringAsFixed(1)} km',
+                  style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                ),
+              ],
             ),
           ),
         ],
