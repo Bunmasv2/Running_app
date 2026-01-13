@@ -72,7 +72,7 @@ public class UserController : ControllerBase
     }
 
 
-    [HttpGet("signin-google")]
+    // [HttpGet("signin-google")]
     // public IActionResult SignGoogle(string returnUrl = "https://www.facebook.com/")
     // {
     //     if (string.IsNullOrEmpty(returnUrl))
@@ -90,16 +90,16 @@ public class UserController : ControllerBase
     // }
 
     [HttpGet("profile")]
-    // [Authorize]
+    [Authorize]
     public async Task<ActionResult> GetUserProfile()
     {
         string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         UserDTO.Profile user = await _userServcie.GetUserProfile(userId);
         return Ok(user);
     }
-
-    [HttpPut("update")]
+    
     [Authorize]
+    [HttpPut("update")]
     public async Task<ActionResult> UpdateProfile([FromBody] UserDTO.UpdateProfile dto)
     {
         string? userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -111,8 +111,8 @@ public class UserController : ControllerBase
         return Ok(new { message = "Update successful" });
     }
 
-    [HttpPost("avatar")]
     [Authorize]
+    [HttpPost("avatar")]
     public async Task<ActionResult> UploadAvatar([FromForm] IFormFile avatar)
     {
         if (avatar == null || avatar.Length == 0)
@@ -129,6 +129,7 @@ public class UserController : ControllerBase
         return Ok(new { message = "Upload avatar successful" });
     }
 
+    [Authorize]
     [HttpGet("suggests")]
     public async Task<ActionResult> GetSuggestedUser()
     {
