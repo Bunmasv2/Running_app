@@ -7,6 +7,7 @@ import '../Services/UserService.dart';
 import '../models/ChallengeModels.dart';
 import '../Services/ChallengeService.dart';
 import '../Views/ChallengeView.dart';
+import '../models/SlideModel.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -365,7 +366,7 @@ class _HomeViewState extends State<HomeView> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Who to Follow',
+                'Những người bạn có thể theo dõi',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -375,7 +376,7 @@ class _HomeViewState extends State<HomeView> {
               GestureDetector(
                 onTap: () => print('See all users'),
                 child: const Text(
-                  'See All',
+                  'Xem tất cả',
                   style: TextStyle(color: Colors.orange, fontSize: 14),
                 ),
               ),
@@ -473,7 +474,7 @@ class _HomeViewState extends State<HomeView> {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   ),
-                  child: const Text('Follow', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  child: const Text('Theo dõi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -487,7 +488,7 @@ class _HomeViewState extends State<HomeView> {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   ),
-                  child: const Text('Remove', style: TextStyle(fontSize: 13)),
+                  child: const Text('Ẩn hiển thị', style: TextStyle(fontSize: 13)),
                 ),
               ),
             ],
@@ -581,7 +582,7 @@ class _SuggestedChallengesWidgetState extends State<_SuggestedChallengesWidget> 
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Suggested Challenges',
+          'Gợi ý thử thách cho bạn',
           style: TextStyle(
             color: Colors.white,
             fontSize: 22,
@@ -590,7 +591,7 @@ class _SuggestedChallengesWidgetState extends State<_SuggestedChallengesWidget> 
         ),
         const SizedBox(height: 4),
         Text(
-          'Make accountability a little easier, more fun and earn rewards!',
+          'Tạo động lực cho hành trình chạy bộ của bạn với các thử thách hấp dẫn!',
           style: TextStyle(color: Colors.grey[400], fontSize: 14),
         ),
       ],
@@ -638,7 +639,7 @@ Widget _buildExploreLink(BuildContext context) {
         );
       },
       child: const Text(
-        'Explore All Challenges',
+        'Khám phá tất cả thử thách',
         style: TextStyle(
           color: Colors.orange,
           fontSize: 15,
@@ -664,64 +665,66 @@ class _ChallengeCard extends StatelessWidget {
     this.isFocused = false,
   });
 
-@override
-Widget build(BuildContext context) {
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    decoration: BoxDecoration(
-      color: const Color(0xFF2D2D2D),
-      borderRadius: BorderRadius.circular(16),
-      border: isFocused
-          ? Border.all(color: Colors.orange.withOpacity(0.3), width: 1)
-          : null,
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center, // ✅ căn giữa theo trục dọc
-          children: [
-            // Badge hiển thị khoảng cách mục tiêu (VD: 5K, 10K)
-            _buildBadge(challenge.targetDistanceKm.toInt().toString()),
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2D2D2D),
+        borderRadius: BorderRadius.circular(16),
+        border: isFocused
+            ? Border.all(color: Colors.orange.withOpacity(0.3), width: 1)
+            : null,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Badge hiển thị khoảng cách mục tiêu (VD: 5K, 10K)
+                _buildBadge(challenge.targetDistanceKm.toInt().toString()),
 
-            const SizedBox(width: 14),
+                const SizedBox(width: 14),
 
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center, // ✅ căn giữa nội dung
-                children: [
-                  Text(
-                    challenge.title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        challenge.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        challenge.description,
+                        style: TextStyle(color: Colors.grey[400], fontSize: 13),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    challenge.description,
-                    style: TextStyle(color: Colors.grey[400], fontSize: 11),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
 
-        const SizedBox(height: 10),
+          const SizedBox(height: 12),
 
-        _buildJoinButton(context),
-      ],
-    ),
-  );
-}
+          _buildJoinButton(context),
+        ],
+      ),
+    );
+  }
 
 
   Widget _buildBadge(String text) {
@@ -796,32 +799,6 @@ class _BadgePatternPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// ============================================
-// DATA MODELS
-// ============================================
 
-class SlideData {
-  final String title;
-  final String titleTag;
-  final String linkText;
-  final IconData icon;
-  final Color iconColor;
-  final String mainText;
-  final String subText;
-  final String duration;
-  final VoidCallback? onLinkTap;
-  final VoidCallback? onButtonTap;
 
-  SlideData({
-    required this.title,
-    required this.titleTag,
-    required this.linkText,
-    required this.icon,
-    required this.iconColor,
-    required this.mainText,
-    required this.subText,
-    required this.duration,
-    this.onLinkTap,
-    this.onButtonTap,
-  });
-}
+

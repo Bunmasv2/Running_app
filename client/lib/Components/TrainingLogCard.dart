@@ -40,7 +40,7 @@ class TrainingLogCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
               Text(
-                'Training Log',
+                'Log luyện tập',
                 style: TextStyle(
                     color: Colors.white, fontWeight: FontWeight.bold),
               ),
@@ -90,13 +90,13 @@ class TrainingLogCard extends StatelessWidget {
 
               final dayKm = weeklySessions
                   .where((s) =>
-              isSameDay(s.endTime, day) && s.distanceKm > 0)
+              isSameDay(s.endTime.toLocal(), day) && s.distanceKm > 0)
                   .fold<double>(0, (sum, s) => sum + s.distanceKm);
 
               return Expanded(
                 child: Center(
                   child: Text(
-                    dayKm > 0 ? dayKm.toStringAsFixed(1) : '-',
+                    dayKm > 0 ? dayKm.toStringAsFixed(2) : '-',
                     style: TextStyle(
                       color: dayKm > 0 ? Colors.white : Colors.grey[600],
                       fontSize: 12,

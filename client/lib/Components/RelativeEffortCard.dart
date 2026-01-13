@@ -56,7 +56,7 @@ class RelativeEffortCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Relative Effort',
+                  'Nỗ lực tương đối',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -67,7 +67,7 @@ class RelativeEffortCard extends StatelessWidget {
               ],
             ),
 
-            const SizedBox(height: 12),
+            const Spacer(),
 
             Text(
               '$progress',
@@ -78,12 +78,12 @@ class RelativeEffortCard extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
 
             // Date
             Text(
               dateText,
-              style: TextStyle(color: Colors.grey[500], fontSize: 11),
+              style: TextStyle(color: Colors.grey[500], fontSize: 13),
             ),
           ],
         ),

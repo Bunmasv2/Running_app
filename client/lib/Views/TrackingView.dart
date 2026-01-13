@@ -470,7 +470,7 @@ class _TrackingViewState extends State<TrackingView> {
                               ],
                             ),
                             const SizedBox(height: 5),
-                            Text("${(progress * 100).toInt()}% Goal",
+                            Text("${(progress * 100).toInt()}% Mục tiêu",
                                 style: const TextStyle(
                                     color: Colors.white70, fontSize: 12))
                           ],
@@ -527,7 +527,7 @@ class _TrackingViewState extends State<TrackingView> {
                                     color: Colors.white),
                               ),
                               const SizedBox(height: 5),
-                              const Text("Set Goal",
+                              const Text("Đặt mục tiêu",
                                   style: TextStyle(
                                       color: Colors.white70, fontSize: 12))
                             ],

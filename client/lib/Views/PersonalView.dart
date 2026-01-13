@@ -52,8 +52,17 @@ class _PersonalviewState extends State<Personalview> {
 
   // --- API Calls ---
   Future<void> _loadMonthlyData() async {
-    final data = await _runService.getMonthlyRunSessions(_currentMonthView.month, _currentMonthView.year);
-    setState(() => _monthlySessions = data);
+    // Load current month and 2 previous months to cover the 12-week chart
+    List<Future<List<RunHistoryDto>>> futures = [];
+    for (int i = 0; i < 3; i++) {
+      DateTime date = DateTime(_currentMonthView.year, _currentMonthView.month - i, 1);
+      futures.add(_runService.getMonthlyRunSessions(date.month, date.year));
+    }
+
+    final results = await Future.wait(futures);
+    List<RunHistoryDto> allSessions = results.expand((x) => x).toList();
+
+    setState(() => _monthlySessions = allSessions);
   }
 
   Future<void> _loadTop2Data() async {
@@ -62,8 +71,19 @@ class _PersonalviewState extends State<Personalview> {
   }
 
   Future<void> _loadWeeklyData() async {
-    final data = await _runService.getWeeklyRunSessions(_currentMonthView.month, _currentMonthView.year);
-    setState(() => _weeklySessions = data);
+    DateTime start = _currentWeekStart;
+    DateTime end = start.add(const Duration(days: 6));
+    List<RunHistoryDto> sessions = [];
+
+    // Lấy dữ liệu tháng của ngày bắt đầu tuần
+    sessions.addAll(await _runService.getWeeklyRunSessions(start.month, start.year));
+
+    // Nếu tuần vắt qua tháng khác, lấy thêm dữ liệu tháng đó
+    if (start.month != end.month || start.year != end.year) {
+      sessions.addAll(await _runService.getWeeklyRunSessions(end.month, end.year));
+    }
+
+    setState(() => _weeklySessions = sessions);
   }
 
   Future<void> _loadRealativeEffort() async {
@@ -85,26 +105,6 @@ class _PersonalviewState extends State<Personalview> {
     _loadWeeklyData();
   }
 
-  void _handleLogout() async {
-    final bool? confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Đăng xuất"),
-        content: const Text("Bạn có muốn đăng xuất khỏi ứng dụng?"),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Hủy")),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
-            child: const Text("Đăng xuất"),
-          ),
-        ],
-      ),
-    );
-    if (confirm == true) {
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -141,15 +141,18 @@ class _PersonalviewState extends State<Personalview> {
 
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                Expanded(child:WeeklyGoalsCard(
-                  weeklySessions: _weeklySessions,
-                  weekStart: _currentWeekStart,
-                ),),
-                const SizedBox(width: 12),
-                Expanded(child: RelativeEffortCard(efforts: _realativeEffort)),
-              ],
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(child:WeeklyGoalsCard(
+                    weeklySessions: _weeklySessions,
+                    weekStart: _currentWeekStart,
+                  ),),
+                  const SizedBox(width: 12),
+                  Expanded(child: RelativeEffortCard(efforts: _realativeEffort)),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -160,25 +163,6 @@ class _PersonalviewState extends State<Personalview> {
             onNextWeek: () => _changeWeek(1),
           ),
 
-          const SizedBox(height: 30),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.logout),
-                label: const Text('Đăng xuất'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: _handleLogout,
-              ),
-            ),
-          ),
           const SizedBox(height: 30),
         ],
       ),

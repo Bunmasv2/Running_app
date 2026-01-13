@@ -7,6 +7,7 @@ class GoalService {
   // 1. SỬA IP: Dùng đúng IP LAN của máy tính (không dùng localhost trên điện thoại)
   static const String _baseUrl = 'https://running-app-ywpg.onrender.com/Goal';
   // static const String _baseUrl = 'http://192.168.100.231:5144/Goal';
+//   static const String _baseUrl = 'http://10.0.2.2:5144/Goal';
   // 2. TẮT MOCK DATA: Đặt thành false để gọi API thật
   final bool useMockData = false;
   Future<String?> _getToken() async {

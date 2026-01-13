@@ -56,13 +56,15 @@ class _HistoryViewState extends State<HistoryView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100], // Màu nền xám nhẹ
+      backgroundColor: const Color(0xFF1A1A1A), // Màu nền xám đậm
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.orange))
           : _historyList.isEmpty
           ? _buildEmptyState()
           : RefreshIndicator(
         onRefresh: _loadHistory,
+        color: Colors.orange,
+        backgroundColor: const Color(0xFF2D2D2D),
         child: ListView.separated(
           physics: const AlwaysScrollableScrollPhysics(), // Để có thể kéo refresh kể cả khi list ngắn
           padding: const EdgeInsets.all(16),
@@ -82,14 +84,14 @@ class _HistoryViewState extends State<HistoryView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.directions_run_outlined, size: 80, color: Colors.grey[400]),
+          Icon(Icons.directions_run_outlined, size: 80, color: Colors.grey[700]),
           const SizedBox(height: 16),
-          Text("Bạn chưa chạy lần nào", style: TextStyle(color: Colors.grey[600], fontSize: 16)),
+          Text("Bạn chưa chạy lần nào", style: TextStyle(color: Colors.grey[500], fontSize: 16)),
           const SizedBox(height: 10),
           TextButton.icon(
               onPressed: _loadHistory,
-              icon: const Icon(Icons.refresh),
-              label: const Text("Tải lại")
+              icon: const Icon(Icons.refresh, color: Colors.orange),
+              label: const Text("Tải lại", style: TextStyle(color: Colors.orange))
           )
         ],
       ),
@@ -99,10 +101,10 @@ class _HistoryViewState extends State<HistoryView> {
   Widget _buildHistoryCard(RunHistoryDto item) {
     return Card(
       elevation: 0, // Flat style hiện đại hơn
-      color: Colors.white,
+      color: const Color(0xFF2D2D2D), // Màu card tối
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.grey.shade200) // Viền mỏng
+          side: const BorderSide(color: Colors.white10) // Viền mỏng sáng nhẹ
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -124,16 +126,16 @@ class _HistoryViewState extends State<HistoryView> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
+                      color: Colors.orange.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.directions_run, color: Colors.blue, size: 20),
+                    child: const Icon(Icons.directions_run, color: Colors.orange, size: 20),
                   ),
                   const SizedBox(width: 10),
                   Text(
                     _formatDate(item.endTime),
-                    style: TextStyle(
-                        color: Colors.grey[800],
+                    style: const TextStyle(
+                        color: Colors.white,
                         fontSize: 14,
                         fontWeight: FontWeight.w600
                     ),
@@ -144,7 +146,7 @@ class _HistoryViewState extends State<HistoryView> {
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 12),
-                child: Divider(height: 1),
+                child: Divider(height: 1, color: Colors.white12),
               ),
 
               // Body: 3 Thông số chính
@@ -153,17 +155,17 @@ class _HistoryViewState extends State<HistoryView> {
                 children: [
                   _statItem(
                       "${item.distanceKm.toStringAsFixed(2)}", "km",
-                      Colors.black
+                      Colors.white
                   ),
-                  Container(width: 1, height: 30, color: Colors.grey[300]), // Vạch ngăn cách
+                  Container(width: 1, height: 30, color: Colors.white12), // Vạch ngăn cách
                   _statItem(
                       _formatDuration(item.durationSeconds), "Thời gian",
-                      Colors.black
+                      Colors.white
                   ),
-                  Container(width: 1, height: 30, color: Colors.grey[300]), // Vạch ngăn cách
+                  Container(width: 1, height: 30, color: Colors.white12), // Vạch ngăn cách
                   _statItem(
                       "${item.calories.toStringAsFixed(0)}", "Kcal",
-                      Colors.black
+                      Colors.white
                   ),
                 ],
               )

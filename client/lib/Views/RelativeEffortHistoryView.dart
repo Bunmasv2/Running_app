@@ -31,7 +31,7 @@ class RelativeEffortHistoryView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Relative Effort theo ngày',
+          'Nỗ lực tương đối',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF1A1A1A),

@@ -6,11 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="bc54e4c9-b60e-460d-87f5-6a9c68e4bc80" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Services/ChallengeService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/ChallengeService.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Services/GoalService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/GoalService.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Services/RunService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/RunService.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Services/TrackingService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/TrackingService.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/lib/Services/UserService.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Services/UserService.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Server/server/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/Server/server/appsettings.Development.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Components/TrainingLogCard.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Components/TrainingLogCard.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Views/PersonalView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/PersonalView.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Views/RelativeEffortHistoryView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/RelativeEffortHistoryView.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/lib/Views/RunDetailView.dart" beforeDir="false" afterPath="$PROJECT_DIR$/client/lib/Views/RunDetailView.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,25 +42,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Flutter.main.dart.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "fix/auth-error-handling",
-    "ignore.virus.scanning.warn.message": "true",
-    "io.flutter.reload.alreadyRun": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "E:/Hoc_Tai_Nha/Running_app",
-    "settings.editor.selected.configurable": "templates.modelproviders.configurable",
-    "show.migrate.to.gradle.popup": "false"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Flutter.main.dart.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;UIA__FE&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;io.flutter.reload.alreadyRun&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/Hoc_Tai_Nha/Running_app&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;flutter.settings&quot;,
+    &quot;show.migrate.to.gradle.popup&quot;: &quot;false&quot;
   }
 }]]></component>
   <component name="RunManager">

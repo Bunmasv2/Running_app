@@ -52,7 +52,7 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       _selectedIndex = index;
       // Reset subtitle khi chuyển tab, các trang có tabs sẽ cập nhật lại
-      if (index != 3 && index != 4) {
+      if (index != 1 && index != 3 && index != 4) {
         _currentSubtitle = null;
       }
     });
@@ -93,7 +93,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     // Lấy title và content tương ứng với tab hiện tại
-    String currentTitle = ['Trang chủ', 'Bản đồ', 'Ghi đường', 'Nhóm', 'Cá nhân'][_selectedIndex];
+    String currentTitle = ['Trang chủ', 'Thử thách', 'Ghi đường', 'Nhóm', 'Cá nhân'][_selectedIndex];
     Widget currentContent;
 
     switch (_selectedIndex) {
@@ -101,7 +101,7 @@ class _MainScreenState extends State<MainScreen> {
         currentContent = const HomeView();
         break;
       case 1:
-        currentContent = const ChallengeView();
+        currentContent = ChallengeView(onSubtitleChanged: _onSubtitleChanged);
         break;
       case 2:
         currentContent = TrackingView();
@@ -116,8 +116,8 @@ class _MainScreenState extends State<MainScreen> {
         currentContent = const Center(child: Text("Error"));
     }
 
-    // Chỉ hiển thị subtitle cho các trang có tabs (Nhóm, Cá nhân)
-    String? subtitle = (_selectedIndex == 3 || _selectedIndex == 4) ? _currentSubtitle : null;
+    // Chỉ hiển thị subtitle cho các trang có tabs (Thử thách, Nhóm, Cá nhân)
+    String? subtitle = (_selectedIndex == 1 || _selectedIndex == 3 || _selectedIndex == 4) ? _currentSubtitle : null;
 
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
